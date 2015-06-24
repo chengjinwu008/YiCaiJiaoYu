@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/image"
+        />
+
+    <TextView
+        android:id="@+id/text"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@color/banner_hint"
+        android:layout_alignParentBottom="true"
+        android:text="标题"
+        android:gravity="center_vertical"
+        android:padding="10dp"
+        android:textSize="20sp"
+        android:textColor="@color/pure_white"
+        />
+</RelativeLayout>

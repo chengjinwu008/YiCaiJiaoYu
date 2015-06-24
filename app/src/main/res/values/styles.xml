@@ -1,0 +1,49 @@
+<resources>
+    <style name="AppTheme" parent="Base.Theme.AppCompat.Light.DarkActionBar">
+
+    </style>
+
+    <style name="MediaController_Text">
+        <item name="android:textColor">@color/pure_white</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="MediaController_SeekBar" parent="android:Widget.SeekBar">
+        <item name="android:progressDrawable">@drawable/scrubber_progress_horizontal_holo_dark</item>
+        <item name="android:indeterminateDrawable">@drawable/scrubber_progress_horizontal_holo_dark</item>
+        <item name="android:minHeight">13dip</item>
+        <item name="android:maxHeight">13dip</item>
+        <item name="android:thumb">@drawable/scrubber_control_selector_holo</item>
+        <item name="android:thumbOffset">16dip</item>
+        <item name="android:paddingLeft">16dip</item>
+        <item name="android:paddingRight">16dip</item>
+    </style>
+
+    <style name="menu_text_not_selected">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/menu_text_color</item>
+    </style>
+
+    <style name="menu_text_selected" parent="menu_text_not_selected">
+        <item name="android:textColor">@color/pure_white</item>
+    </style>
+
+    <style name="main_title_bar_button">
+        <item name="android:layout_width">40dp</item>
+        <item name="android:padding">5dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:layout_centerVertical">true</item>
+    </style>
+
+    <style name="course_item_text">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/course_item_gray_text</item>
+        <item name="android:layout_margin">3dp</item>
+    </style>
+
+    <style name="course_category_list" parent="android:Animation">
+        <item name="android:windowEnterAnimation">@anim/category_win_in</item>
+        <item name="android:windowExitAnimation">@anim/category_win_out</item>
+        </style>
+</resources>

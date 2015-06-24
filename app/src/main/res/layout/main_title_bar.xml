@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:background="@color/main_titlebar_background"
+    android:layout_height="50dp">
+
+    <ImageView
+        android:layout_marginLeft="10dp"
+        android:src="@drawable/caidan"
+        style="@style/main_title_bar_button"
+        android:id="@+id/main_left_menu_button"
+        />
+    <ImageView
+        style="@style/main_title_bar_button"
+        android:src="@drawable/xiaosousuo"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="10dp"
+        android:id="@+id/main_search_button"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/all_courses"
+        android:id="@+id/main_title_text"
+        android:textSize="20sp"
+        android:textColor="@color/pure_white"
+        android:layout_centerInParent="true"
+        />
+
+    <FrameLayout android:layout_width="1dp"
+        android:id="@+id/tab"
+        android:layout_height="1dp"
+        android:layout_toLeftOf="@+id/main_title_text"
+        />
+    <FrameLayout android:layout_width="20dp"
+        android:id="@+id/tab2"
+        android:layout_height="20dp"
+        android:layout_toRightOf="@+id/main_title_text"
+        />
+    <FrameLayout android:layout_width="1dp"
+        android:id="@+id/tab3"
+        android:layout_height="1dp"
+        android:layout_toRightOf="@+id/tab2"
+        />
+    <RelativeLayout
+        android:id="@+id/main_click_drop"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_toLeftOf="@id/tab3"
+        android:layout_toRightOf="@+id/tab"
+        android:layout_centerVertical="true"
+        >
+        <ImageView
+            android:id="@+id/main_drop_arrow"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/jiantou"
+            android:layout_width="15dp"
+            android:layout_height="15dp" />
+        </RelativeLayout>
+</RelativeLayout>

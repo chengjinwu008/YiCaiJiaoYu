@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/pure_white"
+    >
+
+    <com.cjq.yicaijiaoyu.view.AllListView
+        android:id="@+id/category_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/free_list"
+        />
+
+    <LinearLayout
+        android:layout_alignParentBottom="true"
+        android:id="@+id/free_list"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+
+        android:orientation="horizontal">
+
+        <CheckBox
+            android:checked="true"
+            android:id="@+id/check_free"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_margin="10dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:button="@android:drawable/btn_radio"
+            android:text="@string/video_for_free" />
+
+        <CheckBox
+            android:checked="true"
+            android:id="@+id/check_fee"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_margin="10dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:button="@android:drawable/btn_radio"
+            android:text="@string/video_for_fee" />
+    </LinearLayout>
+</RelativeLayout>
