@@ -1,6 +1,8 @@
 package com.cjq.yicaijiaoyu.applications;
 
 import android.app.Application;
+import android.content.Context;
+import android.net.ConnectivityManager;
 import android.os.Environment;
 
 import com.android.volley.Request;
@@ -22,12 +24,11 @@ public class MainApplication extends Application {
         super.onCreate();
         //数据初始化
         CommonDataObject.ERROR_LISTENER = new RequestErrListener();
-        String userid = null;
-        String privatekey = null;
-        String writetoken = null;
-        String readtoken = null;
+        String userid = "ea307b2422";
+        String privatekey = "78WV5wyNvhz801P-iVw0ahx0MZfSuBYz";
+        String writetoken = "ekNNqIqQOk-IrcU0T7O5J-KPTih5x6GE";
+        String readtoken = "J615IBxdfO";
 
-        //todo 请求token
         //判断sd卡可读可写
         if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
             File saveDir=new File(Environment.getExternalStorageDirectory()+ File.separator+ CommonDataObject.DIR);
@@ -36,6 +37,7 @@ public class MainApplication extends Application {
                 @Override
                 public void onResponse(String s) {
                     //todo 处理返回的json
+
                 }
             },CommonDataObject.ERROR_LISTENER);
 

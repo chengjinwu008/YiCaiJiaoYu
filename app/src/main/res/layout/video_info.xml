@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/lec_info"
+        >
+        <RelativeLayout
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="40dp">
+            <TextView
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="30dp"
+                android:text="@string/lecture"
+                android:layout_width="wrap_content"
+                android:textSize="20sp"
+                android:textColor="@color/pure_black"
+                android:layout_height="wrap_content" />
+        </RelativeLayout>
+        <RelativeLayout
+            android:layout_below="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:layout_marginLeft="25dp"
+                android:layout_marginTop="10dp"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/menu_portrait"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/caidan"
+                app:border_width="0dp"
+                app:border_color="#FF000000"/>
+            <RelativeLayout android:layout_marginLeft="20dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/menu_portrait"
+                >
+                <TextView android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp"
+                    android:textColor="@color/pure_black"
+                    android:id="@+id/lec_name"
+
+                    />
+                <TextView
+                    android:id="@+id/lec_tro"
+                    android:layout_below="@+id/lec_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="none"
+                    android:maxLines="100"
+                    android:scrollHorizontally="false"
+                    android:textSize="16sp"
+                    android:textColor="@color/menu_text_color"
+                    />
+            </RelativeLayout>
+        </RelativeLayout>
+
+        </RelativeLayout>
+    <FrameLayout
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginBottom="10dp"
+        android:id="@+id/divider"
+        android:layout_below="@+id/lec_info"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/menu_text_color"
+        />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/divider"
+        android:id="@+id/intro"
+        >
+        <RelativeLayout
+            android:id="@+id/title2"
+            android:layout_width="match_parent"
+            android:layout_height="40dp">
+            <TextView
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="30dp"
+                android:text="@string/course_intro"
+                android:layout_width="wrap_content"
+                android:textSize="20sp"
+                android:textColor="@color/pure_black"
+                android:layout_height="wrap_content" />
+        </RelativeLayout>
+        <TextView android:layout_below="@id/title2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/intro_text"
+            android:ellipsize="none"
+            android:maxLines="100"
+            android:scrollHorizontally="false"
+            />
+    </RelativeLayout>
+</RelativeLayout>

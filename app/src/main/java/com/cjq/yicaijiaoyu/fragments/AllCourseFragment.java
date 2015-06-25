@@ -1,11 +1,11 @@
 package com.cjq.yicaijiaoyu.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import com.cjq.yicaijiaoyu.CommonDataObject;
 import com.cjq.yicaijiaoyu.R;
+import com.cjq.yicaijiaoyu.activities.PlayActivity;
 import com.cjq.yicaijiaoyu.adapter.CourseCategoryAdapter;
 import com.cjq.yicaijiaoyu.adapter.CourseListAdapter;
 import com.cjq.yicaijiaoyu.adapter.RecommendCourseAdapter;
@@ -30,24 +31,27 @@ import com.cjq.yicaijiaoyu.entities.LectureEntity;
 import com.cjq.yicaijiaoyu.entities.MainMenuEvent;
 import com.cjq.yicaijiaoyu.utils.PopWindowUtil;
 import com.cjq.yicaijiaoyu.utils.TimerForSeconds;
-import com.cjq.yicaijiaoyu.view.RefreshLayout;
+import com.cjq.yicaijiaoyu.utils.VideoUtil;
+import com.markmao.pulltorefresh.widget.XScrollView;
 import com.ypy.eventbus.EventBus;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by CJQ on 2015/6/24.
  */
-public class AllCourseFragment extends Fragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
+public class AllCourseFragment extends Fragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener, XScrollView.IXScrollViewListener, AdapterView.OnItemClickListener {
 
     private boolean TIMER_NOT_DESTROYED = true;
     private boolean TIMER_PAUSED = false;
-    private List<CourseEntity> courseEntityList;
+    private List<CourseEntity> courseEntityList;//课程总表
     private ListView courseList;
-    private List<CourseEntity> newList;
+//    private List<CourseEntity> newList;
     private CourseListAdapter courseListAdapter;
-    private RefreshLayout refreshLayout;
     private TextView titleText;
     private ImageView arrowImage;
     private CourseCategoryAdapter categoryAdapter;
@@ -59,6 +63,8 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
     private CheckBox checkBoxFree;
     private View title;
     private Handler mHandler = new Handler();
+    private XScrollView mRefreshLayout;
+    private ViewPager banner_pager;
 
     @Nullable
     @Override
@@ -72,21 +78,68 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
         //标题栏
         title = view.findViewById(R.id.title);
 
+        //注册下拉刷新和上拉加载
+        mRefreshLayout = (XScrollView) view.findViewById(R.id.refresh);
+        mRefreshLayout.setPullRefreshEnable(true);
+        mRefreshLayout.setPullLoadEnable(true);
+        mRefreshLayout.setAutoLoadEnable(true);
+
+        mRefreshLayout.setIXScrollViewListener(this);
+        mRefreshLayout.setRefreshTime(getTime());
+
+        View content = inflater.inflate(R.layout.course_list_content, mRefreshLayout,false);
+
+        mRefreshLayout.setView(content);
+
+
+        //初始化课程视频列表
+        //todo 请求课程列表 课程列表要筛选 提升为属性
+        courseEntityList = new ArrayList<>();
+
+        LectureEntity lectureEntity = new LectureEntity("陈昶","呵呵呵","https://www.baidu.com/img/bd_logo1.png");
+
+        CourseEntity courseEntity3 = new CourseEntity();
+        courseEntity3.setCover_image_url("https://www.baidu.com/img/bd_logo1.png");
+        courseEntity3.setTitle("资产负载要素产妇");
+        courseEntity3.setFree(true);
+        courseEntity3.setCategory(CourseCategory.FOR_PRIMARY);
+        courseEntity3.setLecture(lectureEntity);
+        courseEntityList.add(courseEntity3);
+
+
+        CourseEntity courseEntity4 = new CourseEntity();
+        courseEntity4.setCover_image_url("https://www.baidu.com/img/bd_logo1.png");
+        courseEntity4.setTitle("资产负载要素产妇");
+        courseEntity4.setFree(false);
+        courseEntity4.setCategory(CourseCategory.FOR_INTERMEDIATE);
+        courseEntity4.setLecture(lectureEntity);
+        courseEntityList.add(courseEntity4);
+
+        //获取到课程list
+        courseList = (ListView) content.findViewById(R.id.course_list);
+
+        courseList.setOnItemClickListener(this);
+
+        courseListAdapter = new CourseListAdapter(courseEntityList,getActivity());
+        courseList.setAdapter(courseListAdapter);
+
         //todo 获取推荐课程banner
         List<CourseEntity> courses = new ArrayList<>();
         CourseEntity courseEntity = new CourseEntity();
         courseEntity.setTitle("你猜");
         courseEntity.setCover_image_url("https://www.baidu.com/img/bd_logo1.png");
-        courseEntity.setView(inflater.inflate(R.layout.recommend_course, null));
+        courseEntity.setView(getBanner());
+        courseEntity.setLecture(lectureEntity);
         courses.add(courseEntity);
 
         CourseEntity courseEntity2 = new CourseEntity();
         courseEntity2.setTitle("你猜2");
         courseEntity2.setCover_image_url("https://www.baidu.com/img/bd_logo1.png");
-        courseEntity2.setView(inflater.inflate(R.layout.recommend_course, null));
+        courseEntity2.setView(getBanner());
+        courseEntity2.setLecture(lectureEntity);
         courses.add(courseEntity2);
 
-        final ViewPager banner_pager = (ViewPager)view. findViewById(R.id.banner_pager);
+        banner_pager = (ViewPager)content.findViewById(R.id.banner_pager);
         banner_pager.setAdapter(new RecommendCourseAdapter(courses,getActivity()));
         //开启banner滚动线程
         Thread timer = new TimerForSeconds(5000, -1, new TimerForSeconds.TimerListener() {
@@ -143,62 +196,6 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
             }
         });
 
-
-        //初始化课程视频列表
-        //todo 请求课程列表 课程列表要筛选 提升为属性
-        courseEntityList = new ArrayList<>();
-
-        LectureEntity lectureEntity = new LectureEntity("陈昶","呵呵呵","https://www.baidu.com/img/bd_logo1.png");
-
-        CourseEntity courseEntity3 = new CourseEntity();
-        courseEntity3.setCover_image_url("https://www.baidu.com/img/bd_logo1.png");
-        courseEntity3.setTitle("资产负载要素产妇");
-        courseEntity3.setFree(true);
-        courseEntity3.setCategory(CourseCategory.FOR_PRIMARY);
-        courseEntity3.setLecture(lectureEntity);
-        courseEntityList.add(courseEntity3);
-
-
-        CourseEntity courseEntity4 = new CourseEntity();
-        courseEntity4.setCover_image_url("https://www.baidu.com/img/bd_logo1.png");
-        courseEntity4.setTitle("资产负载要素产妇");
-        courseEntity4.setFree(false);
-        courseEntity4.setCategory(CourseCategory.FOR_INTERMEDIATE);
-        courseEntity4.setLecture(lectureEntity);
-        courseEntityList.add(courseEntity4);
-
-        //获取到课程list
-        courseList = (ListView) view.findViewById(R.id.course_list);
-        newList = new ArrayList<CourseEntity>(courseEntityList);
-
-        courseListAdapter = new CourseListAdapter(newList,getActivity());
-        courseList.setAdapter(courseListAdapter);
-
-        //注册下拉刷新和上拉加载
-        refreshLayout = (RefreshLayout) view.findViewById(R.id.refresh);
-
-        // 设置下拉刷新时的颜色值,颜色值需要定义在xml中
-//        myRefreshListView
-//                .setColorScheme(R.color.umeng_comm_text_topic_light_color,
-//                        R.color.umeng_comm_yellow, R.color.umeng_comm_green,
-//                        R.color.umeng_comm_linked_text);
-
-        //下拉刷新监听
-        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                refreshLayout.setRefreshing(false);
-            }
-        });
-
-        //上拉加载监听
-        refreshLayout.setOnLoadListener(new RefreshLayout.OnLoadListener() {
-            @Override
-            public void onLoad() {
-                refreshLayout.setLoading(true);
-            }
-        });
-
         //下拉分类点击注册
         titleText = (TextView) view.findViewById(R.id.main_title_text);
         arrowImage = (ImageView)view.findViewById(R.id.main_drop_arrow);
@@ -211,9 +208,22 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
         categorys.add(new CategoryEntity(R.drawable.guanzhu_dianji,"会计初级"));
         categorys.add(new CategoryEntity(R.drawable.guanzhu_dianji,"会计中级"));
 
-
         categoryAdapter = new CourseCategoryAdapter(categorys,getActivity());
 
+        return view;
+    }
+
+    private View getBanner() {
+        View view = inflater.inflate(R.layout.recommend_course, null);
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int index = banner_pager.getCurrentItem();
+                //获取视频信息
+                CourseEntity course = ((RecommendCourseAdapter)banner_pager.getAdapter()).getCourses().get(index);
+                VideoUtil.startVideo(getActivity(),course);
+            }
+        });
         return view;
     }
 
@@ -242,7 +252,17 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                             CommonDataObject.categoryChecked=position;
                             categoryAdapter.notifyDataSetChanged();
-                            sortCourse();
+
+                            if(CommonDataObject.CM==null){
+                                //网络不可用
+                            }else{
+                                if(!CommonDataObject.CM.getActiveNetworkInfo().isAvailable()){
+                                    //网络不可用
+                                }else{
+                                    //网络可用再进行筛选
+                                    sortCourse();
+                                }
+                            }
                         }
                     });
                 }
@@ -252,8 +272,12 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
     }
 
     private void sortCourse() {
-        boolean fee= checkBoxFee.isChecked();
-        boolean free = checkBoxFree.isChecked();
+        boolean fee=true;
+        boolean free=true;
+        if(windowView!=null){
+            fee= checkBoxFee.isChecked();
+            free= checkBoxFree.isChecked();
+        }
 
         CourseCategory category = null;
         switch (CommonDataObject.categoryChecked){
@@ -271,33 +295,131 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
                 break;
         }
 
-        //执行课程筛选 本地
+        //执行课程筛选 网络
         if(category!=null){
-            newList.clear();
+//            直接请求列表
 
-            //筛选
-            for(CourseEntity e:courseEntityList){
-                if(e.getCategory()==category && ((fee && !e.isFree())||(free && e.isFree()))){
-                    newList.add(e);
-                }
-            }
+            //todo 构建请求 fee free category
 
-            courseListAdapter.setCourses(newList);
+            courseEntityList.clear();
+            LectureEntity lectureEntity = new LectureEntity("陈昶","呵呵呵","https://www.baidu.com/img/bd_logo1.png");
+            CourseEntity courseEntity3 = new CourseEntity();
+            courseEntity3.setCover_image_url("https://www.baidu.com/img/bd_logo1.png");
+            courseEntity3.setTitle("资产负载要素产妇");
+            courseEntity3.setFree(true);
+            courseEntity3.setCategory(CourseCategory.FOR_PRIMARY);
+            courseEntity3.setLecture(lectureEntity);
+            courseEntityList.add(courseEntity3);
+
+
+            CourseEntity courseEntity4 = new CourseEntity();
+            courseEntity4.setCover_image_url("https://www.baidu.com/img/bd_logo1.png");
+            courseEntity4.setTitle("资产负载要素产妇");
+            courseEntity4.setFree(true);
+            courseEntity4.setCategory(CourseCategory.FOR_INTERMEDIATE);
+            courseEntity4.setLecture(lectureEntity);
+            courseEntityList.add(courseEntity4);
+            //提醒数据
             courseListAdapter.notifyDataSetChanged();
         }else{
-            newList.clear();
-            for(CourseEntity e:courseEntityList){
-                if((fee && !e.isFree())||(free && e.isFree())){
-                    newList.add(e);
-                }
-            }
-            courseListAdapter.setCourses(newList);
+            //todo 构建请求 fee free
+
+            courseEntityList.clear();
+            LectureEntity lectureEntity = new LectureEntity("陈昶","呵呵呵","https://www.baidu.com/img/bd_logo1.png");
+            CourseEntity courseEntity3 = new CourseEntity();
+            courseEntity3.setCover_image_url("https://www.baidu.com/img/bd_logo1.png");
+            courseEntity3.setTitle("资产负载要素产妇");
+            courseEntity3.setFree(true);
+            courseEntity3.setCategory(CourseCategory.FOR_PRIMARY);
+            courseEntity3.setLecture(lectureEntity);
+            courseEntityList.add(courseEntity3);
+
+
+            CourseEntity courseEntity4 = new CourseEntity();
+            courseEntity4.setCover_image_url("https://www.baidu.com/img/bd_logo1.png");
+            courseEntity4.setTitle("资产负载要素产妇");
+            courseEntity4.setFree(true);
+            courseEntity4.setCategory(CourseCategory.FOR_INTERMEDIATE);
+            courseEntity4.setLecture(lectureEntity);
+            courseEntityList.add(courseEntity4);
+
             courseListAdapter.notifyDataSetChanged();
         }
     }
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        sortCourse();
+        if(CommonDataObject.CM==null){
+            //网络不可用
+        }else{
+            if(!CommonDataObject.CM.getActiveNetworkInfo().isAvailable()){
+                //网络不可用
+            }else{
+                sortCourse();
+            }
+        }
+    }
+
+    private String getTime() {
+        return new SimpleDateFormat("MM-dd HH:mm", Locale.CHINA).format(new Date());
+    }
+
+    private void onLoad() {
+        mRefreshLayout.stopRefresh();
+        mRefreshLayout.stopLoadMore();
+        mRefreshLayout.setRefreshTime(getTime());
+        mRefreshLayout.setPullRefreshEnable(true);
+        mRefreshLayout.setPullLoadEnable(true);
+        mRefreshLayout.setAutoLoadEnable(true);
+    }
+
+    private void isLoading() {
+        mRefreshLayout.setPullRefreshEnable(false);
+        mRefreshLayout.setPullLoadEnable(false);
+        mRefreshLayout.setAutoLoadEnable(false);
+    }
+
+    @Override
+    public void onRefresh() {
+        isLoading();
+        if(CommonDataObject.CM!=null){
+            if(CommonDataObject.CM.getActiveNetworkInfo().isAvailable()){
+                //todo 请求刷新
+                sortCourse();
+                onLoad();
+            }else{
+                //网络不可用
+                onLoad();
+            }
+        }else{
+            //网络不可用
+            onLoad();
+        }
+    }
+
+    @Override
+    public void onLoadMore() {
+        isLoading();
+        if(CommonDataObject.CM!=null){
+            if(CommonDataObject.CM.getActiveNetworkInfo().isAvailable()){
+                //todo 请求加载
+                //组建参数
+                onLoad();
+            }else{
+                //网络不可用
+                onLoad();
+            }
+        }else{
+            //网络不可用
+            onLoad();
+        }
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//        跳转到视频
+        CourseEntity course = courseEntityList.get(position);
+
+        VideoUtil.startVideo(getActivity(),course);
     }
 }

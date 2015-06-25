@@ -22,6 +22,14 @@ public class RecommendCourseAdapter extends PagerAdapter {
     List<CourseEntity> courses;
     private Context context;
 
+    public List<CourseEntity> getCourses() {
+        return courses;
+    }
+
+    public void setCourses(List<CourseEntity> courses) {
+        this.courses = courses;
+    }
+
     public RecommendCourseAdapter(List<CourseEntity> courses, Context context) {
         this.courses = courses;
         this.context = context;

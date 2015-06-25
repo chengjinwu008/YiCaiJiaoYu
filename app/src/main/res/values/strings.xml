@@ -9,7 +9,7 @@
     <string name="my_courses">我的课程</string>
     <string name="sign_up_online">在线报名</string>
     <string name="my_setting">我的设置</string>
-    <string name="signed_uped">已签到</string>
+    <string name="signed_uped">签到成功</string>
     <string name="not_free">付费观看</string>
     <string name="for_free">免费试听</string>
     <string name="category">科目:</string>
@@ -17,4 +17,7 @@
     <string name="load">加载中</string>
     <string name="video_for_fee">收费视频</string>
     <string name="video_for_free">免费视频</string>
+    <string name="loading_more">正在加载更多的数据</string>
+    <string name="title_activity_play">PlayActivity</string>
+    <string name="course_intro">课程简介:</string>
 </resources>

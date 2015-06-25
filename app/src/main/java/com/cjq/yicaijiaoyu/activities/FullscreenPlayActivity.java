@@ -11,7 +11,7 @@ import com.easefun.polyvsdk.ijk.IjkVideoView;
 /**
  * Created by android on 2015/6/16.
  */
-public class FullscreenPlayActivity extends FragmentActivity {
+public class FullscreenPlayActivity extends BaseActivity {
 
 
     @Override

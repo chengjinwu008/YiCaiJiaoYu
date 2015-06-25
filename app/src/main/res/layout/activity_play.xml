@@ -1,0 +1,76 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.cjq.yicaijiaoyu.activities.PlayActivity">
+
+    <RelativeLayout
+        android:id="@+id/rl"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:background="#000000"
+        >
+        <com.easefun.polyvsdk.ijk.IjkVideoView
+            android:id="@+id/videoview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            ></com.easefun.polyvsdk.ijk.IjkVideoView>
+        <ProgressBar
+            android:id="@+id/loadingprogress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerInParent="true"
+            android:visibility="visible"
+            />
+    </RelativeLayout>
+    <RelativeLayout
+        android:background="@drawable/my_shadow"
+        android:id="@+id/rr"
+        android:layout_below="@+id/rl"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        >
+        <LinearLayout
+            android:id="@+id/rrs"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <TextView
+                style="@style/tab_text"
+                android:text="详情"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:id="@+id/detail"
+                />
+            <TextView
+                android:id="@+id/pinlun"
+                style="@style/tab_text"
+                android:text="评论"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent" />
+            <TextView
+                android:id="@+id/chapter"
+                style="@style/tab_text"
+                android:text="章节"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent" />
+        </LinearLayout>
+        <FrameLayout android:layout_alignParentBottom="true"
+            android:id="@+id/soap"
+            android:layout_width="100dp"
+            android:background="@color/main_titlebar_background"
+            android:layout_height="1dp"
+            android:layout_marginBottom="2dp"
+            />
+    </RelativeLayout>
+    <android.support.v4.view.ViewPager
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/rr"
+        />
+</RelativeLayout>

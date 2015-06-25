@@ -1,5 +1,7 @@
 package com.cjq.yicaijiaoyu.activities;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
@@ -31,6 +33,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        CommonDataObject.CM= (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 
         //注册弹出菜单监听
         EventBus.getDefault().register(this);
@@ -111,12 +114,15 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     private void loadFragment() {
+        //不论如何，切换碎片总是会重置筛选条件
+
+        CommonDataObject.categoryChecked=0;
+        CommonDataObject.my_categoryChecked=0;
+
         switch (CommonDataObject.menuChecked){
             case 0:
-
                 AllCourseFragment fragment = new AllCourseFragment();
                 manager.beginTransaction().replace(R.id.content,fragment).commit();
-
                 break;
         }
     }

@@ -7,10 +7,50 @@ import android.view.View;
  */
 public class CourseEntity {
 
+    public CourseEntity(String cover_image_url, String title, CourseCategory category, boolean free) {
+        this.cover_image_url = cover_image_url;
+        this.title = title;
+        this.category = category;
+        this.free = free;
+    }
+
+    public CourseEntity(String requestApi, String cover_image_url, String title, LectureEntity lecture, CourseCategory category, View view, String intro, boolean free, int id) {
+        this.requestApi = requestApi;
+        this.cover_image_url = cover_image_url;
+        this.title = title;
+        this.lecture = lecture;
+        this.category = category;
+        this.view = view;
+        this.intro = intro;
+        this.free = free;
+        this.id = id;
+    }
+
+    public CourseEntity() {
+    }
+
+    public int getProgress() {
+        return progress;
+    }
+
+    public void setProgress(int progress) {
+        this.progress = progress;
+    }
+
+    int progress;
+    String requestApi;
     String cover_image_url;
     String title;
     LectureEntity lecture;
     CourseCategory category;
+
+    public String getRequestApi() {
+        return requestApi;
+    }
+
+    public void setRequestApi(String requestApi) {
+        this.requestApi = requestApi;
+    }
 
     public View getView() {
         return view;

@@ -46,4 +46,10 @@
         <item name="android:windowEnterAnimation">@anim/category_win_in</item>
         <item name="android:windowExitAnimation">@anim/category_win_out</item>
         </style>
+
+    <style name="tab_text">
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/menu_text_color</item>
+    </style>
 </resources>
