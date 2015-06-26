@@ -72,5 +72,46 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/rr"
+        android:layout_above="@+id/bottom_bar"
         />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:id="@+id/bottom_bar"
+        android:layout_alignParentBottom="true"
+        >
+
+        <ImageView
+            android:rotation="180"
+            android:padding="5dp"
+            android:id="@+id/back"
+            android:src="@drawable/jinqu_xiayiye"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="30dp"
+            android:layout_alignParentLeft="true"
+            android:layout_width="40dp"
+            android:layout_height="40dp" />
+
+        <ImageView
+            android:src="@drawable/pinlun"
+            android:id="@+id/write_comments"
+            android:layout_centerInParent="true"
+            android:layout_width="40dp"
+            android:padding="5dp"
+            android:layout_height="40dp" />
+
+        <ImageView
+            android:src="@drawable/guanzhu"
+            android:id="@+id/add_to_favor"
+            android:padding="5dp"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="30dp"
+            android:layout_alignParentRight="true"
+            android:layout_width="40dp"
+            android:layout_height="40dp" />
+        <FrameLayout
+            android:background="@color/course_item_gray_text"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"/>
+        </RelativeLayout>
 </RelativeLayout>

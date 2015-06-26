@@ -1,6 +1,5 @@
 package com.cjq.yicaijiaoyu.fragments;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -20,7 +19,6 @@ import android.widget.TextView;
 
 import com.cjq.yicaijiaoyu.CommonDataObject;
 import com.cjq.yicaijiaoyu.R;
-import com.cjq.yicaijiaoyu.activities.PlayActivity;
 import com.cjq.yicaijiaoyu.adapter.CourseCategoryAdapter;
 import com.cjq.yicaijiaoyu.adapter.CourseListAdapter;
 import com.cjq.yicaijiaoyu.adapter.RecommendCourseAdapter;
@@ -29,6 +27,8 @@ import com.cjq.yicaijiaoyu.entities.CourseCategory;
 import com.cjq.yicaijiaoyu.entities.CourseEntity;
 import com.cjq.yicaijiaoyu.entities.LectureEntity;
 import com.cjq.yicaijiaoyu.entities.MainMenuEvent;
+import com.cjq.yicaijiaoyu.utils.ImageUtil;
+import com.cjq.yicaijiaoyu.utils.NetStateUtil;
 import com.cjq.yicaijiaoyu.utils.PopWindowUtil;
 import com.cjq.yicaijiaoyu.utils.TimerForSeconds;
 import com.cjq.yicaijiaoyu.utils.VideoUtil;
@@ -50,7 +50,6 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
     private boolean TIMER_PAUSED = false;
     private List<CourseEntity> courseEntityList;//课程总表
     private ListView courseList;
-//    private List<CourseEntity> newList;
     private CourseListAdapter courseListAdapter;
     private TextView titleText;
     private ImageView arrowImage;
@@ -102,6 +101,7 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
         courseEntity3.setCover_image_url("https://www.baidu.com/img/bd_logo1.png");
         courseEntity3.setTitle("资产负载要素产妇");
         courseEntity3.setFree(true);
+        courseEntity3.setId("sl8da4jjbxc377d0a79c7224552b6ee4_s");
         courseEntity3.setCategory(CourseCategory.FOR_PRIMARY);
         courseEntity3.setLecture(lectureEntity);
         courseEntityList.add(courseEntity3);
@@ -111,7 +111,9 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
         courseEntity4.setCover_image_url("https://www.baidu.com/img/bd_logo1.png");
         courseEntity4.setTitle("资产负载要素产妇");
         courseEntity4.setFree(false);
+        courseEntity4.setId("sl8da4jjbx5d715bc3a8ce8f8194afab_s");
         courseEntity4.setCategory(CourseCategory.FOR_INTERMEDIATE);
+        courseEntity4.setIntro("这个是收费视频，你看不到的~");
         courseEntity4.setLecture(lectureEntity);
         courseEntityList.add(courseEntity4);
 
@@ -203,10 +205,10 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
 
         //初始化课程分类下拉适配器
         List<CategoryEntity> categorys = new ArrayList<>();
-        categorys.add(new CategoryEntity(R.drawable.guanzhu_dianji,"全部视频"));
-        categorys.add(new CategoryEntity(R.drawable.guanzhu_dianji,"会计从业"));
-        categorys.add(new CategoryEntity(R.drawable.guanzhu_dianji,"会计初级"));
-        categorys.add(new CategoryEntity(R.drawable.guanzhu_dianji,"会计中级"));
+        categorys.add(new CategoryEntity(R.drawable.guanzhu_dianji,getActivity().getString(R.string.all_video)));
+        categorys.add(new CategoryEntity(R.drawable.guanzhu_dianji,getActivity().getString(R.string.for_job)));
+        categorys.add(new CategoryEntity(R.drawable.guanzhu_dianji,getActivity().getString(R.string.for_primary)));
+        categorys.add(new CategoryEntity(R.drawable.guanzhu_dianji,getActivity().getString(R.string.for_intermediate)));
 
         categoryAdapter = new CourseCategoryAdapter(categorys,getActivity());
 
@@ -235,8 +237,15 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
                 break;
             case R.id.main_click_drop:
                 //点击下拉课程分类
-                if(window ==null )
+                if(window ==null ){
                     window = new PopupWindow(view.getMeasuredWidth(), 400);
+                    window.setOnDismissListener(new PopupWindow.OnDismissListener() {
+                        @Override
+                        public void onDismiss() {
+                            arrowImage.setImageResource(R.drawable.jiantou);
+                        }
+                    });
+                }
                 if(windowView ==null){
                     windowView = inflater.inflate(R.layout.sort_window, null);
                     ListView listView = (ListView) windowView.findViewById(R.id.category_list);
@@ -252,21 +261,22 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                             CommonDataObject.categoryChecked=position;
                             categoryAdapter.notifyDataSetChanged();
-
-                            if(CommonDataObject.CM==null){
-                                //网络不可用
-                            }else{
-                                if(!CommonDataObject.CM.getActiveNetworkInfo().isAvailable()){
-                                    //网络不可用
-                                }else{
-                                    //网络可用再进行筛选
+                            NetStateUtil.checkNetwork(new NetStateUtil.NetWorkStateListener() {
+                                @Override
+                                public void doWithNetWork() {
                                     sortCourse();
                                 }
-                            }
+
+                                @Override
+                                public void doWithoutNetWork() {
+
+                                }
+                            });
                         }
                     });
                 }
                 PopWindowUtil.show(windowView, title, null, window, R.style.course_category_list);
+                arrowImage.setImageResource(R.drawable.jiantou_shang);
                 break;
         }
     }
@@ -349,15 +359,7 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if(CommonDataObject.CM==null){
-            //网络不可用
-        }else{
-            if(!CommonDataObject.CM.getActiveNetworkInfo().isAvailable()){
-                //网络不可用
-            }else{
-                sortCourse();
-            }
-        }
+
     }
 
     private String getTime() {
@@ -371,6 +373,7 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
         mRefreshLayout.setPullRefreshEnable(true);
         mRefreshLayout.setPullLoadEnable(true);
         mRefreshLayout.setAutoLoadEnable(true);
+        courseListAdapter.notifyDataSetChanged();
     }
 
     private void isLoading() {
@@ -382,37 +385,37 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
     @Override
     public void onRefresh() {
         isLoading();
-        if(CommonDataObject.CM!=null){
-            if(CommonDataObject.CM.getActiveNetworkInfo().isAvailable()){
+        NetStateUtil.checkNetwork(new NetStateUtil.NetWorkStateListener() {
+            @Override
+            public void doWithNetWork() {
                 //todo 请求刷新
                 sortCourse();
                 onLoad();
-            }else{
-                //网络不可用
+            }
+
+            @Override
+            public void doWithoutNetWork() {
                 onLoad();
             }
-        }else{
-            //网络不可用
-            onLoad();
-        }
+        });
     }
 
     @Override
     public void onLoadMore() {
         isLoading();
-        if(CommonDataObject.CM!=null){
-            if(CommonDataObject.CM.getActiveNetworkInfo().isAvailable()){
+        NetStateUtil.checkNetwork(new NetStateUtil.NetWorkStateListener() {
+            @Override
+            public void doWithNetWork() {
                 //todo 请求加载
-                //组建参数
-                onLoad();
-            }else{
-                //网络不可用
+                courseEntityList.add(new CourseEntity("https://www.baidu.com/img/bd_logo1.png","新加的课程",CourseCategory.FOR_JOB,true));
                 onLoad();
             }
-        }else{
-            //网络不可用
-            onLoad();
-        }
+
+            @Override
+            public void doWithoutNetWork() {
+                onLoad();
+            }
+        });
     }
 
     @Override

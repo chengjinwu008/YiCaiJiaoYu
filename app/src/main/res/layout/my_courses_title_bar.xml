@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:background="@color/main_titlebar_background"
+    android:layout_height="50dp">
+
+    <ImageView
+        android:layout_marginLeft="10dp"
+        android:src="@drawable/caidan"
+        style="@style/main_title_bar_button"
+        android:id="@+id/main_left_menu_button"
+        />
+    <TextView
+        android:layout_centerVertical="true"
+        android:text="@string/cat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:textColor="@color/pure_white"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="30dp"
+        android:id="@+id/category"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="我的课程"
+        android:id="@+id/main_title_text"
+        android:textSize="20sp"
+        android:textColor="@color/pure_white"
+        android:layout_centerInParent="true"
+        />
+    <RelativeLayout
+        android:id="@+id/main_click_drop"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:paddingRight="13dp"
+        android:layout_toLeftOf="@id/tab3"
+        android:layout_toRightOf="@+id/tab"
+        android:layout_centerVertical="true"
+        >
+        <ImageView
+            android:id="@+id/main_drop_arrow"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/jiantou"
+
+            android:layout_width="15dp"
+            android:layout_height="15dp" />
+    </RelativeLayout>
+
+    <FrameLayout android:layout_width="1dp"
+        android:id="@+id/tab"
+        android:layout_height="1dp"
+        android:layout_toLeftOf="@+id/category"
+        />
+    <FrameLayout android:layout_width="20dp"
+        android:id="@+id/tab2"
+        android:layout_height="20dp"
+        android:layout_toRightOf="@+id/category"
+        />
+    <FrameLayout android:layout_width="1dp"
+        android:id="@+id/tab3"
+        android:layout_height="1dp"
+        android:layout_toRightOf="@+id/tab2"
+        />
+</RelativeLayout>

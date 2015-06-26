@@ -15,6 +15,36 @@
             android:layout_marginLeft="10dp"
             android:layout_centerVertical="true"
             />
-
+        <TextView android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:text="评论"
+            android:textColor="@color/pure_white"
+            android:layout_centerInParent="true"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:padding="10dp"
+            android:gravity="center"
+            android:textSize="18sp"
+            android:text="提交"
+            android:textColor="@color/pure_white"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp"
+            />
         </RelativeLayout>
+    <EditText android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/title_bar"
+        android:singleLine="false"
+        android:scrollHorizontally="false"
+        android:gravity="top"
+        android:padding="10dp"
+        android:inputType="textMultiLine"
+        android:hint="说几句吧！！！！！！"
+        android:text="ikandvjnakvjnaklvnalkjvnlakjnvlakjnvlkajvnlkjanvlkajnvlkjanvlkjavnjerhgoiqufhajcnaiukljanvjnalvkjnalkvjnajhbfgouhljabhv"
+        android:textSize="16sp"
+        android:textColor="@color/pure_black"
+        />
 </RelativeLayout>

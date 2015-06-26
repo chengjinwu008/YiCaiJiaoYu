@@ -14,7 +14,23 @@ public class CourseEntity {
         this.free = free;
     }
 
-    public CourseEntity(String requestApi, String cover_image_url, String title, LectureEntity lecture, CourseCategory category, View view, String intro, boolean free, int id) {
+    String length;
+
+    public CourseEntity(String id, String title, String length) {
+        this.id = id;
+        this.title = title;
+        this.length = length;
+    }
+
+    public String getLength() {
+        return length;
+    }
+
+    public void setLength(String length) {
+        this.length = length;
+    }
+
+    public CourseEntity(String requestApi, String cover_image_url, String title, LectureEntity lecture, CourseCategory category, View view, String intro, boolean free, String id) {
         this.requestApi = requestApi;
         this.cover_image_url = cover_image_url;
         this.title = title;
@@ -63,7 +79,7 @@ public class CourseEntity {
     View view;
 
     String intro;
-    int id;
+    String id;
     boolean free;
 
     public String getCover_image_url() {
@@ -106,11 +122,11 @@ public class CourseEntity {
         this.intro = intro;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 

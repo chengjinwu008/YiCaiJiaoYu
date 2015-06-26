@@ -17,4 +17,5 @@ public class CommonDataObject {
     public static int categoryChecked=0;//全部课程列表筛选
     public static ConnectivityManager CM = null;
     public static int my_categoryChecked=0;//我的课程列表筛选
+    public static String nowPlayingId=null;//当前正在播放的视频的id
 }

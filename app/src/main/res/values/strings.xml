@@ -20,4 +20,14 @@
     <string name="loading_more">正在加载更多的数据</string>
     <string name="title_activity_play">PlayActivity</string>
     <string name="course_intro">课程简介:</string>
+    <string name="all_video">全部视频</string>
+    <string name="for_job">会计从业</string>
+    <string name="for_primary">会计初级</string>
+    <string name="for_intermediate">会计中级</string>
+    <string name="just_now">刚刚</string>
+    <string name="minute_ago">分钟前</string>
+    <string name="cat">分类</string>
+    <string name="logout">退出登录</string>
+    <string name="advise">意见反馈</string>
+    <string name="clean">清除缓存</string>
 </resources>

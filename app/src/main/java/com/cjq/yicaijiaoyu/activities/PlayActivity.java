@@ -15,18 +15,31 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.cjq.yicaijiaoyu.CommonDataObject;
 import com.cjq.yicaijiaoyu.R;
+import com.cjq.yicaijiaoyu.adapter.ChapterAdapter;
+import com.cjq.yicaijiaoyu.adapter.CommentsAdapter;
 import com.cjq.yicaijiaoyu.adapter.PagerAdapter;
+import com.cjq.yicaijiaoyu.entities.ChapterEntity;
+import com.cjq.yicaijiaoyu.entities.ChapterRequestEvent;
+import com.cjq.yicaijiaoyu.entities.ChapterResultEvent;
+import com.cjq.yicaijiaoyu.entities.CommentsEntity;
+import com.cjq.yicaijiaoyu.entities.CommentsRequestEvent;
+import com.cjq.yicaijiaoyu.entities.CommentsResultEvent;
+import com.cjq.yicaijiaoyu.entities.CourseEntity;
 import com.cjq.yicaijiaoyu.entities.NeedVideoInfoEvent;
+import com.cjq.yicaijiaoyu.entities.UserEntity;
 import com.cjq.yicaijiaoyu.entities.VideoInfoEvent;
 import com.cjq.yicaijiaoyu.fragments.ChapterFragment;
 import com.cjq.yicaijiaoyu.fragments.CommentsFragment;
 import com.cjq.yicaijiaoyu.fragments.CourseInfoFragment;
+import com.cjq.yicaijiaoyu.utils.NetStateUtil;
 import com.cjq.yicaijiaoyu.videoPlayer.MediaController;
 import com.easefun.polyvsdk.ijk.IjkVideoView;
 import com.ypy.eventbus.EventBus;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class PlayActivity extends BaseActivity implements View.OnClickListener, ViewPager.OnPageChangeListener {
@@ -52,11 +65,53 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
     private FragmentManager manager;
     private ViewPager pager;
 
+    //详情请求回调
     public void onEventBackgroundThread(NeedVideoInfoEvent e){
         //接到请求视频信息的请求
         VideoInfoEvent event = new VideoInfoEvent(lec_portrait,lec_name,lec_info,video_info);
 
         EventBus.getDefault().post(event);
+    }
+
+    //评论请求回调
+    public void onEventBackgroundThread(CommentsRequestEvent e){
+        //todo 发起对视频评论的请求
+        CommentsEntity commentsEntity1 = new CommentsEntity(new Date().getTime(),new UserEntity("https://www.baidu.com/img/bd_logo1.png","陈昶","12"),"总之这个就是评论了，咋地吧");
+        CommentsEntity commentsEntity2 = new CommentsEntity(new Date().getTime(),new UserEntity("https://www.baidu.com/img/bd_logo1.png","陈昶","12"),"总之这个就是评论了，咋地吧");
+        List<CommentsEntity> commentsEntities = new ArrayList<>();
+        commentsEntities.add(commentsEntity1);
+        commentsEntities.add(commentsEntity2);
+
+        CommentsAdapter adapter = new CommentsAdapter(commentsEntities,this);
+        CommentsResultEvent event = new CommentsResultEvent(adapter);
+
+        EventBus.getDefault().post(event);
+    }
+
+    //章节请求回调
+    public void onEventBackgroundThread(ChapterRequestEvent e){
+        //todo 发起章节请求
+        ChapterEntity chapter1 = new ChapterEntity("第一张，我就呵呵了");
+        ChapterEntity chapter2 = new ChapterEntity("第二章，没有下文");
+        ChapterEntity chapter3 = new ChapterEntity("第三章，都说了没下文了……");
+
+        List<CourseEntity> courses =new ArrayList<>();
+        courses.add(new CourseEntity("sl8da4jjbx5d715bc3a8ce8f8194afab_s","再见今天","3:30"));
+        courses.add(new CourseEntity("sl8da4jjbx5d715bc3a8ce8f8194afab_s","再见明天","3:30"));
+        courses.add(new CourseEntity("sl8da4jjbx5d715bc3a8ce8f8194afab_s","再见后天","3:30"));
+
+        chapter1.setVideos(courses);
+
+        List<ChapterEntity> chapters=new ArrayList<>();
+        chapters.add(chapter1);
+        chapters.add(chapter2);
+        chapters.add(chapter3);
+
+        //构建adapter
+        ChapterAdapter adapter = new ChapterAdapter(chapters,this);
+
+        //发送adapter
+        EventBus.getDefault().post(new ChapterResultEvent(adapter));
     }
 
     @Override
@@ -67,14 +122,29 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         initialRR();
         EventBus.getDefault().register(this);
 
-        Intent intent = getIntent();
-        IjkVideoView videoView = (IjkVideoView) findViewById(R.id.videoview);
-        ProgressBar progressBar = (ProgressBar) findViewById(R.id.loadingprogress);
-        videoView.setMediaBufferingIndicator(progressBar);
-        mediaController = new MediaController(this, false);
-        mediaController.setAnchorView(videoView);
-        videoView.setMediaController(mediaController);
-        videoView.setVid(intent.getStringExtra(ID));
+        final Intent intent = getIntent();
+        final String id = intent.getStringExtra(ID);
+        CommonDataObject.nowPlayingId = id;
+        //判断网络
+        NetStateUtil.checkNetwork(new NetStateUtil.NetWorkStateListener() {
+            @Override
+            public void doWithNetWork() {
+                if(id!=null){
+                    IjkVideoView videoView = (IjkVideoView) findViewById(R.id.videoview);
+                    ProgressBar progressBar = (ProgressBar) findViewById(R.id.loadingprogress);
+                    videoView.setMediaBufferingIndicator(progressBar);
+                    mediaController = new MediaController(PlayActivity.this, false);
+                    mediaController.setAnchorView(videoView);
+                    videoView.setMediaController(mediaController);
+                    videoView.setVid(id);
+                }
+            }
+
+            @Override
+            public void doWithoutNetWork() {
+
+            }
+        });
 
         lec_portrait = intent.getStringExtra(LEC_PORT);
         lec_name = intent.getStringExtra(LEC_NAME);
@@ -91,12 +161,13 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         PagerAdapter adapter = new PagerAdapter(manager,fragments);
         pager.setAdapter(adapter);
 
-        pager.addOnPageChangeListener(this);
+        pager.addOnPageChangeListener(PlayActivity.this);
 
     }
 
     @Override
     protected void onDestroy() {
+        CommonDataObject.nowPlayingId=null;
         EventBus.getDefault().unregister(this);
         super.onDestroy();
     }

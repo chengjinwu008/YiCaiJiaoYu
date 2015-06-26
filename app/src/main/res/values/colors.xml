@@ -5,6 +5,7 @@
     <color name="pure_white">#fff</color>
     <color name="main_titlebar_background">#66cd33</color>
     <color name="one_key_sign_uped">#F35D57</color>
+    <color name="one_key_sign_uped_dark">#af4a43</color>
     <color name="banner_hint">#b0000000</color>
     <color name="course_item_gray_text">#bbb</color>
     <color name="orange_background">#fb9854</color>

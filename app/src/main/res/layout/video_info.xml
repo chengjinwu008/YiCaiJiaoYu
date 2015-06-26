@@ -92,6 +92,8 @@
                 android:layout_height="wrap_content" />
         </RelativeLayout>
         <TextView android:layout_below="@id/title2"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/intro_text"

@@ -33,7 +33,8 @@
         android:scrollHorizontally="false"
         android:textColor="@color/pure_black"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:id="@+id/comments_content" />
     <TextView
         android:id="@+id/time"
         android:textColor="@color/menu_text_color"

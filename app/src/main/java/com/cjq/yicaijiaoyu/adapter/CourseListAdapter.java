@@ -68,6 +68,7 @@ public class CourseListAdapter extends BaseAdapter {
         }
         ImageUtil.LoadImage(context,entity.getCover_image_url(),holder.cover);
         holder.courseTitle.setText(entity.getTitle());
+        if(entity.getLecture()!=null)
         holder.lecture.setText(entity.getLecture().getName());
         holder.category.setText(entity.getCategory().getName());
         return convertView;

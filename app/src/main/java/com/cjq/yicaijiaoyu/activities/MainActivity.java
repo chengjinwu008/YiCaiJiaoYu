@@ -9,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -18,6 +19,9 @@ import com.cjq.yicaijiaoyu.adapter.MenuAdapter;
 import com.cjq.yicaijiaoyu.entities.MainMenuEvent;
 import com.cjq.yicaijiaoyu.entities.MenuItemEntity;
 import com.cjq.yicaijiaoyu.fragments.AllCourseFragment;
+import com.cjq.yicaijiaoyu.fragments.MyCourseFragment;
+import com.cjq.yicaijiaoyu.fragments.MySettingFragment;
+import com.cjq.yicaijiaoyu.utils.AccountUtil;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import com.ypy.eventbus.EventBus;
 
@@ -65,11 +69,18 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
         menu.setMenu(R.layout.leftmenu);
 
+        //todo 注册头像和未登录点击登录
+        ImageView menu_portrait = (ImageView) menu.findViewById(R.id.menu_portrait);
+        TextView menu_username = (TextView) menu.findViewById(R.id.menu_username);
+        menu_portrait.setOnClickListener(this);
+        menu_username.setOnClickListener(this);
+
+
         //为侧滑菜单添加菜单项
         List<MenuItemEntity> items = new ArrayList<>();
         items.add(new MenuItemEntity(getString(R.string.all_courses), R.drawable.kecheng_icon, R.drawable.kecheng_icon_dian));
         items.add(new MenuItemEntity(getString(R.string.my_courses), R.drawable.wode_icon, R.drawable.wode_icon_dian));
-        items.add(new MenuItemEntity(getString(R.string.sign_up_online), R.drawable.baoming, R.drawable.baoming_dianji));
+//        items.add(new MenuItemEntity(getString(R.string.sign_up_online), R.drawable.baoming, R.drawable.baoming_dianji));
         items.add(new MenuItemEntity(getString(R.string.my_setting), R.drawable.shezhi, R.drawable.shezhi_dian));
 
         ListView listView = (ListView) menu.findViewById(R.id.menu_items);
@@ -78,23 +89,32 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                int preFragment = CommonDataObject.menuChecked;
                 CommonDataObject.menuChecked = position;
                 adapter.notifyDataSetChanged();
-                //todo 请求课程列表，现在假设请求了
+                if(preFragment!=position)
+                //todo 如果和之前的碎片不同才进行请求
                 switch (CommonDataObject.menuChecked) {
                     case 0:
                         //全部课程
-
+                        loadFragment();
+                        menu.toggle();
                         break;
                     case 1:
                         //我的课程
+                        loadFragment();
+                        menu.toggle();
                         break;
                     case 2:
-                        //在线报名
+                        //在线报名 我的设置
+                        loadFragment();
+                        menu.toggle();
                         break;
-                    case 3:
-                        //我的设置
-                        break;
+//                    case 3:
+//                        //我的设置
+//                        loadFragment();
+//                        break;
                 }
             }
         });
@@ -103,6 +123,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         menu.findViewById(R.id.one_key_sign_in).setOnClickListener(this);
 
         //todo 检查签到
+        checkLogin();
+
 //        menu.findViewById(R.id.one_key_sign_in).setBackgroundColor(getResources().getColor(R.color.one_key_sign_uped));
 //        menu.findViewById(R.id.one_key_sign_in).setClickable(false);
 //        ((TextView)menu.findViewById(R.id.one_key_sign_in)).setText(R.string.signed_uped);
@@ -111,6 +133,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         manager = getSupportFragmentManager();
 
         loadFragment();
+    }
+
+    private void checkLogin() {
+        if(!AccountUtil.isLoggedIn(this)){
+            menu.findViewById(R.id.one_key_sign_in).setVisibility(View.GONE);
+        }else{
+            menu.findViewById(R.id.one_key_sign_in).setVisibility(View.VISIBLE);
+        }
     }
 
     private void loadFragment() {
@@ -123,6 +153,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             case 0:
                 AllCourseFragment fragment = new AllCourseFragment();
                 manager.beginTransaction().replace(R.id.content,fragment).commit();
+                break;
+            case 1:
+                MyCourseFragment fragment1 = new MyCourseFragment();
+                manager.beginTransaction().replace(R.id.content,fragment1).commit();
+                break;
+            case 2:
+                MySettingFragment fragment2 = new MySettingFragment();
+                manager.beginTransaction().replace(R.id.content,fragment2).commit();
                 break;
         }
     }
@@ -165,11 +203,21 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 ((TextView) v).setText(R.string.signed_uped);
                 v.setClickable(false);
                 break;
+            case R.id.menu_username:
+                showloginActivity();
+                break;
+            case R.id.menu_portrait:
+                showloginActivity();
+                break;
         }
     }
 
+    private void showloginActivity() {
+        //todo 实现跳转到登录活动
+
+    }
+
     public void onEventMainThread(MainMenuEvent e) {
-        Log.i("sds","sdsdadasdasdasd");
         menu.toggle();
     }
 }
