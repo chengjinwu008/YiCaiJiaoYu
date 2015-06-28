@@ -4,7 +4,6 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -214,7 +213,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     private void showloginActivity() {
         //todo 实现跳转到登录活动
-
+        AccountUtil.showLoginActivity(this);
     }
 
     public void onEventMainThread(MainMenuEvent e) {
