@@ -12,7 +12,8 @@ import com.cjq.yicaijiaoyu.activities.MainActivity;
 public class AccountUtil {
 
     public static boolean isLoggedIn(Context context){
-        return getUserId(context) != null;
+        //测试 暂时默认登录
+        return /*getUserId(context) != null*/true;
     }
 
     public static String getUserId(Context context){

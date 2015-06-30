@@ -1,6 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
+    <RelativeLayout
+        android:id="@+id/header"
+        style="@style/black_header">
 
+        <ImageView
+            android:id="@+id/back"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="20dp"
+            android:padding="10dp"
+            android:src="@drawable/cha" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:background="@null"
+            android:text="@string/login"
+            android:textColor="@color/pure_white"
+            android:textSize="20sp" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/input_table"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:layout_below="@+id/header"
+        android:layout_marginTop="20dp"
+        android:background="@color/pure_white"
+        android:orientation="vertical">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@color/pure_white"
+            android:hint="@string/hint1"
+            android:padding="20dp" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/menu_text_color" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@color/pure_white"
+            android:hint="@string/password"
+            android:inputType="textPassword"
+            android:padding="20dp" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/login_button"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@+id/input_table"
+        android:layout_margin="10dp"
+        android:background="@drawable/green_button"
+        android:text="@string/login"
+        android:textColor="@color/pure_white"
+        android:textSize="20sp" />
+
+    <RelativeLayout
+        android:id="@+id/go_register"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/login_button"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp">
+
+        <TextView
+            android:id="@+id/register"
+            style="@style/blueText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/quick_register" />
+
+        <TextView
+            android:id="@+id/forget"
+            style="@style/blueText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="@string/forget_password" />
+    </RelativeLayout>
 </RelativeLayout>

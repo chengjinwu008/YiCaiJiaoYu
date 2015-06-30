@@ -52,4 +52,15 @@
         <item name="android:textSize">20sp</item>
         <item name="android:textColor">@color/menu_text_color</item>
     </style>
+
+    <style name="blueText">
+        <item name="android:textSize">17sp</item>
+        <item name="android:textColor">@color/light_blue</item>
+    </style>
+
+    <style name="black_header">
+        <item name="android:background">@color/pure_black</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">50dp</item>
+    </style>
 </resources>

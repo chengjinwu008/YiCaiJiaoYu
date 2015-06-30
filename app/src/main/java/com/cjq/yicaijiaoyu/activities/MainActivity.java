@@ -36,7 +36,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        CommonDataObject.CM= (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+        CommonDataObject.CM = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 
         //注册弹出菜单监听
         EventBus.getDefault().register(this);
@@ -90,31 +90,42 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 int preFragment = CommonDataObject.menuChecked;
-                CommonDataObject.menuChecked = position;
+                if (position == 1) {
+                    //判断登录
+                    if(AccountUtil.isLoggedIn(MainActivity.this))
+                        CommonDataObject.menuChecked = position;
+                    else{
+                        //todo 未登录提示
+
+                    }
+                }else{
+                    CommonDataObject.menuChecked = position;
+                }
+
                 adapter.notifyDataSetChanged();
-                if(preFragment!=position)
-                //todo 如果和之前的碎片不同才进行请求
-                switch (CommonDataObject.menuChecked) {
-                    case 0:
-                        //全部课程
-                        loadFragment();
-                        menu.toggle();
-                        break;
-                    case 1:
-                        //我的课程
-                        loadFragment();
-                        menu.toggle();
-                        break;
-                    case 2:
-                        //在线报名 我的设置
-                        loadFragment();
-                        menu.toggle();
-                        break;
+                if (preFragment != position)
+                    //todo 如果和之前的碎片不同才进行请求
+                    switch (CommonDataObject.menuChecked) {
+                        case 0:
+                            //全部课程
+                            loadFragment();
+                            menu.toggle();
+                            break;
+                        case 1:
+                            //我的课程
+                            loadFragment();
+                            menu.toggle();
+                            break;
+                        case 2:
+                            //在线报名 我的设置
+                            loadFragment();
+                            menu.toggle();
+                            break;
 //                    case 3:
 //                        //我的设置
 //                        loadFragment();
 //                        break;
-                }
+                    }
             }
         });
 
@@ -135,9 +146,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     private void checkLogin() {
-        if(!AccountUtil.isLoggedIn(this)){
+        if (!AccountUtil.isLoggedIn(this)) {
             menu.findViewById(R.id.one_key_sign_in).setVisibility(View.GONE);
-        }else{
+        } else {
             menu.findViewById(R.id.one_key_sign_in).setVisibility(View.VISIBLE);
         }
     }
@@ -145,21 +156,22 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private void loadFragment() {
         //不论如何，切换碎片总是会重置筛选条件
 
-        CommonDataObject.categoryChecked=0;
-        CommonDataObject.my_categoryChecked=0;
+        CommonDataObject.categoryChecked = 0;
+        CommonDataObject.my_categoryChecked = 0;
 
-        switch (CommonDataObject.menuChecked){
+        switch (CommonDataObject.menuChecked) {
             case 0:
                 AllCourseFragment fragment = new AllCourseFragment();
-                manager.beginTransaction().replace(R.id.content,fragment).commit();
+                manager.beginTransaction().replace(R.id.content, fragment).commit();
                 break;
             case 1:
+                //涉及到用户，所以应该检测用户的登录状态
                 MyCourseFragment fragment1 = new MyCourseFragment();
-                manager.beginTransaction().replace(R.id.content,fragment1).commit();
+                manager.beginTransaction().replace(R.id.content, fragment1).commit();
                 break;
             case 2:
                 MySettingFragment fragment2 = new MySettingFragment();
-                manager.beginTransaction().replace(R.id.content,fragment2).commit();
+                manager.beginTransaction().replace(R.id.content, fragment2).commit();
                 break;
         }
     }

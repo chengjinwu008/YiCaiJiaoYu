@@ -21,6 +21,10 @@ public class CourseListAdapter extends BaseAdapter {
     List<CourseEntity> courses;
     Context context;
 
+    public List<CourseEntity> getCourses() {
+        return courses;
+    }
+
     public void setCourses(List<CourseEntity> courses) {
         this.courses = courses;
     }

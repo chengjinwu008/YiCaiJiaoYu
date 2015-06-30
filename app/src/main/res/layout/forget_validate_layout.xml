@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <RelativeLayout
+        android:id="@+id/header"
+        style="@style/black_header">
+
+        <ImageView
+            android:id="@+id/back"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="20dp"
+            android:padding="10dp"
+            android:src="@drawable/cha" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:background="@null"
+            android:text="@string/register"
+            android:textColor="@color/pure_white"
+            android:textSize="20sp" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/input_table"
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:layout_below="@+id/header"
+        android:layout_marginTop="20dp"
+        android:background="@color/pure_white"
+        android:orientation="vertical">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            >
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/pure_white"
+                android:hint="@string/hint3"
+                android:padding="20dp"
+                android:id="@+id/verifier" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:text="再次发送"
+                android:textSize="17sp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="20dp"
+                android:padding="10dp"
+                android:background="@drawable/white_border"
+                android:id="@+id/timer" />
+        </RelativeLayout>
+
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/menu_text_color" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@color/pure_white"
+            android:hint="@string/hint7"
+            android:inputType="textPassword"
+            android:padding="20dp"
+            android:id="@+id/sms_password" />
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/menu_text_color" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@color/pure_white"
+            android:hint="@string/hint8"
+            android:inputType="textPassword"
+            android:padding="20dp"
+            android:id="@+id/sms_password_re" />
+    </LinearLayout>
+
+    <TextView
+        android:textSize="20sp"
+        android:textColor="@color/pure_white"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/green_button"
+        android:layout_margin="20dp"
+        android:text="@string/reset_password"
+        android:id="@+id/change_confirm" />
+</LinearLayout>

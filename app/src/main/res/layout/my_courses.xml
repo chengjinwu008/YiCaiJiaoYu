@@ -8,12 +8,59 @@
     <include
         android:id="@+id/title"
         layout="@layout/my_courses_title_bar" />
-
-
-    <com.markmao.pulltorefresh.widget.XScrollView
-        android:id="@+id/refresh"
+    <RelativeLayout
+        android:id="@+id/tabs"
+        android:layout_below="@+id/title"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/title"/>
+        android:layout_height="50dp">
+        <LinearLayout
+            android:id="@+id/rrs"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            >
+            <TextView
+                style="@style/tab_text"
+                android:text="@string/care_for"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:id="@+id/detail"
+                />
+            <TextView
+                android:id="@+id/pinlun"
+                style="@style/tab_text"
+                android:text="@string/bought"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent" />
+            <TextView
+                android:id="@+id/chapter"
+                style="@style/tab_text"
+                android:text="@string/history"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent" />
 
+
+        </LinearLayout>
+
+        <FrameLayout android:layout_alignParentBottom="true"
+            android:id="@+id/soap"
+            android:layout_width="100dp"
+            android:background="@color/main_titlebar_background"
+            android:layout_height="1dp"
+            android:layout_marginBottom="2dp"
+            />
+    </RelativeLayout>
+
+
+
+    <android.support.v4.view.ViewPager
+        android:layout_below="@+id/tabs"
+        android:id="@+id/pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </android.support.v4.view.ViewPager>
 </RelativeLayout>

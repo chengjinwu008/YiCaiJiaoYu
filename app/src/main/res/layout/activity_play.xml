@@ -38,7 +38,7 @@
             android:layout_height="match_parent">
             <TextView
                 style="@style/tab_text"
-                android:text="详情"
+                android:text="@string/detail"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -47,14 +47,14 @@
             <TextView
                 android:id="@+id/pinlun"
                 style="@style/tab_text"
-                android:text="评论"
+                android:text="@string/comments"
                 android:layout_weight="1"
                 android:layout_width="0dp"
                 android:layout_height="match_parent" />
             <TextView
                 android:id="@+id/chapter"
                 style="@style/tab_text"
-                android:text="章节"
+                android:text="@string/chapters"
                 android:layout_weight="1"
                 android:layout_width="0dp"
                 android:layout_height="match_parent" />

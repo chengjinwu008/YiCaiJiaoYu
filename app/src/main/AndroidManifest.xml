@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.cjq.yicaijiaoyu" >
-
     <uses-sdk tools:overrideLibrary="de.hdodenhof.circleimageview" />
 
     <!-- 视频播放器需要的权限 -->
@@ -34,6 +33,12 @@
             android:name=".activities.PlayActivity"
             android:label="@string/title_activity_play" >
         </activity>
+        <activity android:name=".activities.ForgetPasswordActivity"/>
+        <activity android:name=".activities.ForgetPasswordSMSActivity"/>
+        <activity android:name=".activities.LoginActivity"/>
+        <activity android:name=".activities.RegisterActivity"/>
+        <activity android:name=".activities.RegisterSMSActivity"/>
+        <activity android:name=".activities.SearchActivity"/>
     </application>
 
 </manifest>

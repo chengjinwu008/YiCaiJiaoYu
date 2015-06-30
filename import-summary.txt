@@ -1,4 +1,3 @@
-
 ECLIPSE ANDROID PROJECT IMPORT SUMMARY
 ======================================
 
@@ -8,45 +7,45 @@ The following files were *not* copied into the new Gradle project; you
 should evaluate whether these are still needed in your project and if
 so manually move them:
 
-* LICENSE.txt
-* build.gradle
-* library.iml
-* pom.xml
-
-Replaced Jars with Dependencies:
---------------------------------
-The importer recognized the following .jar files as third party
-libraries and replaced them with Gradle dependencies instead. This has
-the advantage that more explicit version information is known, and the
-libraries can be updated automatically. However, it is possible that
-the .jar file in your project was of an older version than the
-dependency we picked, which could render the project not compileable.
-You can disable the jar replacement in the import wizard and try again:
-
-android-support-v4.jar => com.android.support:support-v4:18.+
+From PhoneNumberVerify:
+* .gitattributes
+* .gitignore
+* .idea\
+* .idea\.name
+* .idea\compiler.xml
+* .idea\copyright\
+* .idea\copyright\profiles_settings.xml
+* .idea\misc.xml
+* .idea\modules.xml
+* .idea\uiDesigner.xml
+* .idea\vcs.xml
+* .idea\workspace.xml
+* PhoneNumberVerify.iml
+* ant.properties
+* build.xml
+* proguard-project.txt
+From StreamUtil:
+* .gitattributes
+* .gitignore
+* StreamUtil.iml
+* ant.properties
+* build.xml
+* proguard-project.txt
 
 Moved Files:
 ------------
 Android Gradle projects use a different directory structure than ADT
 Eclipse projects. Here's how the projects were restructured:
 
-* AndroidManifest.xml => slidingMenumaster\src\main\AndroidManifest.xml
-* res\ => slidingMenumaster\src\main\res\
-* src\ => slidingMenumaster\src\main\java\
-
-Missing Android Support Repository:
------------------------------------
-Some useful libraries, such as the Android Support Library, are
-installed from a special Maven repository, which should be installed
-via the SDK manager.
-
-It looks like this library is missing from your SDK installation at:
-null
-
-To install it, open the SDK manager, and in the Extras category,
-select "Android Support Repository". You may also want to install the
-"Google Repository" if you want to use libraries like Google Play
-Services.
+In StreamUtil:
+* AndroidManifest.xml => streamUtil\src\main\AndroidManifest.xml
+* res\ => streamUtil\src\main\res
+* src\ => streamUtil\src\main\java\
+In PhoneNumberVerify:
+* AndroidManifest.xml => phoneNumberVerify\src\main\AndroidManifest.xml
+* assets\ => phoneNumberVerify\src\main\assets
+* res\ => phoneNumberVerify\src\main\res\
+* src\ => phoneNumberVerify\src\main\java\
 
 Next Steps:
 -----------

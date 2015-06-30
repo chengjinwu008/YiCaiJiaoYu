@@ -1,5 +1,6 @@
 package com.cjq.yicaijiaoyu.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -19,6 +20,7 @@ import android.widget.TextView;
 
 import com.cjq.yicaijiaoyu.CommonDataObject;
 import com.cjq.yicaijiaoyu.R;
+import com.cjq.yicaijiaoyu.activities.SearchActivity;
 import com.cjq.yicaijiaoyu.adapter.CourseCategoryAdapter;
 import com.cjq.yicaijiaoyu.adapter.CourseListAdapter;
 import com.cjq.yicaijiaoyu.adapter.RecommendCourseAdapter;
@@ -212,6 +214,8 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
 
         categoryAdapter = new CourseCategoryAdapter(categorys,getActivity());
 
+        //注册搜索键
+        view.findViewById(R.id.main_search_button).setOnClickListener(this);
         return view;
     }
 
@@ -277,6 +281,10 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
                 }
                 PopWindowUtil.show(windowView, title, null, window, R.style.course_category_list);
                 arrowImage.setImageResource(R.drawable.jiantou_shang);
+                break;
+            case R.id.main_search_button:
+                Intent intent = new Intent(getActivity(), SearchActivity.class);
+                startActivity(intent);
                 break;
         }
     }

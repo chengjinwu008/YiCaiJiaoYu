@@ -5,83 +5,59 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.cjq.yicaijiaoyu.CommonDataObject;
 import com.cjq.yicaijiaoyu.R;
 import com.cjq.yicaijiaoyu.adapter.CourseCategoryAdapter;
 import com.cjq.yicaijiaoyu.adapter.CourseListAdapter;
-import com.cjq.yicaijiaoyu.adapter.RecommendCourseAdapter;
 import com.cjq.yicaijiaoyu.entities.CategoryEntity;
 import com.cjq.yicaijiaoyu.entities.CourseCategory;
 import com.cjq.yicaijiaoyu.entities.CourseEntity;
+import com.cjq.yicaijiaoyu.entities.CourseListRequestEvent;
+import com.cjq.yicaijiaoyu.entities.CourseListResultEvent;
 import com.cjq.yicaijiaoyu.entities.LectureEntity;
 import com.cjq.yicaijiaoyu.entities.MainMenuEvent;
 import com.cjq.yicaijiaoyu.utils.NetStateUtil;
 import com.cjq.yicaijiaoyu.utils.PopWindowUtil;
-import com.cjq.yicaijiaoyu.utils.TimerForSeconds;
-import com.cjq.yicaijiaoyu.utils.VideoUtil;
-import com.markmao.pulltorefresh.widget.XScrollView;
+import com.jeremyfeinstein.slidingmenu.lib.CustomViewAbove;
 import com.ypy.eventbus.EventBus;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Created by CJQ on 2015/6/25.
  */
-public class MyCourseFragment extends Fragment implements View.OnClickListener, XScrollView.IXScrollViewListener, AdapterView.OnItemClickListener {
+public class MyCourseFragment extends Fragment implements View.OnClickListener {
 
     private View view;
     private View title;
-    private XScrollView mRefreshLayout;
     private List<CourseEntity> courseEntityList;
-    private ListView courseList;
     private CourseListAdapter courseListAdapter;
-    private TextView titleText;
     private ImageView arrowImage;
     private CourseCategoryAdapter categoryAdapter;
     private PopupWindow window;
     private View windowView;
     private LayoutInflater inflater;
+    private int tab;
+    private View soap;
+    private TextView careFor;//关注
+    private TextView bought;//已购
+    private TextView history;//历史
+    private ViewPager pager;
 
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        this.inflater = inflater;
 
-        view = inflater.inflate(R.layout.my_courses,container,false);
-        //注册菜单键
-        view.findViewById(R.id.main_left_menu_button).setOnClickListener(this);
-
-        //标题栏
-        title = view.findViewById(R.id.title);
-
-        //注册下拉刷新和上拉加载
-        mRefreshLayout = (XScrollView) view.findViewById(R.id.refresh);
-        mRefreshLayout.setPullRefreshEnable(true);
-        mRefreshLayout.setPullLoadEnable(true);
-        mRefreshLayout.setAutoLoadEnable(true);
-
-        mRefreshLayout.setIXScrollViewListener(this);
-        mRefreshLayout.setRefreshTime(getTime());
-
-        View content = inflater.inflate(R.layout.my_course_list, mRefreshLayout,false);
-
-        mRefreshLayout.setView(content);
-
-        //初始化课程视频列表
+    public void onEventBackgroundThread(CourseListRequestEvent e){
+        //收到了请求
         //todo 请求课程列表 课程列表要筛选 提升为属性
         courseEntityList = new ArrayList<>();
 
@@ -107,16 +83,41 @@ public class MyCourseFragment extends Fragment implements View.OnClickListener, 
         courseEntity4.setLecture(lectureEntity);
         courseEntityList.add(courseEntity4);
 
-        //获取到课程list
-        courseList = (ListView) content.findViewById(R.id.course_list);
-
-        courseList.setOnItemClickListener(this);
-
+        //生成Adapter
         courseListAdapter = new CourseListAdapter(courseEntityList,getActivity());
-        courseList.setAdapter(courseListAdapter);
+        CourseListResultEvent event = new CourseListResultEvent(courseListAdapter,null);
+        switch (tab){
+            case 0:
+                event.setRequestCode();
+                break;
+            case 1:
+                break;
+            case 2:
+                break;
+        }
+
+        EventBus.getDefault().post(event);
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        this.inflater = inflater;
+
+        initialRR();
+
+        view = inflater.inflate(R.layout.my_courses,container,false);
+        //注册菜单键
+        view.findViewById(R.id.main_left_menu_button).setOnClickListener(this);
+
+        //标题栏
+        title = view.findViewById(R.id.title);
+
+        EventBus.getDefault().register(this);
+
+        pager= (ViewPager) view.findViewById(R.id.pager);
 
         //下拉分类点击注册
-        titleText = (TextView) view.findViewById(R.id.main_title_text);
         arrowImage = (ImageView)view.findViewById(R.id.main_drop_arrow);
         view.findViewById(R.id.main_click_drop).setOnClickListener(this);
 
@@ -131,6 +132,32 @@ public class MyCourseFragment extends Fragment implements View.OnClickListener, 
 
         return view;
     }
+
+    private void initialRR() {
+        soap = view.findViewById(R.id.soap);
+        //初始化肥皂的长宽
+        careFor = (TextView) view.findViewById(R.id.detail);
+        bought = (TextView) view.findViewById(R.id.pinlun);
+        history = (TextView) view.findViewById(R.id.chapter);
+
+        LinearLayout rr = (LinearLayout) view.findViewById(R.id.rrs);
+        int count = rr.getChildCount();
+
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) soap.getLayoutParams();
+
+        int width = getResources().getDisplayMetrics().widthPixels;
+
+        params.width = width / count;
+        soap.setLayoutParams(params);
+
+        //初始化三按钮
+        careFor.setTextColor(getResources().getColor(R.color.main_titlebar_background));
+
+        careFor.setOnClickListener(this);
+        bought.setOnClickListener(this);
+        history.setOnClickListener(this);
+    }
+
 
     @Override
     public void onClick(View v) {
@@ -162,7 +189,6 @@ public class MyCourseFragment extends Fragment implements View.OnClickListener, 
                             NetStateUtil.checkNetwork(new NetStateUtil.NetWorkStateListener() {
                                 @Override
                                 public void doWithNetWork() {
-                                    sortCourse();
                                 }
 
                                 @Override
@@ -176,138 +202,68 @@ public class MyCourseFragment extends Fragment implements View.OnClickListener, 
                 PopWindowUtil.show(windowView, title, null, window, R.style.course_category_list);
                 arrowImage.setImageResource(R.drawable.jiantou_shang);
                 break;
+            case R.id.detail:
+                tab = 0;
+                changeColor();
+                changeFragment();
+                break;
+            case R.id.pinlun:
+                tab = 1;
+                changeColor();
+                changeFragment();
+                break;
+            case R.id.chapter:
+                tab = 2;
+                changeColor();
+                changeFragment();
+                break;
         }
     }
 
-    private String getTime() {
-        return new SimpleDateFormat("MM-dd HH:mm", Locale.CHINA).format(new Date());
-    }
-
-    private void onLoad() {
-        mRefreshLayout.stopRefresh();
-        mRefreshLayout.stopLoadMore();
-        mRefreshLayout.setRefreshTime(getTime());
-        mRefreshLayout.setPullRefreshEnable(true);
-        mRefreshLayout.setPullLoadEnable(true);
-        mRefreshLayout.setAutoLoadEnable(true);
-        courseListAdapter.notifyDataSetChanged();
-    }
-
-    private void isLoading() {
-        mRefreshLayout.setPullRefreshEnable(false);
-        mRefreshLayout.setPullLoadEnable(false);
-        mRefreshLayout.setAutoLoadEnable(false);
-    }
-
-    private void sortCourse() {
-        CourseCategory category = null;
-        switch (CommonDataObject.categoryChecked){
-            case  0:
-                category=null;
+    /**
+     * 改变头颜色的方法
+     */
+    private void changeColor() {
+        //首先改变颜色值
+        RelativeLayout.LayoutParams params;
+        int left;
+        switch (tab) {
+            case 0:
+                //改变颜色值
+                careFor.setTextColor(getResources().getColor(R.color.main_titlebar_background));
+                bought.setTextColor(getResources().getColor(R.color.menu_text_color));
+                history.setTextColor(getResources().getColor(R.color.menu_text_color));
+                //移动滑块
+                params = (RelativeLayout.LayoutParams) soap.getLayoutParams();
+                params.leftMargin=careFor.getLeft();
+                soap.setLayoutParams(params);
                 break;
             case 1:
-                category=CourseCategory.FOR_JOB;
+//改变颜色值
+                bought.setTextColor(getResources().getColor(R.color.main_titlebar_background));
+                careFor.setTextColor(getResources().getColor(R.color.menu_text_color));
+                history.setTextColor(getResources().getColor(R.color.menu_text_color));
+                //移动滑块
+                params = (RelativeLayout.LayoutParams) soap.getLayoutParams();
+                params.leftMargin=bought.getLeft();
+
+                soap.setLayoutParams(params);
                 break;
             case 2:
-                category=CourseCategory.FOR_PRIMARY;
+//改变颜色值
+                history.setTextColor(getResources().getColor(R.color.main_titlebar_background));
+                bought.setTextColor(getResources().getColor(R.color.menu_text_color));
+                careFor.setTextColor(getResources().getColor(R.color.menu_text_color));
+                //移动滑块
+                params = (RelativeLayout.LayoutParams) soap.getLayoutParams();
+                params.leftMargin=history.getLeft();
+
+                soap.setLayoutParams(params);
                 break;
-            case 3:
-                category=CourseCategory.FOR_INTERMEDIATE;
-                break;
-        }
-
-        //执行课程筛选 网络
-        if(category!=null){
-//            直接请求列表
-
-            //todo 构建请求 fee free category
-
-            courseEntityList.clear();
-            LectureEntity lectureEntity = new LectureEntity("陈昶","呵呵呵","https://www.baidu.com/img/bd_logo1.png");
-            CourseEntity courseEntity3 = new CourseEntity();
-            courseEntity3.setCover_image_url("https://www.baidu.com/img/bd_logo1.png");
-            courseEntity3.setTitle("资产负载要素产妇");
-            courseEntity3.setFree(true);
-            courseEntity3.setCategory(CourseCategory.FOR_PRIMARY);
-            courseEntity3.setLecture(lectureEntity);
-            courseEntityList.add(courseEntity3);
-
-
-            CourseEntity courseEntity4 = new CourseEntity();
-            courseEntity4.setCover_image_url("https://www.baidu.com/img/bd_logo1.png");
-            courseEntity4.setTitle("资产负载要素产妇");
-            courseEntity4.setFree(true);
-            courseEntity4.setCategory(CourseCategory.FOR_INTERMEDIATE);
-            courseEntity4.setLecture(lectureEntity);
-            courseEntityList.add(courseEntity4);
-            //提醒数据
-            courseListAdapter.notifyDataSetChanged();
-        }else{
-            //todo 构建请求 fee free
-
-            courseEntityList.clear();
-            LectureEntity lectureEntity = new LectureEntity("陈昶","呵呵呵","https://www.baidu.com/img/bd_logo1.png");
-            CourseEntity courseEntity3 = new CourseEntity();
-            courseEntity3.setCover_image_url("https://www.baidu.com/img/bd_logo1.png");
-            courseEntity3.setTitle("资产负载要素产妇");
-            courseEntity3.setFree(true);
-            courseEntity3.setCategory(CourseCategory.FOR_PRIMARY);
-            courseEntity3.setLecture(lectureEntity);
-            courseEntityList.add(courseEntity3);
-
-
-            CourseEntity courseEntity4 = new CourseEntity();
-            courseEntity4.setCover_image_url("https://www.baidu.com/img/bd_logo1.png");
-            courseEntity4.setTitle("资产负载要素产妇");
-            courseEntity4.setFree(true);
-            courseEntity4.setCategory(CourseCategory.FOR_INTERMEDIATE);
-            courseEntity4.setLecture(lectureEntity);
-            courseEntityList.add(courseEntity4);
-
-            courseListAdapter.notifyDataSetChanged();
         }
     }
 
-    @Override
-    public void onRefresh() {
-        isLoading();
-        NetStateUtil.checkNetwork(new NetStateUtil.NetWorkStateListener() {
-            @Override
-            public void doWithNetWork() {
-                //todo 请求刷新
-                sortCourse();
-                onLoad();
-            }
-
-            @Override
-            public void doWithoutNetWork() {
-                onLoad();
-            }
-        });
-    }
-
-    @Override
-    public void onLoadMore() {
-        isLoading();
-        NetStateUtil.checkNetwork(new NetStateUtil.NetWorkStateListener() {
-            @Override
-            public void doWithNetWork() {
-                //todo 请求加载
-                courseEntityList.add(new CourseEntity("https://www.baidu.com/img/bd_logo1.png","新加的课程", CourseCategory.FOR_JOB,true));
-                onLoad();
-            }
-
-            @Override
-            public void doWithoutNetWork() {
-                onLoad();
-            }
-        });
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        CourseEntity course = courseEntityList.get(position);
-
-        VideoUtil.startVideo(getActivity(), course);
+    private void changeFragment(){
+        pager.setCurrentItem(tab);
     }
 }
