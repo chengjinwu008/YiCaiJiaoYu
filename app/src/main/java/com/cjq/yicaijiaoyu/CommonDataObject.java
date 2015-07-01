@@ -18,6 +18,7 @@ public class CommonDataObject {
     public static String nowPlayingId=null;//当前正在播放的视频的id
     public static final Gson GSON = new Gson();
     public static int COURSE_NUM_SHOWING=5;//每页显示的条数
+    public static int ALL_COURSE_MAX_PAGE = 0;//最大页数
 
     public final static String MAIN_URL="http://192.168.0.181/xct";
     public final static String POLYV_INIT_URL =MAIN_URL+"";//视频播放器初始化请求地址 请求json的地方
