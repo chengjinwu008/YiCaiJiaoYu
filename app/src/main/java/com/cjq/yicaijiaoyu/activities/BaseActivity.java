@@ -24,6 +24,6 @@ public class BaseActivity extends FragmentActivity {
     @Override
     public void finish() {
         super.finish();
-        overridePendingTransition(android.R.anim.fade_in,android.R.anim.fade_out);
+//        overridePendingTransition(android.R.anim.fade_in,android.R.anim.fade_out);
     }
 }

@@ -3,6 +3,7 @@ package com.cjq.yicaijiaoyu.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -19,7 +20,11 @@ import com.cjq.yicaijiaoyu.CommonDataObject;
 import com.cjq.yicaijiaoyu.R;
 import com.cjq.yicaijiaoyu.entities.RegisterRequestEntity;
 import com.cjq.yicaijiaoyu.entities.SMSRequestEntity;
+import com.cjq.yicaijiaoyu.utils.SharedPreferenceUtil;
 import com.cjq.yicaijiaoyu.utils.TimerForSeconds;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -51,6 +56,8 @@ public class RegisterSMSActivity extends BaseActivity implements View.OnClickLis
         //调用短信接口
         doSendSMS(num);
 
+        timer.setOnClickListener(this);
+
         registerBtn = findViewById(R.id.do_register);
 
         registerBtn.setOnClickListener(this);
@@ -61,10 +68,16 @@ public class RegisterSMSActivity extends BaseActivity implements View.OnClickLis
      */
     private void doSendSMS(final String num) {
         //todo 短信接口
+        Log.i("SMS","开始发送短信");
         StringRequest request = new StringRequest(Request.Method.POST, CommonDataObject.SMS_URL, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
-                Toast.makeText(RegisterSMSActivity.this,getString(R.string.hint5),Toast.LENGTH_SHORT).show();
+                try {
+                    JSONObject object = new JSONObject(s);
+                    Toast.makeText(RegisterSMSActivity.this,object.getString("msg"),Toast.LENGTH_SHORT).show();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         }, new Response.ErrorListener() {
             @Override
@@ -88,7 +101,7 @@ public class RegisterSMSActivity extends BaseActivity implements View.OnClickLis
         queue.start();
 
         //todo 打开倒计时
-        new TimerForSeconds(1000, 60, new TimerForSeconds.TimerListener() {
+        new TimerForSeconds(1000, 5, new TimerForSeconds.TimerListener() {
             @Override
             public void onEverySeconds(final int timeLeft) {
                 mHandler.post(new Runnable() {
@@ -103,10 +116,11 @@ public class RegisterSMSActivity extends BaseActivity implements View.OnClickLis
 
             @Override
             public void onTimeUp() {
-                timer.setClickable(true);
+                System.out.println("时间到");
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
+                        timer.setClickable(true);
                         timer.setText(R.string.resend_no_time);
                     }
                 });
@@ -138,10 +152,21 @@ public class RegisterSMSActivity extends BaseActivity implements View.OnClickLis
                 StringRequest request = new StringRequest(Request.Method.POST, CommonDataObject.REGISTER_URl, new Response.Listener<String>() {
                     @Override
                     public void onResponse(String s) {
-                        //todo 注册成功
-
-                        setResult(RESULT_OK);
-                        finish();
+                        try {
+                            JSONObject jsonObject = new JSONObject(s);
+                            String code = jsonObject.getString("code");
+                            Toast.makeText(RegisterSMSActivity.this,jsonObject.getString("msg"),Toast.LENGTH_SHORT).show();
+                            if("0000".equals(code)){
+                                //注册成功
+                                String userId = jsonObject.getJSONObject("data").getString("userId");
+                                //保存userId
+                                SharedPreferenceUtil.getInstance(RegisterSMSActivity.this).putString(new String[]{SharedPreferenceUtil.USER_ID},new String[]{userId});
+                                setResult(RESULT_OK);
+                                finish();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }, new Response.ErrorListener() {
                     @Override
@@ -155,13 +180,17 @@ public class RegisterSMSActivity extends BaseActivity implements View.OnClickLis
                         //组建注册请求实体
                         RegisterRequestEntity.Data data = new RegisterRequestEntity.Data(num,smsPassword.getText().toString(),verifier.getText().toString());
                         RegisterRequestEntity entity = new RegisterRequestEntity(CommonDataObject.REGISTER_CODE,data);
-                        params.put("opjson",CommonDataObject.GSON.toJson(entity));
+                        params.put("opjson", CommonDataObject.GSON.toJson(entity));
                         return params;
                     }
                 };
+
+                RequestQueue queue = Volley.newRequestQueue(this);
+
+                queue.add(request);
+                queue.start();
                 break;
             case R.id.timer:
-                //todo 实现重新请求短信接口
                 doSendSMS(num);
                 break;
             case R.id.back:

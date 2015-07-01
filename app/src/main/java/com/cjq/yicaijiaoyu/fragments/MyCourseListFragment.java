@@ -6,7 +6,6 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 
 import com.cjq.yicaijiaoyu.adapter.CourseListAdapter;
@@ -63,6 +62,12 @@ public class MyCourseListFragment extends Fragment implements XListView.IXListVi
     }
 
     @Override
+    public void onDestroyView() {
+        EventBus.getDefault().unregister(this);
+        super.onDestroyView();
+    }
+
+    @Override
     public void onRefresh() {
         //todo 刷新做的事情
         isLoading();
@@ -70,9 +75,13 @@ public class MyCourseListFragment extends Fragment implements XListView.IXListVi
             @Override
             public void doWithNetWork() {
                 //todo 请求刷新
+                if(requestCode==null){
+
+                }else{
+
+                }
                 onLoad();
             }
-
             @Override
             public void doWithoutNetWork() {
                 onLoad();
@@ -106,7 +115,7 @@ public class MyCourseListFragment extends Fragment implements XListView.IXListVi
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         //点击课程后，需要跳转
-        CourseEntity course = adapter.getCourses().get(position);
+        CourseEntity course = adapter.getCourses().get(position-1);
         VideoUtil.startVideo(getActivity(), course);
     }
 

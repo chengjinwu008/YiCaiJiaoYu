@@ -37,29 +37,32 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
+            android:clickable="true"
             >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="重新发送"
+                android:gravity="center"
+                android:textSize="17sp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="20dp"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:layout_margin="5dp"
+                android:background="@drawable/white_border"
+                android:id="@+id/timer" />
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@color/pure_white"
                 android:hint="@string/hint3"
                 android:padding="20dp"
-                android:id="@+id/verifier" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-
-                android:text="再次发送"
-                android:textSize="17sp"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:layout_marginRight="20dp"
-                android:padding="10dp"
-                android:background="@drawable/white_border"
-                android:id="@+id/timer" />
+                android:id="@+id/verifier"
+                android:layout_toLeftOf="@+id/timer"
+                />
         </RelativeLayout>
-
 
         <FrameLayout
             android:layout_width="match_parent"

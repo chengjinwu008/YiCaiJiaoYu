@@ -19,6 +19,7 @@ import com.cjq.yicaijiaoyu.CommonDataObject;
 import com.cjq.yicaijiaoyu.R;
 import com.cjq.yicaijiaoyu.adapter.CourseCategoryAdapter;
 import com.cjq.yicaijiaoyu.adapter.CourseListAdapter;
+import com.cjq.yicaijiaoyu.adapter.PagerAdapter;
 import com.cjq.yicaijiaoyu.entities.CategoryEntity;
 import com.cjq.yicaijiaoyu.entities.CourseCategory;
 import com.cjq.yicaijiaoyu.entities.CourseEntity;
@@ -28,7 +29,6 @@ import com.cjq.yicaijiaoyu.entities.LectureEntity;
 import com.cjq.yicaijiaoyu.entities.MainMenuEvent;
 import com.cjq.yicaijiaoyu.utils.NetStateUtil;
 import com.cjq.yicaijiaoyu.utils.PopWindowUtil;
-import com.jeremyfeinstein.slidingmenu.lib.CustomViewAbove;
 import com.ypy.eventbus.EventBus;
 
 import java.util.ArrayList;
@@ -55,47 +55,46 @@ public class MyCourseFragment extends Fragment implements View.OnClickListener {
     private TextView history;//历史
     private ViewPager pager;
 
-
     public void onEventBackgroundThread(CourseListRequestEvent e){
         //收到了请求
-        //todo 请求课程列表 课程列表要筛选 提升为属性
-        courseEntityList = new ArrayList<>();
-
-        LectureEntity lectureEntity = new LectureEntity("陈昶","呵呵呵","https://www.baidu.com/img/bd_logo1.png");
-
-        CourseEntity courseEntity3 = new CourseEntity();
-        courseEntity3.setCover_image_url("https://www.baidu.com/img/bd_logo1.png");
-        courseEntity3.setTitle("资产负载要素产妇");
-        courseEntity3.setFree(true);
-        courseEntity3.setId("sl8da4jjbxc377d0a79c7224552b6ee4_s");
-        courseEntity3.setCategory(CourseCategory.FOR_PRIMARY);
-        courseEntity3.setLecture(lectureEntity);
-        courseEntityList.add(courseEntity3);
-
-
-        CourseEntity courseEntity4 = new CourseEntity();
-        courseEntity4.setCover_image_url("https://www.baidu.com/img/bd_logo1.png");
-        courseEntity4.setTitle("资产负载要素产妇");
-        courseEntity4.setFree(false);
-        courseEntity4.setId("sl8da4jjbx5d715bc3a8ce8f8194afab_s");
-        courseEntity4.setCategory(CourseCategory.FOR_INTERMEDIATE);
-        courseEntity4.setIntro("这个是收费视频，你看不到的~");
-        courseEntity4.setLecture(lectureEntity);
-        courseEntityList.add(courseEntity4);
-
         //生成Adapter
-        courseListAdapter = new CourseListAdapter(courseEntityList,getActivity());
-        CourseListResultEvent event = new CourseListResultEvent(courseListAdapter,null);
+        courseListAdapter = new CourseListAdapter(null,getActivity());
+        CourseListResultEvent event = new CourseListResultEvent();
         switch (tab){
             case 0:
-                event.setRequestCode();
+                event.setRequestCode(CommonDataObject.COURSE_CARE_REQUEST_CODE);
+                //todo 获取课程列表
+                courseEntityList = new ArrayList<>();
+                LectureEntity lectureEntity = new LectureEntity("陈昶","呵呵呵","https://www.baidu.com/img/bd_logo1.png");
+
+                CourseEntity courseEntity3 = new CourseEntity();
+                courseEntity3.setCover_image_url("https://www.baidu.com/img/bd_logo1.png");
+                courseEntity3.setTitle("资产负载要素产妇1");
+                courseEntity3.setFree(true);
+                courseEntity3.setId("sl8da4jjbxc377d0a79c7224552b6ee4_s");
+                courseEntity3.setCategory(CourseCategory.FOR_PRIMARY);
+                courseEntity3.setLecture(lectureEntity);
+                courseEntityList.add(courseEntity3);
+
+                CourseEntity courseEntity4 = new CourseEntity();
+                courseEntity4.setCover_image_url("https://www.baidu.com/img/bd_logo1.png");
+                courseEntity4.setTitle("资产负载要素产妇1");
+                courseEntity4.setFree(false);
+                courseEntity4.setId("sl8da4jjbx5d715bc3a8ce8f8194afab_s");
+                courseEntity4.setCategory(CourseCategory.FOR_INTERMEDIATE);
+                courseEntity4.setIntro("这个是收费视频，你看不到的~");
+                courseEntity4.setLecture(lectureEntity);
+                courseEntityList.add(courseEntity4);
+                courseListAdapter.setCourses(courseEntityList);
+                event.setAdapter(courseListAdapter);
                 break;
             case 1:
+                event.setRequestCode(CommonDataObject.COURSE_BOUGHT_REQUEST_CODE);
                 break;
             case 2:
+                event.setRequestCode(null);
                 break;
         }
-
         EventBus.getDefault().post(event);
     }
 
@@ -104,18 +103,26 @@ public class MyCourseFragment extends Fragment implements View.OnClickListener {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         this.inflater = inflater;
 
-        initialRR();
-
         view = inflater.inflate(R.layout.my_courses,container,false);
         //注册菜单键
         view.findViewById(R.id.main_left_menu_button).setOnClickListener(this);
-
+        initialRR();
         //标题栏
         title = view.findViewById(R.id.title);
 
+        //事件注册
         EventBus.getDefault().register(this);
 
         pager= (ViewPager) view.findViewById(R.id.pager);
+        pager.setOffscreenPageLimit(4);
+
+        //初始化三碎片
+        List<Fragment> fragments = new ArrayList<>();
+        fragments.add(new MyCourseListFragment());
+        fragments.add(new MyCourseListFragment());
+        fragments.add(new MyCourseListFragment());
+
+        pager.setAdapter(new PagerAdapter(getFragmentManager(),fragments));
 
         //下拉分类点击注册
         arrowImage = (ImageView)view.findViewById(R.id.main_drop_arrow);
@@ -131,6 +138,12 @@ public class MyCourseFragment extends Fragment implements View.OnClickListener {
         categoryAdapter = new CourseCategoryAdapter(categorys,getActivity());
 
         return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        EventBus.getDefault().unregister(this);
+        super.onDestroyView();
     }
 
     private void initialRR() {
@@ -157,7 +170,6 @@ public class MyCourseFragment extends Fragment implements View.OnClickListener {
         bought.setOnClickListener(this);
         history.setOnClickListener(this);
     }
-
 
     @Override
     public void onClick(View v) {

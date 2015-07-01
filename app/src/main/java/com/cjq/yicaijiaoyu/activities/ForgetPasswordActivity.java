@@ -31,25 +31,27 @@ public class ForgetPasswordActivity extends BaseActivity implements View.OnClick
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.next:
-                //todo 验证短信
-
                 //验证手机号码
                 final String num = phoneNum.getText().toString();
 
-                Validator.verify(num, new Validator.VerifyListener() {
-                    @Override
-                    public void verifyFinished(boolean state) {
-                        if (state) {
-                            //验证成功
-                            Intent intent = new Intent(ForgetPasswordActivity.this, RegisterSMSActivity.class);
-                            intent.putExtra(ForgetPasswordSMSActivity.EXTRA_PHONE_NUM, num);
-                            startActivityForResult(intent, 0);
-                        } else {
-                            //验证失败
-                            Toast.makeText(ForgetPasswordActivity.this, R.string.wrong_num, Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+//                Validator.verify(num, new Validator.VerifyListener() {
+//                    @Override
+//                    public void verifyFinished(boolean state) {
+//                        if (state) {
+//                            //验证成功
+//                            Intent intent = new Intent(ForgetPasswordActivity.this, RegisterSMSActivity.class);
+//                            intent.putExtra(ForgetPasswordSMSActivity.EXTRA_PHONE_NUM, num);
+//                            startActivityForResult(intent, 0);
+//                        } else {
+//                            //验证失败
+//                            Toast.makeText(ForgetPasswordActivity.this, R.string.wrong_num, Toast.LENGTH_SHORT).show();
+//                        }
+//                    }
+//                });
+
+                Intent intent = new Intent(ForgetPasswordActivity.this, ForgetPasswordSMSActivity.class);
+                intent.putExtra(ForgetPasswordSMSActivity.EXTRA_PHONE_NUM, num);
+                startActivityForResult(intent, 0);
                 break;
             case R.id.back:
                 finish();
@@ -59,7 +61,13 @@ public class ForgetPasswordActivity extends BaseActivity implements View.OnClick
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        setResult(RESULT_OK);
-        finish();
+        switch (requestCode){
+            case 0:
+                if(resultCode==RESULT_OK){
+                    setResult(RESULT_OK);
+                    this.finish();
+                }
+                break;
+        }
     }
 }

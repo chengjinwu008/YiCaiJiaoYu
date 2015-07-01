@@ -22,6 +22,9 @@ public class CourseListResultEvent {
         this.requestCode = requestCode;
     }
 
+    public CourseListResultEvent() {
+    }
+
     public CourseListAdapter getAdapter() {
         return adapter;
     }

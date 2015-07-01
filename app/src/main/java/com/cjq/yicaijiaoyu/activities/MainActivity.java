@@ -3,7 +3,10 @@ package com.cjq.yicaijiaoyu.activities;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,30 +15,102 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.cjq.yicaijiaoyu.CommonDataObject;
 import com.cjq.yicaijiaoyu.R;
 import com.cjq.yicaijiaoyu.adapter.MenuAdapter;
+import com.cjq.yicaijiaoyu.adapter.PagerAdapter;
 import com.cjq.yicaijiaoyu.entities.MainMenuEvent;
 import com.cjq.yicaijiaoyu.entities.MenuItemEntity;
+import com.cjq.yicaijiaoyu.entities.ShowLoginEvent;
+import com.cjq.yicaijiaoyu.entities.SkipLeaderPageEvent;
+import com.cjq.yicaijiaoyu.entities.UserInfoRequestEntity;
+import com.cjq.yicaijiaoyu.entities.UserLoginEvent;
 import com.cjq.yicaijiaoyu.fragments.AllCourseFragment;
 import com.cjq.yicaijiaoyu.fragments.MyCourseFragment;
 import com.cjq.yicaijiaoyu.fragments.MySettingFragment;
+import com.cjq.yicaijiaoyu.fragments.WelcomeOneFragment;
+import com.cjq.yicaijiaoyu.fragments.WelcomeThreeFragment;
+import com.cjq.yicaijiaoyu.fragments.WelcomeTwoFragment;
 import com.cjq.yicaijiaoyu.utils.AccountUtil;
+import com.cjq.yicaijiaoyu.utils.ImageUtil;
+import com.cjq.yicaijiaoyu.utils.NetStateUtil;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import com.ypy.eventbus.EventBus;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     private SlidingMenu menu;
     private FragmentManager manager;
+    private ImageView menu_portrait;
+    private TextView menu_username;
+    private Handler mHandler=new Handler();
+    private View content;
+    private ViewPager welcome;
+
+    public void onEventMainThread(UserLoginEvent e){
+        checkLogin();
+    }
+
+    public void onEventMainThread(ShowLoginEvent e){
+        showMain();
+        showLoginActivity();
+    }
+
+    private void showMain() {
+        //隐藏引导界面
+        welcome.setVisibility(View.GONE);
+    }
+
+    public void onEventMainThread(SkipLeaderPageEvent e){
+        showMain();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        welcome = (ViewPager) findViewById(R.id.welcome);
+        if(savedInstanceState==null){
+            //隐藏欢迎页
+            findViewById(R.id.loading).setVisibility(View.VISIBLE);
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    findViewById(R.id.loading).setVisibility(View.GONE);
+                }
+            },3000);
+            welcome.setVisibility(View.VISIBLE);
+            if(AccountUtil.isLoggedIn(this)){
+                //跳过引导界面
+                showMain();
+            }else{
+                //显示引导界面
+                List<Fragment> fragments = new ArrayList<>();
+                fragments.add(new WelcomeOneFragment());
+                fragments.add(new WelcomeTwoFragment());
+                fragments.add(new WelcomeThreeFragment());
+                welcome.setAdapter(new PagerAdapter(getSupportFragmentManager(),fragments));
+            }
+        }
+
+        content = findViewById(R.id.content);
+        //判断登录
+
         CommonDataObject.CM = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 
         //注册弹出菜单监听
@@ -46,10 +121,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         //设置划出方向
         menu.setMode(SlidingMenu.LEFT);
 
-        /**
-         * SLIDING_WINDOW will include the Title/ActionBar in the content
-         * section of the SlidingMenu, while SLIDING_CONTENT does not.
-         */
         menu.attachToActivity(this, SlidingMenu.SLIDING_CONTENT);
 
         //设置菜单给主界面的剩余空间
@@ -69,8 +140,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         menu.setMenu(R.layout.leftmenu);
 
         //todo 注册头像和未登录点击登录
-        ImageView menu_portrait = (ImageView) menu.findViewById(R.id.menu_portrait);
-        TextView menu_username = (TextView) menu.findViewById(R.id.menu_username);
+        menu_portrait = (ImageView) menu.findViewById(R.id.menu_portrait);
+        menu_username = (TextView) menu.findViewById(R.id.menu_username);
         menu_portrait.setOnClickListener(this);
         menu_username.setOnClickListener(this);
 
@@ -96,7 +167,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                         CommonDataObject.menuChecked = position;
                     else{
                         //todo 未登录提示
-
                     }
                 }else{
                     CommonDataObject.menuChecked = position;
@@ -104,7 +174,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
                 adapter.notifyDataSetChanged();
                 if (preFragment != position)
-                    //todo 如果和之前的碎片不同才进行请求
                     switch (CommonDataObject.menuChecked) {
                         case 0:
                             //全部课程
@@ -132,20 +201,84 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         //侧滑菜单一键签到按钮
         menu.findViewById(R.id.one_key_sign_in).setOnClickListener(this);
 
-        //todo 检查签到
-        checkLogin();
-
-//        menu.findViewById(R.id.one_key_sign_in).setBackgroundColor(getResources().getColor(R.color.one_key_sign_uped));
-//        menu.findViewById(R.id.one_key_sign_in).setClickable(false);
-//        ((TextView)menu.findViewById(R.id.one_key_sign_in)).setText(R.string.signed_uped);
-
         //获取FragmentManager
         manager = getSupportFragmentManager();
 
         loadFragment();
     }
 
+    @Override
+    protected void onStart() {
+        EventBus.getDefault().post(new UserLoginEvent());
+        super.onStart();
+        //todo 每次展示页面的时候，进行用户信息请求
+    }
+
     private void checkLogin() {
+        if(AccountUtil.isLoggedIn(this)){
+            //请求
+            NetStateUtil.checkNetwork(new NetStateUtil.NetWorkStateListener() {
+                @Override
+                public void doWithNetWork() {
+                    //有网络就请求
+                    StringRequest request = new StringRequest(Request.Method.POST, CommonDataObject.USER_INFO_URL, new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String s) {
+                            //获取到用户信息的处理
+                            try {
+                                JSONObject object = new JSONObject(s);
+                                String code = object.getString("code");
+                                if("0000".equals(code)){
+                                    JSONObject data = object.getJSONArray("data").getJSONObject(0);
+                                    final String userName = data.getString("user_name");
+//                                    final String portrait = data.getString("portrait");
+                                    //用户名和头像回显
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            //回显头像
+//                                            ImageUtil.LoadImage(MainActivity.this,portrait,menu_portrait);
+                                            //回显用户名
+                                            menu_username.setText(userName);
+                                        }
+                                    });
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+
+                        }
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError volleyError) {
+
+                        }
+                    }){
+                        @Override
+                        protected Map<String, String> getParams() throws AuthFailureError {
+                            Map<String,String> params = new HashMap<String, String>();
+                            UserInfoRequestEntity.Data data = new UserInfoRequestEntity.Data(AccountUtil.getUserId(MainActivity.this));
+                            UserInfoRequestEntity entity = new UserInfoRequestEntity(CommonDataObject.USER_INFO_REQUEST_CODE,data);
+
+                            params.put("opjson",CommonDataObject.GSON.toJson(entity));
+                            return params;
+                        }
+                    };
+
+                    //todo 签到查询接口
+
+                    RequestQueue queue = Volley.newRequestQueue(MainActivity.this);
+                    queue.add(request);
+                    queue.start();
+                }
+
+                @Override
+                public void doWithoutNetWork() {
+                    //没有网络，想做啥你自己想
+                }
+            });
+        }
+
         if (!AccountUtil.isLoggedIn(this)) {
             menu.findViewById(R.id.one_key_sign_in).setVisibility(View.GONE);
         } else {
@@ -157,7 +290,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         //不论如何，切换碎片总是会重置筛选条件
 
         CommonDataObject.categoryChecked = 0;
-        CommonDataObject.my_categoryChecked = 0;
 
         switch (CommonDataObject.menuChecked) {
             case 0:
@@ -215,15 +347,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 v.setClickable(false);
                 break;
             case R.id.menu_username:
-                showloginActivity();
+                if(!AccountUtil.isLoggedIn(this))
+                showLoginActivity();
                 break;
             case R.id.menu_portrait:
-                showloginActivity();
+                if(!AccountUtil.isLoggedIn(this))
+                showLoginActivity();
                 break;
         }
     }
 
-    private void showloginActivity() {
+    private void showLoginActivity() {
         //todo 实现跳转到登录活动
         AccountUtil.showLoginActivity(this);
     }

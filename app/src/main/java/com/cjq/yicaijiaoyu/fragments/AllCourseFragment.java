@@ -18,17 +18,26 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.cjq.yicaijiaoyu.CommonDataObject;
 import com.cjq.yicaijiaoyu.R;
 import com.cjq.yicaijiaoyu.activities.SearchActivity;
 import com.cjq.yicaijiaoyu.adapter.CourseCategoryAdapter;
 import com.cjq.yicaijiaoyu.adapter.CourseListAdapter;
 import com.cjq.yicaijiaoyu.adapter.RecommendCourseAdapter;
+import com.cjq.yicaijiaoyu.entities.AllCourseRequestEntity;
 import com.cjq.yicaijiaoyu.entities.CategoryEntity;
 import com.cjq.yicaijiaoyu.entities.CourseCategory;
 import com.cjq.yicaijiaoyu.entities.CourseEntity;
 import com.cjq.yicaijiaoyu.entities.LectureEntity;
 import com.cjq.yicaijiaoyu.entities.MainMenuEvent;
+import com.cjq.yicaijiaoyu.utils.AccountUtil;
 import com.cjq.yicaijiaoyu.utils.ImageUtil;
 import com.cjq.yicaijiaoyu.utils.NetStateUtil;
 import com.cjq.yicaijiaoyu.utils.PopWindowUtil;
@@ -37,11 +46,16 @@ import com.cjq.yicaijiaoyu.utils.VideoUtil;
 import com.markmao.pulltorefresh.widget.XScrollView;
 import com.ypy.eventbus.EventBus;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Created by CJQ on 2015/6/24.
@@ -95,6 +109,37 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
 
         //初始化课程视频列表
         //todo 请求课程列表 课程列表要筛选 提升为属性
+        StringRequest request = new StringRequest(Request.Method.POST, CommonDataObject.COURSE_LIST_URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                try {
+                    JSONObject jsonObject = new JSONObject(s);
+                    System.out.println(s);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                System.out.println(volleyError.getMessage());
+            }
+        }){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String,String> params = new HashMap<>();
+                AllCourseRequestEntity.Data data = new AllCourseRequestEntity.Data(1,CommonDataObject.COURSE_NUM_SHOWING);
+                AllCourseRequestEntity entity =new AllCourseRequestEntity(CommonDataObject.ALLCOURSE_REQUEST_CODE,data);
+                params.put("opjson",CommonDataObject.GSON.toJson(entity));
+                return params;
+            }
+        };
+
+        //开启请求队列
+        RequestQueue queue = Volley.newRequestQueue(getActivity());
+        queue.add(request);
+        queue.start();
+
         courseEntityList = new ArrayList<>();
 
         LectureEntity lectureEntity = new LectureEntity("陈昶","呵呵呵","https://www.baidu.com/img/bd_logo1.png");

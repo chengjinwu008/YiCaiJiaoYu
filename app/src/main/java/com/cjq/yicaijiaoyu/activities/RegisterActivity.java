@@ -3,6 +3,7 @@ package com.cjq.yicaijiaoyu.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -31,30 +32,34 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.next:
                 //验证手机号码
+                Log.i("TAG", "开始验证手机号码");
                 final String num = phoneNum.getText().toString();
-
-                Validator.verify(num, new Validator.VerifyListener() {
-                    @Override
-                    public void verifyFinished(boolean state) {
-                        if(state){
-                            //验证成功
-                            Intent intent = new Intent(RegisterActivity.this,RegisterSMSActivity.class);
-                            intent.putExtra(RegisterSMSActivity.EXTRA_PHONE_NUM,num);
-                            startActivityForResult(intent, 0);
-                        }else{
-                            //验证失败
-                            mHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(RegisterActivity.this, R.string.wrong_num,Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }
-                    }
-                });
+//                Validator.verify(num, new Validator.VerifyListener() {
+//                    @Override
+//                    public void verifyFinished(boolean state) {
+//                        if(state){
+//                            //验证成功
+//                            Intent intent = new Intent(RegisterActivity.this,RegisterSMSActivity.class);
+//                            intent.putExtra(RegisterSMSActivity.EXTRA_PHONE_NUM,num);
+//                            startActivityForResult(intent, 0);
+//                        }else{
+//                            //验证失败
+//                            mHandler.post(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    Toast.makeText(RegisterActivity.this, R.string.wrong_num,Toast.LENGTH_SHORT).show();
+//                                }
+//                            });
+//                        }
+//                    }
+//                });
+                //验证成功
+                Intent intent = new Intent(RegisterActivity.this, RegisterSMSActivity.class);
+                intent.putExtra(RegisterSMSActivity.EXTRA_PHONE_NUM, num);
+                startActivityForResult(intent, 0);
                 break;
             case R.id.back:
                 finish();
@@ -64,7 +69,13 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        setResult(RESULT_OK);
-        finish();
+        switch (requestCode){
+            case 0:
+                if(resultCode==RESULT_OK){
+                    setResult(RESULT_OK);
+                    finish();
+                }
+                break;
+        }
     }
 }

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/lead_background"
+    android:id="@+id/background_img"
+    >
+    <!--<ImageView-->
+        <!--android:layout_marginTop="20dp"-->
+        <!--android:layout_centerHorizontal="true"-->
+        <!--android:scaleType="fitCenter"-->
+        <!--android:id="@+id/background_img"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content" />-->
+    
+    
+    <LinearLayout
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginBottom="30dp"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/btn1"
+            android:layout_marginLeft="10dp"
+            android:gravity="center"
+            android:textSize="23sp"
+            android:textColor="@color/pure_white"
+            android:text="@string/login_directly"
+            android:layout_weight="1"
+            android:layout_width="0px"
+            android:layout_height="60dp"
+            android:background="@drawable/green_button"
+            />
+        <TextView
+            android:id="@+id/btn2"
+            android:layout_marginLeft="10dp"
+            android:gravity="center"
+            android:textSize="23sp"
+            android:textColor="@color/main_titlebar_background"
+            android:text="@string/maybe_later"
+            android:layout_weight="1"
+            android:layout_width="0px"
+            android:layout_height="60dp"
+            android:background="@drawable/white_green_corner_border"
+            />
+    </LinearLayout>
+</RelativeLayout>

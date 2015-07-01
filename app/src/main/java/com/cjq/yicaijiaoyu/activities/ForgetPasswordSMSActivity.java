@@ -21,6 +21,9 @@ import com.cjq.yicaijiaoyu.entities.RegisterRequestEntity;
 import com.cjq.yicaijiaoyu.entities.SMSRequestEntity;
 import com.cjq.yicaijiaoyu.utils.TimerForSeconds;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,6 +54,7 @@ public class ForgetPasswordSMSActivity extends BaseActivity implements View.OnCl
 
         timer.setOnClickListener(this);
         findViewById(R.id.back).setOnClickListener(this);
+        findViewById(R.id.change_confirm).setOnClickListener(this);
 
         doSendSMS(num);
     }
@@ -63,7 +67,13 @@ public class ForgetPasswordSMSActivity extends BaseActivity implements View.OnCl
         StringRequest request = new StringRequest(Request.Method.POST, CommonDataObject.FORGET_SMS_URL, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
-                Toast.makeText(ForgetPasswordSMSActivity.this, getString(R.string.hint5), Toast.LENGTH_SHORT).show();
+                System.out.println(s);
+                try {
+                    JSONObject object = new JSONObject(s);
+                    Toast.makeText(ForgetPasswordSMSActivity.this,object.getString("msg"),Toast.LENGTH_SHORT).show();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         }, new Response.ErrorListener() {
             @Override
@@ -102,10 +112,11 @@ public class ForgetPasswordSMSActivity extends BaseActivity implements View.OnCl
 
             @Override
             public void onTimeUp() {
-                timer.setClickable(true);
+
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
+                        timer.setClickable(true);
                         timer.setText(R.string.resend_no_time);
                     }
                 });
@@ -138,13 +149,20 @@ public class ForgetPasswordSMSActivity extends BaseActivity implements View.OnCl
                     StringRequest request = new StringRequest(Request.Method.POST, CommonDataObject.RESET_PASSWORD_URL, new Response.Listener<String>() {
                         @Override
                         public void onResponse(String s) {
-                            //注册请求成功
-                            setResult(RESULT_OK);
+                            try {
+                                JSONObject object = new JSONObject(s);
+                                Toast.makeText(ForgetPasswordSMSActivity.this,object.getString("msg"),Toast.LENGTH_SHORT).show();
+                                if("0000".equals(object.getString("code"))){
+                                    setResult(RESULT_OK);
+                                    finish();
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
                         }
                     }, new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError volleyError) {
-                            //注册请求致命错误
                         }
                     }){
                         @Override
@@ -152,7 +170,7 @@ public class ForgetPasswordSMSActivity extends BaseActivity implements View.OnCl
                             Map<String,String> params = new HashMap<>();
                             //构建请求实体
                             RegisterRequestEntity.Data data = new RegisterRequestEntity.Data(num,password,verifier.getText().toString());
-                            RegisterRequestEntity entity = new RegisterRequestEntity(CommonDataObject.FORGET_SMS_REQUEST_CODE,data);
+                            RegisterRequestEntity entity = new RegisterRequestEntity(CommonDataObject.RESET_PASSWORD_REQUEST_CODE,data);
                             params.put("opjson",CommonDataObject.GSON.toJson(entity));
                             return params;
                         }

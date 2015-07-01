@@ -59,4 +59,6 @@
     <string name="care_for">关注</string>
     <string name="bought">已购</string>
     <string name="history">历史</string>
+    <string name="login_directly">直接登录</string>
+    <string name="maybe_later">稍后再说</string>
 </resources>

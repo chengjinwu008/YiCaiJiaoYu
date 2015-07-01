@@ -44,7 +44,9 @@
                 android:background="@color/pure_white"
                 android:hint="@string/hint3"
                 android:padding="20dp"
-                android:id="@+id/verifier" />
+                android:id="@+id/verifier"
+                android:layout_toLeftOf="@+id/timer"
+                />
 
             <TextView
                 android:layout_width="wrap_content"
