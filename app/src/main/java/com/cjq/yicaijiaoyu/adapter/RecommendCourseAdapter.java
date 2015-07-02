@@ -54,7 +54,7 @@ public class RecommendCourseAdapter extends PagerAdapter {
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
         View view = courses.get(position).getView();
-        ImageUtil.LoadImage(context,courses.get(position).getCover_image_url(), (ImageView) view.findViewById(R.id.image));
+        ImageUtil.LoadImage(context, courses.get(position).getCover_image_url(), (ImageView) view.findViewById(R.id.image));
         ((TextView) view.findViewById(R.id.text)).setText(courses.get(position).getTitle());
         container.addView(view);
         return view;

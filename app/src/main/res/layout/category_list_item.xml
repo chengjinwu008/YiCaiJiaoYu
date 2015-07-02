@@ -26,6 +26,6 @@
         android:layout_height="30dp"
         android:layout_margin="10dp"
         android:layout_alignParentRight="true"
-        android:src="@drawable/guanzhu_dianji"
+        android:src="@drawable/gou"
         />
 </RelativeLayout>

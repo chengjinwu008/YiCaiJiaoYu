@@ -101,10 +101,9 @@ public class MyCourseListFragment extends Fragment implements XListView.IXListVi
             @Override
             public void doWithNetWork() {
                 //todo 请求加载
-                adapter.getCourses().add(new CourseEntity("https://www.baidu.com/img/bd_logo1.png","新加的课程", CourseCategory.FOR_JOB,true));
+                adapter.getCourses().add(new CourseEntity("https://www.baidu.com/img/bd_logo1.png","新加的课程", "基础班",true));
                 onLoad();
             }
-
             @Override
             public void doWithoutNetWork() {
                 onLoad();
@@ -124,14 +123,14 @@ public class MyCourseListFragment extends Fragment implements XListView.IXListVi
         view.stopLoadMore();
         view.setRefreshTime(getTime());
         view.setPullRefreshEnable(true);
-        view.setPullLoadEnable(true);
-        view.setAutoLoadEnable(true);
+//        view.setPullLoadEnable(true);
+//        view.setAutoLoadEnable(true);
         adapter.notifyDataSetChanged();
     }
 
     private void isLoading() {
         view.setPullRefreshEnable(false);
-        view.setPullLoadEnable(false);
-        view.setAutoLoadEnable(false);
+//        view.setPullLoadEnable(false);
+//        view.setAutoLoadEnable(false);
     }
 }

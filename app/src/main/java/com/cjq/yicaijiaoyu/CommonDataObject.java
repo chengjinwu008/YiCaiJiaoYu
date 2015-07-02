@@ -19,6 +19,7 @@ public class CommonDataObject {
     public static final Gson GSON = new Gson();
     public static int COURSE_NUM_SHOWING=5;//每页显示的条数
     public static int ALL_COURSE_MAX_PAGE = 0;//最大页数
+    public static String NO_CATE_ID="no_cate";//没有分类的时候的分类id
 
     public final static String MAIN_URL="http://192.168.0.181/xct";
     public final static String POLYV_INIT_URL =MAIN_URL+"";//视频播放器初始化请求地址 请求json的地方
@@ -29,6 +30,8 @@ public class CommonDataObject {
     public static final String LOGIN_URL=MAIN_URL+"/service/app.php";//用户登录接口
     public static final String USER_INFO_URL =MAIN_URL+"/service/app.php";//用户信息请求接口
 
+    public static final String AD_REQUEST_URL =MAIN_URL + "/service/app.php";//广告请求接口
+    public static final String SORT_CAT_REQUEST_URL =MAIN_URL + "/service/app.php";//分类请求接口
     public static final String COURSE_LIST_URL = MAIN_URL+"/service/app.php";//课程列表接口
 
     public static final String REGISTER_CODE = "act_register"; //注册接口请求码
@@ -36,9 +39,12 @@ public class CommonDataObject {
     public static final String RESET_PASSWORD_REQUEST_CODE = "act_reset";//重置密码请求码
     public static final String SMS_REQUETS_CODE ="act_verifycode"; //短信验证码请求码
     public static final String COURSE_BOUGHT_REQUEST_CODE ="act_coursesearch";//已购课程请求码
-    public static final String COURSE_CARE_REQUEST_CODE ="act_addcollect";//已关注课程请求码
+    public static final String COURSE_CARE_REQUEST_CODE ="act_selectcollect";//已关注课程请求码
     public static final String LOGIN_REQUEST_CODE="act_login";//登录请求码
     public static final String USER_INFO_REQUEST_CODE = "act_userinfo";//用户信息请求码
     public static final String ALLCOURSE_REQUEST_CODE ="act_coursepage";//所有课程请求码
-
+    public static final String AD_REQUEST_CODE = "act_getad";//广告请求码
+    public static final String SORT_CAT_REQUEST_CODE ="act_course";//课程分类请求码
+    public static final String SORTED_COURSE_LIST_REQUEST_CODE = "act_specialcoursepage";//分类的课程请求码
+    public static final String SEARCH_COURSE_REQUEST_CODE ="act_coursesearch";//搜索课程请求码
 }

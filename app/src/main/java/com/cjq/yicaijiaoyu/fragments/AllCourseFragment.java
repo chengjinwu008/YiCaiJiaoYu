@@ -7,7 +7,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -17,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -31,14 +31,14 @@ import com.cjq.yicaijiaoyu.activities.SearchActivity;
 import com.cjq.yicaijiaoyu.adapter.CourseCategoryAdapter;
 import com.cjq.yicaijiaoyu.adapter.CourseListAdapter;
 import com.cjq.yicaijiaoyu.adapter.RecommendCourseAdapter;
+import com.cjq.yicaijiaoyu.entities.AdRequestEntity;
 import com.cjq.yicaijiaoyu.entities.AllCourseRequestEntity;
 import com.cjq.yicaijiaoyu.entities.CategoryEntity;
-import com.cjq.yicaijiaoyu.entities.CourseCategory;
 import com.cjq.yicaijiaoyu.entities.CourseEntity;
-import com.cjq.yicaijiaoyu.entities.LectureEntity;
 import com.cjq.yicaijiaoyu.entities.MainMenuEvent;
-import com.cjq.yicaijiaoyu.utils.AccountUtil;
-import com.cjq.yicaijiaoyu.utils.ImageUtil;
+import com.cjq.yicaijiaoyu.utils.AdUtil;
+import com.cjq.yicaijiaoyu.utils.CategoryUtil;
+import com.cjq.yicaijiaoyu.utils.CourseUtil;
 import com.cjq.yicaijiaoyu.utils.NetStateUtil;
 import com.cjq.yicaijiaoyu.utils.PopWindowUtil;
 import com.cjq.yicaijiaoyu.utils.TimerForSeconds;
@@ -46,6 +46,7 @@ import com.cjq.yicaijiaoyu.utils.VideoUtil;
 import com.markmao.pulltorefresh.widget.XScrollView;
 import com.ypy.eventbus.EventBus;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -80,6 +81,10 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
     private Handler mHandler = new Handler();
     private XScrollView mRefreshLayout;
     private ViewPager banner_pager;
+    private List<CourseEntity> bannerList;
+    private List<CategoryEntity> categoryEntityList;
+    private CategoryEntity all;
+    private int nowPage;
 
     @Nullable
     @Override
@@ -96,8 +101,8 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
         //注册下拉刷新和上拉加载
         mRefreshLayout = (XScrollView) view.findViewById(R.id.refresh);
         mRefreshLayout.setPullRefreshEnable(true);
-        mRefreshLayout.setPullLoadEnable(true);
-        mRefreshLayout.setAutoLoadEnable(true);
+//        mRefreshLayout.setPullLoadEnable(true);
+//        mRefreshLayout.setAutoLoadEnable(true);
 
         mRefreshLayout.setIXScrollViewListener(this);
         mRefreshLayout.setRefreshTime(getTime());
@@ -105,91 +110,31 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
         View content = inflater.inflate(R.layout.course_list_content, mRefreshLayout,false);
 
         mRefreshLayout.setView(content);
-
-
-        //初始化课程视频列表
-        //todo 请求课程列表 课程列表要筛选 提升为属性
-        StringRequest request = new StringRequest(Request.Method.POST, CommonDataObject.COURSE_LIST_URL, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String s) {
-                try {
-                    JSONObject jsonObject = new JSONObject(s);
-                    System.out.println(s);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                System.out.println(volleyError.getMessage());
-            }
-        }){
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String,String> params = new HashMap<>();
-                AllCourseRequestEntity.Data data = new AllCourseRequestEntity.Data(1,CommonDataObject.COURSE_NUM_SHOWING);
-                AllCourseRequestEntity entity =new AllCourseRequestEntity(CommonDataObject.ALLCOURSE_REQUEST_CODE,data);
-                params.put("opjson",CommonDataObject.GSON.toJson(entity));
-                return params;
-            }
-        };
-
-        //开启请求队列
-        RequestQueue queue = Volley.newRequestQueue(getActivity());
-        queue.add(request);
-        queue.start();
-
-        courseEntityList = new ArrayList<>();
-
-        LectureEntity lectureEntity = new LectureEntity("陈昶","呵呵呵","https://www.baidu.com/img/bd_logo1.png");
-
-        CourseEntity courseEntity3 = new CourseEntity();
-        courseEntity3.setCover_image_url("https://www.baidu.com/img/bd_logo1.png");
-        courseEntity3.setTitle("资产负载要素产妇");
-        courseEntity3.setFree(true);
-        courseEntity3.setId("sl8da4jjbxc377d0a79c7224552b6ee4_s");
-        courseEntity3.setCategory(CourseCategory.FOR_PRIMARY);
-        courseEntity3.setLecture(lectureEntity);
-        courseEntityList.add(courseEntity3);
-
-
-        CourseEntity courseEntity4 = new CourseEntity();
-        courseEntity4.setCover_image_url("https://www.baidu.com/img/bd_logo1.png");
-        courseEntity4.setTitle("资产负载要素产妇");
-        courseEntity4.setFree(false);
-        courseEntity4.setId("sl8da4jjbx5d715bc3a8ce8f8194afab_s");
-        courseEntity4.setCategory(CourseCategory.FOR_INTERMEDIATE);
-        courseEntity4.setIntro("这个是收费视频，你看不到的~");
-        courseEntity4.setLecture(lectureEntity);
-        courseEntityList.add(courseEntity4);
-
-        //获取到课程list
+        //初始化课程list
+        courseEntityList=new ArrayList<>();
         courseList = (ListView) content.findViewById(R.id.course_list);
-
         courseList.setOnItemClickListener(this);
+        courseListAdapter = null;
 
-        courseListAdapter = new CourseListAdapter(courseEntityList,getActivity());
-        courseList.setAdapter(courseListAdapter);
+        //下拉分类点击注册
+        titleText = (TextView) view.findViewById(R.id.main_title_text);
+        arrowImage = (ImageView)view.findViewById(R.id.main_drop_arrow);
+        view.findViewById(R.id.main_click_drop).setOnClickListener(this);
 
-        //todo 获取推荐课程banner
-        List<CourseEntity> courses = new ArrayList<>();
-        CourseEntity courseEntity = new CourseEntity();
-        courseEntity.setTitle("你猜");
-        courseEntity.setCover_image_url("https://www.baidu.com/img/bd_logo1.png");
-        courseEntity.setView(getBanner());
-        courseEntity.setLecture(lectureEntity);
-        courses.add(courseEntity);
+        //注册搜索键
+        view.findViewById(R.id.main_search_button).setOnClickListener(this);
 
-        CourseEntity courseEntity2 = new CourseEntity();
-        courseEntity2.setTitle("你猜2");
-        courseEntity2.setCover_image_url("https://www.baidu.com/img/bd_logo1.png");
-        courseEntity2.setView(getBanner());
-        courseEntity2.setLecture(lectureEntity);
-        courses.add(courseEntity2);
-
+        //注册banner
         banner_pager = (ViewPager)content.findViewById(R.id.banner_pager);
-        banner_pager.setAdapter(new RecommendCourseAdapter(courses,getActivity()));
+        bannerList = new ArrayList<CourseEntity>();
+
+        //初始化全部列表请求参数
+        AllCourseRequestEntity.Data data = new AllCourseRequestEntity.Data(1,CommonDataObject.COURSE_NUM_SHOWING);
+        AllCourseRequestEntity entity =new AllCourseRequestEntity(CommonDataObject.ALLCOURSE_REQUEST_CODE,data);
+
+        refresh(entity);
+
+
         //开启banner滚动线程
         Thread timer = new TimerForSeconds(5000, -1, new TimerForSeconds.TimerListener() {
             @Override
@@ -229,53 +174,126 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
             }
         });
         timer.start();
-
-        banner_pager.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        TIMER_PAUSED = true;
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        TIMER_PAUSED = false;
-                        break;
-                }
-                return false;
-            }
-        });
-
-        //下拉分类点击注册
-        titleText = (TextView) view.findViewById(R.id.main_title_text);
-        arrowImage = (ImageView)view.findViewById(R.id.main_drop_arrow);
-        view.findViewById(R.id.main_click_drop).setOnClickListener(this);
-
-        //初始化课程分类下拉适配器
-        List<CategoryEntity> categorys = new ArrayList<>();
-        categorys.add(new CategoryEntity(R.drawable.guanzhu_dianji,getActivity().getString(R.string.all_video)));
-        categorys.add(new CategoryEntity(R.drawable.guanzhu_dianji,getActivity().getString(R.string.for_job)));
-        categorys.add(new CategoryEntity(R.drawable.guanzhu_dianji,getActivity().getString(R.string.for_primary)));
-        categorys.add(new CategoryEntity(R.drawable.guanzhu_dianji,getActivity().getString(R.string.for_intermediate)));
-
-        categoryAdapter = new CourseCategoryAdapter(categorys,getActivity());
-
-        //注册搜索键
-        view.findViewById(R.id.main_search_button).setOnClickListener(this);
         return view;
     }
 
-    private View getBanner() {
-        View view = inflater.inflate(R.layout.recommend_course, null);
-        view.setOnClickListener(new View.OnClickListener() {
+    private void refresh(final AllCourseRequestEntity requestEntity) {
+        //初始化课程视频列表
+        StringRequest request = new StringRequest(Request.Method.POST, CommonDataObject.COURSE_LIST_URL, new Response.Listener<String>() {
             @Override
-            public void onClick(View v) {
-                int index = banner_pager.getCurrentItem();
-                //获取视频信息
-                CourseEntity course = ((RecommendCourseAdapter)banner_pager.getAdapter()).getCourses().get(index);
-                VideoUtil.startVideo(getActivity(),course);
+            public void onResponse(String s) {
+                try {
+                    JSONObject object = new JSONObject(s);
+                    if("0000".equals(object.getString("code"))){
+                        JSONArray goods = object.getJSONObject("data").getJSONObject("categories").getJSONArray("goods");
+                        courseEntityList.clear();
+                        CourseUtil.chargeCourseList(goods, courseEntityList);
+                        if(courseListAdapter==null)
+                        courseListAdapter =new CourseListAdapter(courseEntityList,getActivity());
+                        if(courseList.getAdapter()==null)
+                        courseList.setAdapter(courseListAdapter);
+                    }
+                    onLoad();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
-        });
-        return view;
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+//                System.out.println(volleyError.getMessage());
+                onLoad();
+            }
+        }){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String,String> params = new HashMap<>();
+                params.put("opjson",CommonDataObject.GSON.toJson(requestEntity));
+                return params;
+            }
+        };
+
+        //获取推荐课程banner
+        StringRequest request1 = new StringRequest(Request.Method.POST, CommonDataObject.AD_REQUEST_URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                JSONObject object = null;
+                try {
+                    object = new JSONObject(s);
+                    if("0000".equals(object.getString("code"))){
+                        bannerList.clear();
+                        AdUtil.chargeAdList(object.getJSONObject("data").getJSONArray("categories"), bannerList, getActivity());
+                        if(banner_pager.getAdapter()==null)
+                        banner_pager.setAdapter(new RecommendCourseAdapter(bannerList,getActivity()));
+                        else
+                            banner_pager.getAdapter().notifyDataSetChanged();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+//                if(volleyError!=null)
+//                System.out.println(volleyError.getMessage());
+            }
+        }){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String,String> params = new HashMap<>();
+                AdRequestEntity requestEntity = new AdRequestEntity(CommonDataObject.AD_REQUEST_CODE);
+                params.put("opjson",CommonDataObject.GSON.toJson(requestEntity));
+                return params;
+            }
+        };
+
+        //初始化课程分类下拉适配器
+        categoryEntityList = new ArrayList<>();
+        StringRequest request2 = new StringRequest(Request.Method.POST, CommonDataObject.SORT_CAT_REQUEST_URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                JSONObject object = null;
+                try {
+                    object = new JSONObject(s);
+                    if("0000".equals(object.getString("code"))){
+                        if(all==null){
+                            all = new CategoryEntity(null,getActivity().getString(R.string.all_courses),CommonDataObject.NO_CATE_ID);
+                            all.setImageResource(R.drawable.all_icon);
+                        }
+                        categoryEntityList.clear();
+                        categoryEntityList.add(all);
+                        CategoryUtil.chargeAdList(object.getJSONObject("data").getJSONArray("categories"), categoryEntityList);
+                        if(categoryAdapter==null)
+                        categoryAdapter = new CourseCategoryAdapter(categoryEntityList,getActivity());
+                        else
+                            courseListAdapter.notifyDataSetChanged();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+
+            }
+        }){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String,String> params = new HashMap<>();
+                AdRequestEntity entity = new AdRequestEntity(CommonDataObject.SORT_CAT_REQUEST_CODE);
+                params.put("opjson",CommonDataObject.GSON.toJson(entity));
+                return params;
+            }
+        };
+
+        //开启请求队列
+        RequestQueue queue = Volley.newRequestQueue(getActivity());
+        queue.add(request1);
+        queue.add(request);
+        queue.add(request2);
+        queue.start();
     }
 
     @Override
@@ -335,84 +353,60 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
     }
 
     private void sortCourse() {
+        //刷新当重置页数
+        nowPage = 1;
         boolean fee=true;
         boolean free=true;
         if(windowView!=null){
             fee= checkBoxFee.isChecked();
             free= checkBoxFree.isChecked();
         }
+        String freeString = null;
+        if(fee&&free)
+            freeString = "";
+        else if(free)
+            freeString = "1";
+        else if(fee)
+            freeString = "0";
 
-        CourseCategory category = null;
-        switch (CommonDataObject.categoryChecked){
-            case  0:
-                category=null;
-                break;
-            case 1:
-                category=CourseCategory.FOR_JOB;
-                break;
-            case 2:
-                category=CourseCategory.FOR_PRIMARY;
-                break;
-            case 3:
-                category=CourseCategory.FOR_INTERMEDIATE;
-                break;
-        }
+        String category_id;
+        if(categoryEntityList.size()<=CommonDataObject.categoryChecked){
+            category_id = CommonDataObject.NO_CATE_ID;
+        }else
+            category_id= categoryEntityList.get(CommonDataObject.categoryChecked).getId();
 
         //执行课程筛选 网络
-        if(category!=null){
+        if(!CommonDataObject.NO_CATE_ID.equals(category_id)){
 //            直接请求列表
-
-            //todo 构建请求 fee free category
-
-            courseEntityList.clear();
-            LectureEntity lectureEntity = new LectureEntity("陈昶","呵呵呵","https://www.baidu.com/img/bd_logo1.png");
-            CourseEntity courseEntity3 = new CourseEntity();
-            courseEntity3.setCover_image_url("https://www.baidu.com/img/bd_logo1.png");
-            courseEntity3.setTitle("资产负载要素产妇");
-            courseEntity3.setFree(true);
-            courseEntity3.setCategory(CourseCategory.FOR_PRIMARY);
-            courseEntity3.setLecture(lectureEntity);
-            courseEntityList.add(courseEntity3);
-
-
-            CourseEntity courseEntity4 = new CourseEntity();
-            courseEntity4.setCover_image_url("https://www.baidu.com/img/bd_logo1.png");
-            courseEntity4.setTitle("资产负载要素产妇");
-            courseEntity4.setFree(true);
-            courseEntity4.setCategory(CourseCategory.FOR_INTERMEDIATE);
-            courseEntity4.setLecture(lectureEntity);
-            courseEntityList.add(courseEntity4);
-            //提醒数据
-            courseListAdapter.notifyDataSetChanged();
+            //首先判断freeString
+            if(freeString==null){
+                //不予以请求，清空list
+                courseEntityList.clear();
+                courseListAdapter.notifyDataSetChanged();
+            }else{
+                //进行请求
+                AllCourseRequestEntity.Data data = new AllCourseRequestEntity.Data(category_id,nowPage,CommonDataObject.COURSE_NUM_SHOWING,freeString);
+                AllCourseRequestEntity entity = new AllCourseRequestEntity(CommonDataObject.SORTED_COURSE_LIST_REQUEST_CODE,data);
+                refresh(entity);
+            }
         }else{
-            //todo 构建请求 fee free
-
-            courseEntityList.clear();
-            LectureEntity lectureEntity = new LectureEntity("陈昶","呵呵呵","https://www.baidu.com/img/bd_logo1.png");
-            CourseEntity courseEntity3 = new CourseEntity();
-            courseEntity3.setCover_image_url("https://www.baidu.com/img/bd_logo1.png");
-            courseEntity3.setTitle("资产负载要素产妇");
-            courseEntity3.setFree(true);
-            courseEntity3.setCategory(CourseCategory.FOR_PRIMARY);
-            courseEntity3.setLecture(lectureEntity);
-            courseEntityList.add(courseEntity3);
-
-
-            CourseEntity courseEntity4 = new CourseEntity();
-            courseEntity4.setCover_image_url("https://www.baidu.com/img/bd_logo1.png");
-            courseEntity4.setTitle("资产负载要素产妇");
-            courseEntity4.setFree(true);
-            courseEntity4.setCategory(CourseCategory.FOR_INTERMEDIATE);
-            courseEntity4.setLecture(lectureEntity);
-            courseEntityList.add(courseEntity4);
-
-            courseListAdapter.notifyDataSetChanged();
+            //构建全部请求
+            if(freeString==null){
+                //不予以请求，清空list
+                courseEntityList.clear();
+                courseListAdapter.notifyDataSetChanged();
+            }else{
+                //进行请求
+                AllCourseRequestEntity.Data data =new AllCourseRequestEntity.Data(freeString,nowPage,CommonDataObject.COURSE_NUM_SHOWING);
+                AllCourseRequestEntity entity = new AllCourseRequestEntity(CommonDataObject.SORTED_COURSE_LIST_REQUEST_CODE,data);
+                refresh(entity);
+            }
         }
     }
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
+        sortCourse();
     }
 
     private String getTime() {
@@ -424,15 +418,16 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
         mRefreshLayout.stopLoadMore();
         mRefreshLayout.setRefreshTime(getTime());
         mRefreshLayout.setPullRefreshEnable(true);
-        mRefreshLayout.setPullLoadEnable(true);
-        mRefreshLayout.setAutoLoadEnable(true);
+//        mRefreshLayout.setPullLoadEnable(true);
+//        mRefreshLayout.setAutoLoadEnable(true);
+        if(courseListAdapter!=null)
         courseListAdapter.notifyDataSetChanged();
     }
 
     private void isLoading() {
         mRefreshLayout.setPullRefreshEnable(false);
-        mRefreshLayout.setPullLoadEnable(false);
-        mRefreshLayout.setAutoLoadEnable(false);
+//        mRefreshLayout.setPullLoadEnable(false);
+//        mRefreshLayout.setAutoLoadEnable(false);
     }
 
     @Override
@@ -441,9 +436,7 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
         NetStateUtil.checkNetwork(new NetStateUtil.NetWorkStateListener() {
             @Override
             public void doWithNetWork() {
-                //todo 请求刷新
                 sortCourse();
-                onLoad();
             }
 
             @Override
@@ -459,9 +452,7 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
         NetStateUtil.checkNetwork(new NetStateUtil.NetWorkStateListener() {
             @Override
             public void doWithNetWork() {
-                //todo 请求加载
-                courseEntityList.add(new CourseEntity("https://www.baidu.com/img/bd_logo1.png","新加的课程",CourseCategory.FOR_JOB,true));
-                onLoad();
+                loadNextPage();
             }
 
             @Override
@@ -469,6 +460,103 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
                 onLoad();
             }
         });
+    }
+
+    private void loadNextPage(){
+        //todo 请求加载
+        boolean fee=true;
+        boolean free=true;
+        if(windowView!=null){
+            fee= checkBoxFee.isChecked();
+            free= checkBoxFree.isChecked();
+        }
+        String freeString = null;
+        if(fee&&free)
+            freeString = "";
+        else if(free)
+            freeString = "1";
+        else if(fee)
+            freeString = "0";
+
+        String category_id;
+        if(categoryEntityList.size()<=CommonDataObject.categoryChecked){
+            category_id = CommonDataObject.NO_CATE_ID;
+        }else
+            category_id= categoryEntityList.get(CommonDataObject.categoryChecked).getId();
+
+        //执行课程筛选 网络
+        if(!CommonDataObject.NO_CATE_ID.equals(category_id)){
+//            直接请求列表
+            //首先判断freeString
+            if(freeString==null){
+                //不予以请求，清空list
+                courseEntityList.clear();
+                courseListAdapter.notifyDataSetChanged();
+            }else{
+                //进行请求
+                AllCourseRequestEntity.Data data = new AllCourseRequestEntity.Data(category_id,++nowPage,CommonDataObject.COURSE_NUM_SHOWING,freeString);
+                AllCourseRequestEntity entity = new AllCourseRequestEntity(CommonDataObject.SORTED_COURSE_LIST_REQUEST_CODE,data);
+                doLoadMore(entity);
+            }
+        }else{
+            //构建全部请求
+            if(freeString==null){
+                //不予以请求，清空list
+                courseEntityList.clear();
+                courseListAdapter.notifyDataSetChanged();
+            }else{
+                //进行请求
+                AllCourseRequestEntity.Data data =new AllCourseRequestEntity.Data(freeString,++nowPage,CommonDataObject.COURSE_NUM_SHOWING);
+                AllCourseRequestEntity entity = new AllCourseRequestEntity(CommonDataObject.SORTED_COURSE_LIST_REQUEST_CODE,data);
+                doLoadMore(entity);
+            }
+        }
+    }
+
+    public void doLoadMore(final AllCourseRequestEntity entity){
+        StringRequest request = new StringRequest(Request.Method.POST, CommonDataObject.COURSE_LIST_URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                JSONObject object = null;
+
+                try {
+                    object = new JSONObject(s);
+                    if("0000".equals(object.getString("code"))){
+                        JSONArray goods = object.getJSONObject("data").getJSONObject("categories").getJSONArray("goods");
+//                        courseEntityList.clear();
+                        List<CourseEntity> temp = new ArrayList<>();
+
+                        if(goods.length()==0){
+                            nowPage--;
+                            Toast.makeText(getActivity(), getActivity().getString(R.string.hint11),Toast.LENGTH_SHORT).show();
+                            onLoad();
+                        }else{
+                            CourseUtil.chargeCourseList(goods, temp);
+                            courseListAdapter.getCourses().addAll(temp);
+                            onLoad();
+                        }
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+
+            }
+        }){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String,String> params = new HashMap<>();
+                params.put("opjson",CommonDataObject.GSON.toJson(entity));
+                return params;
+            }
+        };
+
+        RequestQueue queue = Volley.newRequestQueue(getActivity());
+        queue.add(request);
+        queue.start();
     }
 
     @Override

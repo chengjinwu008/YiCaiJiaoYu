@@ -116,7 +116,6 @@ public class RegisterSMSActivity extends BaseActivity implements View.OnClickLis
 
             @Override
             public void onTimeUp() {
-                System.out.println("时间到");
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {

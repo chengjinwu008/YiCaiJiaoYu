@@ -67,7 +67,6 @@ public class ForgetPasswordSMSActivity extends BaseActivity implements View.OnCl
         StringRequest request = new StringRequest(Request.Method.POST, CommonDataObject.FORGET_SMS_URL, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
-                System.out.println(s);
                 try {
                     JSONObject object = new JSONObject(s);
                     Toast.makeText(ForgetPasswordSMSActivity.this,object.getString("msg"),Toast.LENGTH_SHORT).show();

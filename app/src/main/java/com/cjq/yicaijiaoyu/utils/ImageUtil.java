@@ -13,14 +13,14 @@ import java.io.File;
  */
 public class ImageUtil {
     public static void LoadImage(Context context,String url,ImageView imageView){
-        Picasso.with(context).load(url).placeholder(R.drawable.loading).into(imageView);
+        Picasso.with(context).load(url).placeholder(R.drawable.guanggao).into(imageView);
     }
 
     public static void LoadImage(Context context,int id,ImageView imageView){
-        Picasso.with(context).load(id).placeholder(R.drawable.loading).into(imageView);
+        Picasso.with(context).load(id).placeholder(R.drawable.guanggao).into(imageView);
     }
 
     public static void LoadImage(Context context,File file,ImageView imageView){
-        Picasso.with(context).load(file).placeholder(R.drawable.loading).into(imageView);
+        Picasso.with(context).load(file).placeholder(R.drawable.guanggao).into(imageView);
     }
 }

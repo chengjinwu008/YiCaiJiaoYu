@@ -37,6 +37,37 @@ public class AllCourseRequestEntity {
         String catId = "0";
         int page;
         int num;
+        String isfree="";
+        String keyword;
+
+        public String getKeyword() {
+            return keyword;
+        }
+
+        public void setKeyword(String keyword) {
+            this.keyword = keyword;
+        }
+
+        public String getIsfree() {
+            return isfree;
+        }
+
+        public void setIsfree(String isfree) {
+            this.isfree = isfree;
+        }
+
+        public Data(String isfree, int page, int num) {
+            this.isfree = isfree;
+            this.page = page;
+            this.num = num;
+        }
+
+        public Data(String catId, int page, int num, String isfree) {
+            this.catId = catId;
+            this.page = page;
+            this.num = num;
+            this.isfree = isfree;
+        }
 
         public Data(int page, int num) {
             this.page = page;

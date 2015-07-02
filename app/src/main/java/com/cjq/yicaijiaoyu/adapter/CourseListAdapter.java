@@ -74,7 +74,7 @@ public class CourseListAdapter extends BaseAdapter {
         holder.courseTitle.setText(entity.getTitle());
         if(entity.getLecture()!=null)
         holder.lecture.setText(entity.getLecture().getName());
-        holder.category.setText(entity.getCategory().getName());
+        holder.category.setText(entity.getCategory());
         return convertView;
     }
 

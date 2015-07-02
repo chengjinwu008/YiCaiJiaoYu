@@ -7,7 +7,7 @@ import android.view.View;
  */
 public class CourseEntity {
 
-    public CourseEntity(String cover_image_url, String title, CourseCategory category, boolean free) {
+    public CourseEntity(String cover_image_url, String title, String category, boolean free) {
         this.cover_image_url = cover_image_url;
         this.title = title;
         this.category = category;
@@ -30,7 +30,7 @@ public class CourseEntity {
         this.length = length;
     }
 
-    public CourseEntity(String requestApi, String cover_image_url, String title, LectureEntity lecture, CourseCategory category, View view, String intro, boolean free, String id) {
+    public CourseEntity(String requestApi, String cover_image_url, String title, LectureEntity lecture, String category, View view, String intro, boolean free, String id) {
         this.requestApi = requestApi;
         this.cover_image_url = cover_image_url;
         this.title = title;
@@ -58,7 +58,7 @@ public class CourseEntity {
     String cover_image_url;
     String title;
     LectureEntity lecture;
-    CourseCategory category;
+    String category;
 
     public String getRequestApi() {
         return requestApi;
@@ -106,11 +106,11 @@ public class CourseEntity {
         this.lecture = lecture;
     }
 
-    public CourseCategory getCategory() {
+    public String getCategory() {
         return category;
     }
 
-    public void setCategory(CourseCategory category) {
+    public void setCategory(String category) {
         this.category = category;
     }
 

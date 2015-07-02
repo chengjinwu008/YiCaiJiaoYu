@@ -39,6 +39,7 @@ import com.cjq.yicaijiaoyu.fragments.WelcomeOneFragment;
 import com.cjq.yicaijiaoyu.fragments.WelcomeThreeFragment;
 import com.cjq.yicaijiaoyu.fragments.WelcomeTwoFragment;
 import com.cjq.yicaijiaoyu.utils.AccountUtil;
+import com.cjq.yicaijiaoyu.utils.DialogUtil;
 import com.cjq.yicaijiaoyu.utils.ImageUtil;
 import com.cjq.yicaijiaoyu.utils.NetStateUtil;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
@@ -167,6 +168,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                         CommonDataObject.menuChecked = position;
                     else{
                         //todo 未登录提示
+                        DialogUtil.showLoginAlert(MainActivity.this);
                     }
                 }else{
                     CommonDataObject.menuChecked = position;

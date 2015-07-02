@@ -12,7 +12,7 @@ import com.cjq.yicaijiaoyu.entities.CourseEntity;
 public class VideoUtil {
     public static void startVideo(Activity activity,CourseEntity course){
         //首先判断是不是收费的
-        if(course.isFree()){
+        if(/*course.isFree()*/true){
             Intent intent = new Intent(activity, PlayActivity.class);
             intent.putExtra(PlayActivity.URL,course.getRequestApi());
             intent.putExtra(PlayActivity.TITLE,course.getTitle());

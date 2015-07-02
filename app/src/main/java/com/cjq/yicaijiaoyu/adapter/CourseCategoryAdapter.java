@@ -56,7 +56,10 @@ public class CourseCategoryAdapter extends BaseAdapter {
 
         CategoryEntity categoryEntity = list.get(position);
         ViewHolder holder = (ViewHolder) convertView.getTag();
+        if(categoryEntity.getImageId()!=null)
         ImageUtil.LoadImage(context,categoryEntity.getImageId(),holder.imageView);
+        else
+        ImageUtil.LoadImage(context,categoryEntity.getImageResource(),holder.imageView);
         holder.textView.setText(categoryEntity.getName());
         if(CommonDataObject.categoryChecked==position)
             holder.view.setVisibility(View.VISIBLE);

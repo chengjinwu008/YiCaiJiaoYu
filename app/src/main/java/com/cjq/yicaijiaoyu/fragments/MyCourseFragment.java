@@ -15,11 +15,19 @@ import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.cjq.yicaijiaoyu.CommonDataObject;
 import com.cjq.yicaijiaoyu.R;
 import com.cjq.yicaijiaoyu.adapter.CourseCategoryAdapter;
 import com.cjq.yicaijiaoyu.adapter.CourseListAdapter;
 import com.cjq.yicaijiaoyu.adapter.PagerAdapter;
+import com.cjq.yicaijiaoyu.entities.AllCourseRequestEntity;
 import com.cjq.yicaijiaoyu.entities.CategoryEntity;
 import com.cjq.yicaijiaoyu.entities.CourseCategory;
 import com.cjq.yicaijiaoyu.entities.CourseEntity;
@@ -27,12 +35,19 @@ import com.cjq.yicaijiaoyu.entities.CourseListRequestEvent;
 import com.cjq.yicaijiaoyu.entities.CourseListResultEvent;
 import com.cjq.yicaijiaoyu.entities.LectureEntity;
 import com.cjq.yicaijiaoyu.entities.MainMenuEvent;
+import com.cjq.yicaijiaoyu.utils.AccountUtil;
+import com.cjq.yicaijiaoyu.utils.CourseUtil;
 import com.cjq.yicaijiaoyu.utils.NetStateUtil;
 import com.cjq.yicaijiaoyu.utils.PopWindowUtil;
 import com.ypy.eventbus.EventBus;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by CJQ on 2015/6/25.
@@ -59,43 +74,60 @@ public class MyCourseFragment extends Fragment implements View.OnClickListener {
         //收到了请求
         //生成Adapter
         courseListAdapter = new CourseListAdapter(null,getActivity());
-        CourseListResultEvent event = new CourseListResultEvent();
+        final CourseListResultEvent event = new CourseListResultEvent();
         switch (tab){
             case 0:
                 event.setRequestCode(CommonDataObject.COURSE_CARE_REQUEST_CODE);
-                //todo 获取课程列表
-                courseEntityList = new ArrayList<>();
-                LectureEntity lectureEntity = new LectureEntity("陈昶","呵呵呵","https://www.baidu.com/img/bd_logo1.png");
+                //todo 获取课程列表 关注
+                StringRequest request = new StringRequest(Request.Method.POST, CommonDataObject.COURSE_LIST_URL, new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String s) {
+                        JSONObject object = null;
+                        System.out.println(s);
+                        try {
+                            object = new JSONObject(s);
+                            if("0000".equals(object.getString("code"))){
+                                List<CourseEntity> temp = new ArrayList<>();
+                                CourseUtil.chargeCourseList(object.getJSONObject("data").getJSONArray("categories"),temp);
 
-                CourseEntity courseEntity3 = new CourseEntity();
-                courseEntity3.setCover_image_url("https://www.baidu.com/img/bd_logo1.png");
-                courseEntity3.setTitle("资产负载要素产妇1");
-                courseEntity3.setFree(true);
-                courseEntity3.setId("sl8da4jjbxc377d0a79c7224552b6ee4_s");
-                courseEntity3.setCategory(CourseCategory.FOR_PRIMARY);
-                courseEntity3.setLecture(lectureEntity);
-                courseEntityList.add(courseEntity3);
+                                CourseListAdapter adapter = new CourseListAdapter(temp,getActivity());
+                                event.setAdapter(adapter);
+                                EventBus.getDefault().post(event);
+                            }
+                        } catch (JSONException e1) {
+                            e1.printStackTrace();
+                        }
 
-                CourseEntity courseEntity4 = new CourseEntity();
-                courseEntity4.setCover_image_url("https://www.baidu.com/img/bd_logo1.png");
-                courseEntity4.setTitle("资产负载要素产妇1");
-                courseEntity4.setFree(false);
-                courseEntity4.setId("sl8da4jjbx5d715bc3a8ce8f8194afab_s");
-                courseEntity4.setCategory(CourseCategory.FOR_INTERMEDIATE);
-                courseEntity4.setIntro("这个是收费视频，你看不到的~");
-                courseEntity4.setLecture(lectureEntity);
-                courseEntityList.add(courseEntity4);
-                courseListAdapter.setCourses(courseEntityList);
-                event.setAdapter(courseListAdapter);
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError volleyError) {
+
+                    }
+                }){
+                    @Override
+                    protected Map<String, String> getParams() throws AuthFailureError {
+                        AllCourseRequestEntity.Data data = new AllCourseRequestEntity.Data(1,CommonDataObject.COURSE_NUM_SHOWING);
+                        data.setUserId(AccountUtil.getUserId(getActivity()));
+                        AllCourseRequestEntity entity = new AllCourseRequestEntity(CommonDataObject.COURSE_CARE_REQUEST_CODE,data);
+                        Map<String,String> params = new HashMap<>();
+                        params.put("opjson",CommonDataObject.GSON.toJson(entity));
+                        return params;
+                    }
+                };
+                RequestQueue queue = Volley.newRequestQueue(getActivity());
+                queue.add(request);
+                queue.start();
                 break;
             case 1:
                 event.setRequestCode(CommonDataObject.COURSE_BOUGHT_REQUEST_CODE);
+                EventBus.getDefault().post(event);
                 break;
             case 2:
                 event.setRequestCode(null);
+                EventBus.getDefault().post(event);
                 break;
         }
-        EventBus.getDefault().post(event);
     }
 
     @Nullable
@@ -130,10 +162,7 @@ public class MyCourseFragment extends Fragment implements View.OnClickListener {
 
         //初始化课程分类下拉适配器
         List<CategoryEntity> categorys = new ArrayList<>();
-        categorys.add(new CategoryEntity(R.drawable.guanzhu_dianji,getActivity().getString(R.string.all_video)));
-        categorys.add(new CategoryEntity(R.drawable.guanzhu_dianji,getActivity().getString(R.string.for_job)));
-        categorys.add(new CategoryEntity(R.drawable.guanzhu_dianji,getActivity().getString(R.string.for_primary)));
-        categorys.add(new CategoryEntity(R.drawable.guanzhu_dianji,getActivity().getString(R.string.for_intermediate)));
+        categorys.add(new CategoryEntity(CommonDataObject.NO_CATE_ID,null,getActivity().getString(R.string.all_courses),R.drawable.all_icon));
 
         categoryAdapter = new CourseCategoryAdapter(categorys,getActivity());
 

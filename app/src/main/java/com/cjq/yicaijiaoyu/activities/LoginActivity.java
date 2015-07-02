@@ -73,7 +73,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 StringRequest request = new StringRequest(Request.Method.POST, CommonDataObject.LOGIN_URL, new Response.Listener<String>() {
                     @Override
                     public void onResponse(String s) {
-                        System.out.println(s);
                         try {
                             JSONObject object = new JSONObject(s);
                             String code = object.getString("code");
@@ -92,7 +91,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError volleyError) {
-                        System.out.println(volleyError.getMessage());
+
                     }
                 }){
                     @Override
