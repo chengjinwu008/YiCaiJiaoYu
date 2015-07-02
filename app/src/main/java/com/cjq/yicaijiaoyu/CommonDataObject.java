@@ -34,6 +34,7 @@ public class CommonDataObject {
     public static final String COURSE_LIST_URL = MAIN_URL+"/service/app.php";//课程列表接口
 
     public static final String AUTHORITY_URL = MAIN_URL+"/service/app.php";//权限请求接口
+    public static final String FAVORATE_URL = MAIN_URL+"/service/app.php";//关注接口
 
     public static final String ADVISE_URL = MAIN_URL+"/service/app.php";//权限请求接口
 
@@ -52,4 +53,6 @@ public class CommonDataObject {
     public static final String SEARCH_COURSE_REQUEST_CODE ="act_coursesearch";//搜索课程请求码
     public static final String AUTHORITY_REQUEST_CODE = "act_courseplayauth";//权限请求码
     public static final String ADVISE_REQUEST_CODE = "act_feedback";//意见反馈请求码
+    public static final String ADD_FAVORATE_REQUEST_CODE = "act_addcollect";//添加关注请求码
+    public static final String REMOVE_FAVORATE_REQUEST_CODE = "act_delcollect";//取消关注请求码
 }

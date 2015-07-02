@@ -4,10 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.cjq.yicaijiaoyu.R;
-import com.cjq.yicaijiaoyu.utils.Validator;
 
 /**
  * Created by CJQ on 2015/6/29.

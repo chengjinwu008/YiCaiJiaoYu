@@ -11,17 +11,21 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.cjq.yicaijiaoyu.CommonDataObject;
 import com.cjq.yicaijiaoyu.R;
 import com.cjq.yicaijiaoyu.adapter.ChapterAdapter;
 import com.cjq.yicaijiaoyu.adapter.CommentsAdapter;
 import com.cjq.yicaijiaoyu.adapter.PagerAdapter;
+import com.cjq.yicaijiaoyu.entities.FavoriteEntity;
 import com.cjq.yicaijiaoyu.entities.AuthorityRequestEntity;
 import com.cjq.yicaijiaoyu.entities.ChapterEntity;
 import com.cjq.yicaijiaoyu.entities.ChapterRequestEvent;
@@ -74,6 +78,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
     private String video_info;
     private FragmentManager manager;
     private ViewPager pager;
+    private String id;
 
     //详情请求回调
     public void onEventBackgroundThread(NeedVideoInfoEvent e) {
@@ -134,11 +139,16 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
 
         //注册back键
         findViewById(R.id.back).setOnClickListener(this);
+        //注册关注键
+        findViewById(R.id.add_to_favor).setOnClickListener(this);
+        //注册评论键
+        findViewById(R.id.write_comments).setOnClickListener(this);
 
         final Intent intent = getIntent();
-        final String id = intent.getStringExtra(ID);
+        id = intent.getStringExtra(ID);
         final boolean free = intent.getBooleanExtra(FREE, false);
         CommonDataObject.nowPlayingId = id;
+
         //判断网络
         NetStateUtil.checkNetwork(new NetStateUtil.NetWorkStateListener() {
             @Override
@@ -194,7 +204,8 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
             }
             @Override
             public void doWithoutNetWork() {
-
+                Toast.makeText(PlayActivity.this, R.string.no_network,Toast.LENGTH_SHORT).show();
+                finish();
             }
         });
 
@@ -291,6 +302,40 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                 break;
             case R.id.back:
                 finish();
+                break;
+            case R.id.add_to_favor:
+                // TODO: 2015/7/2 添加关注 应该先判断用户是否登录，并且登录了要判断用户是否关注该课程
+                if(AccountUtil.isLoggedIn(PlayActivity.this)){
+                    StringRequest request = new StringRequest(Request.Method.POST, CommonDataObject.FAVORATE_URL, new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String s) {
+                            // TODO: 2015/7/2 根据回调改变关注图标的颜色
+                        }
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError volleyError) {
+
+                        }
+                    }){
+                        @Override
+                        protected Map<String, String> getParams() throws AuthFailureError {
+                            FavoriteEntity.Data data = new FavoriteEntity.Data(AccountUtil.getUserId(PlayActivity.this),id);
+                            // TODO: 2015/7/2 根据关注状态来设置请求码
+                            FavoriteEntity entity = new FavoriteEntity(CommonDataObject.ADD_FAVORATE_REQUEST_CODE,data);
+
+                            Map<String,String> params = new HashMap<>();
+                            params.put("opjson",CommonDataObject.GSON.toJson(entity));
+                            return super.getParams();
+                        }
+                    };
+
+                    RequestQueue queue = Volley.newRequestQueue(this);
+                    queue.add(request);
+                    queue.start();
+                }
+                break;
+            case R.id.write_comments:
+                // TODO: 2015/7/2 撰写评论
                 break;
         }
     }

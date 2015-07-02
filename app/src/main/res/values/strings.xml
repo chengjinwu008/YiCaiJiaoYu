@@ -69,4 +69,5 @@
     <string name="buy">购买</string>
     <string name="submit">提交</string>
     <string name="thank_your_advise">谢谢您的宝贵意见</string>
+    <string name="no_network">没有网络哦，亲~</string>
 </resources>
