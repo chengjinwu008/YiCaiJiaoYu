@@ -15,6 +15,7 @@ public class DialogUtil {
 
     private static AlertDialog showLoginAlertDialog;
     private static AlertDialog showExitDialog;
+    private static AlertDialog showPayDialog;
 
     public static void showLoginAlert(final Context context){
         if(showLoginAlertDialog==null)
@@ -40,7 +41,7 @@ public class DialogUtil {
                 public void onClick(DialogInterface dialog, int which) {
                     dialog.dismiss();
                 }
-            }).setPositiveButton(context.getResources().getString(R.string.sure), new DialogInterface.OnClickListener() {
+            }).setPositiveButton(R.string.sure, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     Intent intent = new Intent(BaseActivity.SHUTDOWN_ACTION);
@@ -49,6 +50,23 @@ public class DialogUtil {
             }).create();
         }
        showExitDialog.show();
+    }
+
+    public static void showPayDialog(final Context context){
+        if(showPayDialog==null){
+            showPayDialog = new AlertDialog.Builder(context).setMessage(R.string.buy_or_not).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            }).setPositiveButton(R.string.buy, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    //todo 打开支付
+                }
+            }).create();
+        }
+        showPayDialog.show();
     }
 
 }

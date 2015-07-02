@@ -8,13 +8,23 @@ import android.content.pm.PackageManager;
  */
 public class VersionUtil {
 
-    public static String getVersion(PackageManager manager,String packageName) {
+    public static String getVersionName(PackageManager manager, String packageName) {
         try {
             PackageInfo info = manager.getPackageInfo(packageName, 0);
             return info.versionName;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    public static int getVersionCode(PackageManager manager, String packageName) {
+        try {
+            PackageInfo info = manager.getPackageInfo(packageName, 0);
+            return info.versionCode;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
         }
     }
 }

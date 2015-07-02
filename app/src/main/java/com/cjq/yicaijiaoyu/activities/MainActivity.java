@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -398,5 +399,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     public void onEventMainThread(MainMenuEvent e) {
         menu.toggle();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(keyCode == KeyEvent.KEYCODE_BACK){
+            DialogUtil.showExitDialog(this);
+        }
+        return super.onKeyUp(keyCode, event);
     }
 }

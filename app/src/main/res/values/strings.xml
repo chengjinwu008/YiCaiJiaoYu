@@ -65,4 +65,8 @@
     <string name="now_login">现在登录</string>
     <string name="exit_or_not">确定要退出程序吗</string>
     <string name="sure">确定</string>
+    <string name="buy_or_not">您还没有购买该课程，要购买吗？</string>
+    <string name="buy">购买</string>
+    <string name="submit">提交</string>
+    <string name="thank_your_advise">谢谢您的宝贵意见</string>
 </resources>

@@ -24,6 +24,7 @@ import com.cjq.yicaijiaoyu.entities.CourseCategory;
 import com.cjq.yicaijiaoyu.entities.CourseEntity;
 import com.cjq.yicaijiaoyu.entities.CourseListRequestEvent;
 import com.cjq.yicaijiaoyu.entities.CourseListResultEvent;
+import com.cjq.yicaijiaoyu.entities.NewHistoryAddedEvent;
 import com.cjq.yicaijiaoyu.utils.AccountUtil;
 import com.cjq.yicaijiaoyu.utils.CourseHistoryUtil;
 import com.cjq.yicaijiaoyu.utils.CourseUtil;
@@ -57,6 +58,12 @@ public class MyCourseListFragment extends Fragment implements XListView.IXListVi
     public MyCourseListFragment setNO(int NO) {
         this.NO = NO;
         return this;
+    }
+
+    public void onEventMainThread(NewHistoryAddedEvent e){
+        //播放历史更新
+        if(NO==2)
+            refresh();
     }
 
     public void onEventMainThread(CourseListResultEvent e){
@@ -129,7 +136,6 @@ public class MyCourseListFragment extends Fragment implements XListView.IXListVi
             @Override
             public void onResponse(String s) {
                 JSONObject object = null;
-                System.out.println(s);
                 try {
                     object = new JSONObject(s);
                     if("0000".equals(object.getString("code"))){
@@ -198,7 +204,6 @@ public class MyCourseListFragment extends Fragment implements XListView.IXListVi
             @Override
             public void onResponse(String s) {
                 JSONObject object = null;
-                System.out.println(s);
                 try {
                     object = new JSONObject(s);
                     if("0000".equals(object.getString("code"))){
@@ -231,7 +236,6 @@ public class MyCourseListFragment extends Fragment implements XListView.IXListVi
                 AllCourseRequestEntity entity = new AllCourseRequestEntity(requestCode,data);
                 Map<String,String> params = new HashMap<>();
                 params.put("opjson",CommonDataObject.GSON.toJson(entity));
-                System.out.println(params.get("opjson"));
                 return params;
             }
         };

@@ -40,6 +40,7 @@
         <activity android:name=".activities.RegisterActivity"/>
         <activity android:name=".activities.RegisterSMSActivity"/>
         <activity android:name=".activities.SearchActivity"/>
+        <activity android:name=".activities.AdviseActivity"/>
     </application>
 
 </manifest>

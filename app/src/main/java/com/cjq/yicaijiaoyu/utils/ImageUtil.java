@@ -9,7 +9,6 @@ import android.os.Environment;
 import android.util.LruCache;
 import android.widget.ImageView;
 
-import com.android.volley.Cache;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.Volley;
 import com.cjq.yicaijiaoyu.R;
@@ -29,11 +28,14 @@ public class ImageUtil {
     public static ImageLoader loader;
 
     public static void LoadImage(Context context,String url,ImageView imageView){
+        if(url!=null)
         try {
             getImageLoader(context).get(url,getImageListener(imageView,R.drawable.guanggao,R.drawable.guanggao));
         } catch (IOException e) {
             e.printStackTrace();
         }
+        else
+            imageView.setImageResource(R.drawable.guanggao);
 //        Picasso.with(context).load(url).placeholder(R.drawable.guanggao).into(imageView);
     }
 
@@ -71,7 +73,7 @@ public class ImageUtil {
                 }
             };
             if(Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
-            mDiskCache=DiskLruCache.open(new File(Environment.getExternalStorageDirectory().getPath()+"/Android/data/"+context.getPackageName()+"/cache"),Integer.parseInt(VersionUtil.getVersion(context.getPackageManager(),context.getPackageName()).substring(0,1)),1,10*1024*1024);
+            mDiskCache=DiskLruCache.open(new File(Environment.getExternalStorageDirectory().getPath()+"/Android/data/"+context.getPackageName()+"/cache"),VersionUtil.getVersionCode(context.getPackageManager(), context.getPackageName()),1,10*1024*1024);
         }
 
         @Override

@@ -106,7 +106,6 @@ public class MyCourseFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onResponse(String s) {
                 JSONObject object = null;
-                System.out.println(s);
                 try {
                     object = new JSONObject(s);
                     if("0000".equals(object.getString("code"))){

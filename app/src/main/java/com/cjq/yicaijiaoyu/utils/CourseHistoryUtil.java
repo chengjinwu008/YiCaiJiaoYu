@@ -9,6 +9,8 @@ import com.cjq.yicaijiaoyu.dao.DaoMaster;
 import com.cjq.yicaijiaoyu.dao.DaoSession;
 import com.cjq.yicaijiaoyu.entities.CourseEntity;
 import com.cjq.yicaijiaoyu.entities.LectureEntity;
+import com.cjq.yicaijiaoyu.entities.NewHistoryAddedEvent;
+import com.ypy.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +42,8 @@ public class CourseHistoryUtil {
 
         courseDao.insertWithoutSettingPk(course);
         db.close();
+
+        EventBus.getDefault().post(new NewHistoryAddedEvent());
     }
 
     public static void deleteToTen(CourseDao courseDao){

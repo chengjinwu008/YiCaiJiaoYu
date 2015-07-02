@@ -59,12 +59,4 @@ public class BaseActivity extends FragmentActivity {
         super.finish();
 //        overridePendingTransition(android.R.anim.fade_in,android.R.anim.fade_out);
     }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if(keyCode == KeyEvent.KEYCODE_BACK){
-            DialogUtil.showExitDialog(this);
-        }
-        return super.onKeyUp(keyCode, event);
-    }
 }

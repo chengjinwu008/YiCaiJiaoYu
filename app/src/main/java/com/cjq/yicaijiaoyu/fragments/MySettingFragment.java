@@ -1,5 +1,6 @@
 package com.cjq.yicaijiaoyu.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -10,6 +11,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.cjq.yicaijiaoyu.R;
+import com.cjq.yicaijiaoyu.activities.AdviseActivity;
 import com.cjq.yicaijiaoyu.adapter.SettingListAdapter;
 import com.cjq.yicaijiaoyu.entities.MainMenuEvent;
 import com.cjq.yicaijiaoyu.entities.SettingEntity;
@@ -53,7 +55,7 @@ public class MySettingFragment extends Fragment implements View.OnClickListener,
         //清理缓存选项
         SettingEntity clean = new SettingEntity(getActivity().getString(R.string.clean), "10M", false);
         //当前版本选项
-        SettingEntity version = new SettingEntity("当前版本", VersionUtil.getVersion(getActivity().getPackageManager(), getActivity().getPackageName()), false);
+        SettingEntity version = new SettingEntity("当前版本", VersionUtil.getVersionName(getActivity().getPackageManager(), getActivity().getPackageName()), false);
 
         List<SettingEntity> settings = new ArrayList<>();
         settings.add(advises);
@@ -96,6 +98,8 @@ public class MySettingFragment extends Fragment implements View.OnClickListener,
         switch (position) {
             case 0:
                 //todo 打开意见反馈留言板
+                Intent intent = new Intent(getActivity(), AdviseActivity.class);
+                startActivity(intent);
                 break;
         }
     }

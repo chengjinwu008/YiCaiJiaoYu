@@ -7,6 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp">
         <ImageView
+            android:id="@+id/back"
             android:layout_centerVertical="true"
             android:layout_marginLeft="10dp"
             android:padding="10dp"
@@ -23,7 +24,7 @@
             android:layout_height="wrap_content" />
         <TextView
             android:id="@+id/submit"
-            android:text="提交"
+            android:text="@string/submit"
             android:textSize="18sp"
             android:textColor="@color/pure_white"
             android:layout_marginRight="10dp"

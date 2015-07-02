@@ -182,10 +182,9 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
         StringRequest request = new StringRequest(Request.Method.POST, CommonDataObject.COURSE_LIST_URL, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
+                System.out.println(s);
                 try {
                     JSONObject object = new JSONObject(s);
-                    //todo
-                    
                     if("0000".equals(object.getString("code"))){
                         JSONArray goods = object.getJSONObject("data").getJSONObject("categories").getJSONArray("goods");
                         courseEntityList.clear();
