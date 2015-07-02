@@ -63,4 +63,6 @@
     <string name="maybe_later">稍后再说</string>
     <string name="hint11">没有更多的课程了</string>
     <string name="now_login">现在登录</string>
+    <string name="exit_or_not">确定要退出程序吗</string>
+    <string name="sure">确定</string>
 </resources>

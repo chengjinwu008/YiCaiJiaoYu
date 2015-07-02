@@ -1,5 +1,6 @@
 package com.cjq.yicaijiaoyu.activities;
 
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
@@ -59,15 +60,18 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private FragmentManager manager;
     private ImageView menu_portrait;
     private TextView menu_username;
-    private Handler mHandler=new Handler();
+    private Handler mHandler = new Handler();
     private View content;
     private ViewPager welcome;
+    private AllCourseFragment fragment1;
+    private MyCourseFragment fragment2;
+    private MySettingFragment fragment3;
 
-    public void onEventMainThread(UserLoginEvent e){
+    public void onEventMainThread(UserLoginEvent e) {
         checkLogin();
     }
 
-    public void onEventMainThread(ShowLoginEvent e){
+    public void onEventMainThread(ShowLoginEvent e) {
         showMain();
         showLoginActivity();
     }
@@ -77,7 +81,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         welcome.setVisibility(View.GONE);
     }
 
-    public void onEventMainThread(SkipLeaderPageEvent e){
+    public void onEventMainThread(SkipLeaderPageEvent e) {
         showMain();
     }
 
@@ -86,7 +90,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         welcome = (ViewPager) findViewById(R.id.welcome);
-        if(savedInstanceState==null){
+        if (savedInstanceState == null) {
             //隐藏欢迎页
             findViewById(R.id.loading).setVisibility(View.VISIBLE);
             mHandler.postDelayed(new Runnable() {
@@ -94,18 +98,18 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 public void run() {
                     findViewById(R.id.loading).setVisibility(View.GONE);
                 }
-            },3000);
+            }, 3000);
             welcome.setVisibility(View.VISIBLE);
-            if(AccountUtil.isLoggedIn(this)){
+            if (AccountUtil.isLoggedIn(this)) {
                 //跳过引导界面
                 showMain();
-            }else{
+            } else {
                 //显示引导界面
                 List<Fragment> fragments = new ArrayList<>();
                 fragments.add(new WelcomeOneFragment());
                 fragments.add(new WelcomeTwoFragment());
                 fragments.add(new WelcomeThreeFragment());
-                welcome.setAdapter(new PagerAdapter(getSupportFragmentManager(),fragments));
+                welcome.setAdapter(new PagerAdapter(getSupportFragmentManager(), fragments));
             }
         }
 
@@ -164,13 +168,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 int preFragment = CommonDataObject.menuChecked;
                 if (position == 1) {
                     //判断登录
-                    if(AccountUtil.isLoggedIn(MainActivity.this))
+                    if (AccountUtil.isLoggedIn(MainActivity.this))
                         CommonDataObject.menuChecked = position;
-                    else{
+                    else {
                         //todo 未登录提示
                         DialogUtil.showLoginAlert(MainActivity.this);
                     }
-                }else{
+                } else {
                     CommonDataObject.menuChecked = position;
                 }
 
@@ -217,7 +221,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     private void checkLogin() {
-        if(AccountUtil.isLoggedIn(this)){
+        if (AccountUtil.isLoggedIn(this)) {
             //请求
             NetStateUtil.checkNetwork(new NetStateUtil.NetWorkStateListener() {
                 @Override
@@ -230,7 +234,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                             try {
                                 JSONObject object = new JSONObject(s);
                                 String code = object.getString("code");
-                                if("0000".equals(code)){
+                                if ("0000".equals(code)) {
                                     JSONObject data = object.getJSONArray("data").getJSONObject(0);
                                     final String userName = data.getString("user_name");
 //                                    final String portrait = data.getString("portrait");
@@ -255,14 +259,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                         public void onErrorResponse(VolleyError volleyError) {
 
                         }
-                    }){
+                    }) {
                         @Override
                         protected Map<String, String> getParams() throws AuthFailureError {
-                            Map<String,String> params = new HashMap<String, String>();
+                            Map<String, String> params = new HashMap<String, String>();
                             UserInfoRequestEntity.Data data = new UserInfoRequestEntity.Data(AccountUtil.getUserId(MainActivity.this));
-                            UserInfoRequestEntity entity = new UserInfoRequestEntity(CommonDataObject.USER_INFO_REQUEST_CODE,data);
+                            UserInfoRequestEntity entity = new UserInfoRequestEntity(CommonDataObject.USER_INFO_REQUEST_CODE, data);
 
-                            params.put("opjson",CommonDataObject.GSON.toJson(entity));
+                            params.put("opjson", CommonDataObject.GSON.toJson(entity));
                             return params;
                         }
                     };
@@ -295,17 +299,45 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
         switch (CommonDataObject.menuChecked) {
             case 0:
-                AllCourseFragment fragment = new AllCourseFragment();
-                manager.beginTransaction().replace(R.id.content, fragment).commit();
+                if (fragment1 == null)
+                    fragment1 = new AllCourseFragment();
+                android.support.v4.app.FragmentTransaction transaction = manager.beginTransaction();
+                if(!fragment1.isAdded())
+                    transaction.add(R.id.content,fragment1);
+                transaction.show(fragment1);
+                if(fragment2!=null && !fragment2.isHidden())
+                    transaction.hide(fragment2);
+                if(fragment3!=null && !fragment3.isHidden())
+                    transaction.hide(fragment3);
+                transaction.commit();
+                fragment1.scrollToTop();
                 break;
             case 1:
                 //涉及到用户，所以应该检测用户的登录状态
-                MyCourseFragment fragment1 = new MyCourseFragment();
-                manager.beginTransaction().replace(R.id.content, fragment1).commit();
+                if (fragment2 == null)
+                    fragment2 = new MyCourseFragment();
+                android.support.v4.app.FragmentTransaction transaction2 = manager.beginTransaction();
+                if(!fragment2.isAdded())
+                    transaction2.add(R.id.content,fragment2);
+                transaction2.show(fragment2);
+                if(fragment1!=null && !fragment1.isHidden())
+                    transaction2.hide(fragment1);
+                if(fragment3!=null && !fragment3.isHidden())
+                    transaction2.hide(fragment3);
+                transaction2.commit();
                 break;
             case 2:
-                MySettingFragment fragment2 = new MySettingFragment();
-                manager.beginTransaction().replace(R.id.content, fragment2).commit();
+                if (fragment3 == null)
+                    fragment3 = new MySettingFragment();
+                android.support.v4.app.FragmentTransaction transaction3 = manager.beginTransaction();
+                if(!fragment3.isAdded())
+                    transaction3.add(R.id.content,fragment3);
+                transaction3.show(fragment3);
+                if(fragment2!=null && !fragment2.isHidden())
+                    transaction3.hide(fragment2);
+                if(fragment1!=null && !fragment1.isHidden())
+                    transaction3.hide(fragment1);
+                transaction3.commit();
                 break;
         }
     }
@@ -349,12 +381,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 v.setClickable(false);
                 break;
             case R.id.menu_username:
-                if(!AccountUtil.isLoggedIn(this))
-                showLoginActivity();
+                if (!AccountUtil.isLoggedIn(this))
+                    showLoginActivity();
                 break;
             case R.id.menu_portrait:
-                if(!AccountUtil.isLoggedIn(this))
-                showLoginActivity();
+                if (!AccountUtil.isLoggedIn(this))
+                    showLoginActivity();
                 break;
         }
     }

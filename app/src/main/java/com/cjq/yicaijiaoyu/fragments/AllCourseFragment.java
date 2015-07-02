@@ -572,4 +572,14 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
 
         VideoUtil.startVideo(getActivity(),course);
     }
+
+    public void scrollToTop() {
+        if(mRefreshLayout!=null)
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mRefreshLayout.scrollTo(0,0);
+                }
+            },500);
+    }
 }
