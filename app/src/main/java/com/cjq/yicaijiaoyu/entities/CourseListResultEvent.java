@@ -8,6 +8,16 @@ import com.cjq.yicaijiaoyu.adapter.CourseListAdapter;
 public class CourseListResultEvent {
     CourseListAdapter adapter;
     String requestCode;
+    int NO;
+
+    public int getNO() {
+        return NO;
+    }
+
+    public CourseListResultEvent setNO(int NO) {
+        this.NO = NO;
+        return this;
+    }
 
     public String getRequestCode() {
         return requestCode;

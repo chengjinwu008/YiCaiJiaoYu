@@ -38,7 +38,7 @@ public class CommonDataObject {
     public static final String FORGET_SMS_REQUEST_CODE = "act_upverifycode";//忘记密码短信请求码
     public static final String RESET_PASSWORD_REQUEST_CODE = "act_reset";//重置密码请求码
     public static final String SMS_REQUETS_CODE ="act_verifycode"; //短信验证码请求码
-    public static final String COURSE_BOUGHT_REQUEST_CODE ="act_coursesearch";//已购课程请求码
+    public static final String COURSE_BOUGHT_REQUEST_CODE ="act_courseuserbuylist";//已购课程请求码
     public static final String COURSE_CARE_REQUEST_CODE ="act_selectcollect";//已关注课程请求码
     public static final String LOGIN_REQUEST_CODE="act_login";//登录请求码
     public static final String USER_INFO_REQUEST_CODE = "act_userinfo";//用户信息请求码

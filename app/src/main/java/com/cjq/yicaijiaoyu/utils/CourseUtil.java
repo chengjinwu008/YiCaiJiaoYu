@@ -18,7 +18,11 @@ public class CourseUtil {
         for(int i=0;i<goods.length();i++){
             JSONObject o = goods.getJSONObject(i);
             LectureEntity l = new LectureEntity(o.getString("keywords"),null,null);
-            CourseEntity e= new CourseEntity(o.getString("url"),o.getString("thumb"),o.getString("name"),l,o.getString("brief"),null,null,o.getInt("is_free")==1,o.getString("id"));
+            CourseEntity e= new CourseEntity(o.getString("url"),null,o.getString("name"),l,o.getString("brief"),null,null,o.getInt("is_free")==1,o.getString("id"));
+            if(o.has("thnumb"))
+            e.setCover_image_url(o.getString("thumb"));
+            else if(o.has("goods_img"))
+            e.setCover_image_url(o.getString("goods_img"));
             courseEntityList.add(e);
         }
     }

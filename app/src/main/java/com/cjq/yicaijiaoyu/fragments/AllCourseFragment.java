@@ -184,6 +184,8 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
             public void onResponse(String s) {
                 try {
                     JSONObject object = new JSONObject(s);
+                    //todo
+                    
                     if("0000".equals(object.getString("code"))){
                         JSONArray goods = object.getJSONObject("data").getJSONObject("categories").getJSONArray("goods");
                         courseEntityList.clear();
@@ -194,6 +196,7 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
                         courseList.setAdapter(courseListAdapter);
                     }
                     onLoad();
+                    courseListAdapter.notifyDataSetChanged();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -218,6 +221,8 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
             @Override
             public void onResponse(String s) {
                 JSONObject object = null;
+                //todo
+                
                 try {
                     object = new JSONObject(s);
                     if("0000".equals(object.getString("code"))){
@@ -420,8 +425,6 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
         mRefreshLayout.setPullRefreshEnable(true);
 //        mRefreshLayout.setPullLoadEnable(true);
 //        mRefreshLayout.setAutoLoadEnable(true);
-        if(courseListAdapter!=null)
-        courseListAdapter.notifyDataSetChanged();
     }
 
     private void isLoading() {
@@ -518,7 +521,6 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
             @Override
             public void onResponse(String s) {
                 JSONObject object = null;
-
                 try {
                     object = new JSONObject(s);
                     if("0000".equals(object.getString("code"))){
@@ -529,12 +531,16 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
                         if(goods.length()==0){
                             nowPage--;
                             Toast.makeText(getActivity(), getActivity().getString(R.string.hint11),Toast.LENGTH_SHORT).show();
-                            onLoad();
                         }else{
                             CourseUtil.chargeCourseList(goods, temp);
                             courseListAdapter.getCourses().addAll(temp);
-                            onLoad();
                         }
+                        mHandler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                onLoad();
+                            }
+                        },3000);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();

@@ -7,20 +7,41 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.cjq.yicaijiaoyu.CommonDataObject;
+import com.cjq.yicaijiaoyu.R;
 import com.cjq.yicaijiaoyu.adapter.CourseListAdapter;
+import com.cjq.yicaijiaoyu.entities.AllCourseRequestEntity;
 import com.cjq.yicaijiaoyu.entities.CourseCategory;
 import com.cjq.yicaijiaoyu.entities.CourseEntity;
 import com.cjq.yicaijiaoyu.entities.CourseListRequestEvent;
 import com.cjq.yicaijiaoyu.entities.CourseListResultEvent;
+import com.cjq.yicaijiaoyu.utils.AccountUtil;
+import com.cjq.yicaijiaoyu.utils.CourseHistoryUtil;
+import com.cjq.yicaijiaoyu.utils.CourseUtil;
 import com.cjq.yicaijiaoyu.utils.NetStateUtil;
 import com.cjq.yicaijiaoyu.utils.VideoUtil;
 import com.cjq.yicaijiaoyu.widget.XListView;
 import com.ypy.eventbus.EventBus;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Created by CJQ on 2015/6/29.
@@ -30,12 +51,23 @@ public class MyCourseListFragment extends Fragment implements XListView.IXListVi
     private XListView view;
     private CourseListAdapter adapter;
     private String requestCode;
+    private int NO;
+    private int nowPage=1;
+
+    public MyCourseListFragment setNO(int NO) {
+        this.NO = NO;
+        return this;
+    }
 
     public void onEventMainThread(CourseListResultEvent e){
         //请求到了数据就进行回显
-        adapter =  e.getAdapter();
-        view.setAdapter(adapter);
-        requestCode = e.getRequestCode();
+        if(NO==e.getNO()){
+            adapter =  e.getAdapter();
+            view.setAdapter(adapter);
+            requestCode = e.getRequestCode();
+            if(requestCode==null)
+                view.setPullLoadEnable(false);
+        }
     }
 
     @Nullable
@@ -46,8 +78,8 @@ public class MyCourseListFragment extends Fragment implements XListView.IXListVi
         view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         view.setPullRefreshEnable(true);
-        view.setPullLoadEnable(true);
-        view.setAutoLoadEnable(true);
+//        view.setPullLoadEnable(true);
+//        view.setAutoLoadEnable(true);
 
         view.setXListViewListener(this);
         view.setRefreshTime(getTime());
@@ -56,7 +88,7 @@ public class MyCourseListFragment extends Fragment implements XListView.IXListVi
 
         //注册事件
         EventBus.getDefault().register(this);
-        EventBus.getDefault().post(new CourseListRequestEvent());
+        EventBus.getDefault().post(new CourseListRequestEvent().setNO(NO));
 
         return view;
     }
@@ -76,11 +108,14 @@ public class MyCourseListFragment extends Fragment implements XListView.IXListVi
             public void doWithNetWork() {
                 //todo 请求刷新
                 if(requestCode==null){
-
+                    //证明是刷新播放历史
+                    adapter.setCourses(CourseHistoryUtil.listHistory(getActivity()));
                 }else{
-
+                    //不是刷新历史，所以需要亲求
+                    refresh();
                 }
                 onLoad();
+                adapter.notifyDataSetChanged();
             }
             @Override
             public void doWithoutNetWork() {
@@ -88,6 +123,47 @@ public class MyCourseListFragment extends Fragment implements XListView.IXListVi
             }
         });
     }
+
+    private void refresh() {
+        StringRequest request = new StringRequest(Request.Method.POST, CommonDataObject.COURSE_LIST_URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                JSONObject object = null;
+                System.out.println(s);
+                try {
+                    object = new JSONObject(s);
+                    if("0000".equals(object.getString("code"))){
+                        List<CourseEntity> temp = new ArrayList<>();
+                        CourseUtil.chargeCourseList(object.getJSONObject("data").getJSONArray("categories"), temp);
+                        adapter.setCourses(temp);
+                        adapter.notifyDataSetChanged();
+                    }
+                } catch (JSONException e1) {
+                    e1.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+
+            }
+        }){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                AllCourseRequestEntity.Data data = new AllCourseRequestEntity.Data(1,CommonDataObject.COURSE_NUM_SHOWING);
+                data.setUserId(AccountUtil.getUserId(getActivity()));
+                AllCourseRequestEntity entity = new AllCourseRequestEntity(requestCode,data);
+                Map<String,String> params = new HashMap<>();
+                params.put("opjson",CommonDataObject.GSON.toJson(entity));
+                return params;
+            }
+        };
+        RequestQueue queue = Volley.newRequestQueue(getActivity());
+        queue.add(request);
+        queue.start();
+    }
+
 
     private String getTime() {
         return new SimpleDateFormat("MM-dd HH:mm", Locale.CHINA).format(new Date());
@@ -101,14 +177,67 @@ public class MyCourseListFragment extends Fragment implements XListView.IXListVi
             @Override
             public void doWithNetWork() {
                 //todo 请求加载
-                adapter.getCourses().add(new CourseEntity("https://www.baidu.com/img/bd_logo1.png","新加的课程", "基础班",true));
-                onLoad();
+                if(requestCode==null) {
+                    //历史直接不给加载
+                    onLoad();
+                    Toast.makeText(getActivity(),getActivity().getString(R.string.hint11),Toast.LENGTH_SHORT).show();
+                }else{
+                    //其他的可以加载
+                    load();
+                }
             }
             @Override
             public void doWithoutNetWork() {
                 onLoad();
             }
         });
+    }
+
+    private void load() {
+        StringRequest request = new StringRequest(Request.Method.POST, CommonDataObject.COURSE_LIST_URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                JSONObject object = null;
+                System.out.println(s);
+                try {
+                    object = new JSONObject(s);
+                    if("0000".equals(object.getString("code"))){
+                        List<CourseEntity> temp = new ArrayList<>();
+                        if(object.getJSONObject("data").getJSONArray("categories").length()==0){
+                            //没有更多
+                            nowPage--;
+                            Toast.makeText(getActivity(),getActivity().getString(R.string.hint11),Toast.LENGTH_SHORT).show();
+                        }else{
+                            CourseUtil.chargeCourseList(object.getJSONObject("data").getJSONArray("categories"), temp);
+                            adapter.getCourses().addAll(temp);
+                        }
+                    }
+                    onLoad();
+                } catch (JSONException e1) {
+                    e1.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+
+            }
+        }){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                AllCourseRequestEntity.Data data = new AllCourseRequestEntity.Data(++nowPage,CommonDataObject.COURSE_NUM_SHOWING);
+                data.setUserId(AccountUtil.getUserId(getActivity()));
+                AllCourseRequestEntity entity = new AllCourseRequestEntity(requestCode,data);
+                Map<String,String> params = new HashMap<>();
+                params.put("opjson",CommonDataObject.GSON.toJson(entity));
+                System.out.println(params.get("opjson"));
+                return params;
+            }
+        };
+        RequestQueue queue = Volley.newRequestQueue(getActivity());
+        queue.add(request);
+        queue.start();
     }
 
     @Override
@@ -125,7 +254,6 @@ public class MyCourseListFragment extends Fragment implements XListView.IXListVi
         view.setPullRefreshEnable(true);
 //        view.setPullLoadEnable(true);
 //        view.setAutoLoadEnable(true);
-        adapter.notifyDataSetChanged();
     }
 
     private void isLoading() {

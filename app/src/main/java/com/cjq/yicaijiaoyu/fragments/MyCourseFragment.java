@@ -36,6 +36,7 @@ import com.cjq.yicaijiaoyu.entities.CourseListResultEvent;
 import com.cjq.yicaijiaoyu.entities.LectureEntity;
 import com.cjq.yicaijiaoyu.entities.MainMenuEvent;
 import com.cjq.yicaijiaoyu.utils.AccountUtil;
+import com.cjq.yicaijiaoyu.utils.CourseHistoryUtil;
 import com.cjq.yicaijiaoyu.utils.CourseUtil;
 import com.cjq.yicaijiaoyu.utils.NetStateUtil;
 import com.cjq.yicaijiaoyu.utils.PopWindowUtil;
@@ -74,60 +75,70 @@ public class MyCourseFragment extends Fragment implements View.OnClickListener {
         //收到了请求
         //生成Adapter
         courseListAdapter = new CourseListAdapter(null,getActivity());
-        final CourseListResultEvent event = new CourseListResultEvent();
-        switch (tab){
+        final CourseListResultEvent event = new CourseListResultEvent().setNO(e.getNO());
+        switch (e.getNO()){
             case 0:
                 event.setRequestCode(CommonDataObject.COURSE_CARE_REQUEST_CODE);
-                //todo 获取课程列表 关注
-                StringRequest request = new StringRequest(Request.Method.POST, CommonDataObject.COURSE_LIST_URL, new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String s) {
-                        JSONObject object = null;
-                        System.out.println(s);
-                        try {
-                            object = new JSONObject(s);
-                            if("0000".equals(object.getString("code"))){
-                                List<CourseEntity> temp = new ArrayList<>();
-                                CourseUtil.chargeCourseList(object.getJSONObject("data").getJSONArray("categories"),temp);
-
-                                CourseListAdapter adapter = new CourseListAdapter(temp,getActivity());
-                                event.setAdapter(adapter);
-                                EventBus.getDefault().post(event);
-                            }
-                        } catch (JSONException e1) {
-                            e1.printStackTrace();
-                        }
-
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError volleyError) {
-
-                    }
-                }){
-                    @Override
-                    protected Map<String, String> getParams() throws AuthFailureError {
-                        AllCourseRequestEntity.Data data = new AllCourseRequestEntity.Data(1,CommonDataObject.COURSE_NUM_SHOWING);
-                        data.setUserId(AccountUtil.getUserId(getActivity()));
-                        AllCourseRequestEntity entity = new AllCourseRequestEntity(CommonDataObject.COURSE_CARE_REQUEST_CODE,data);
-                        Map<String,String> params = new HashMap<>();
-                        params.put("opjson",CommonDataObject.GSON.toJson(entity));
-                        return params;
-                    }
-                };
-                RequestQueue queue = Volley.newRequestQueue(getActivity());
-                queue.add(request);
-                queue.start();
+                AllCourseRequestEntity.Data data = new AllCourseRequestEntity.Data(1,CommonDataObject.COURSE_NUM_SHOWING);
+                data.setUserId(AccountUtil.getUserId(getActivity()));
+                AllCourseRequestEntity entity = new AllCourseRequestEntity(CommonDataObject.COURSE_CARE_REQUEST_CODE,data);
+                getCourseListAdapterEvent(event,entity);
                 break;
             case 1:
                 event.setRequestCode(CommonDataObject.COURSE_BOUGHT_REQUEST_CODE);
-                EventBus.getDefault().post(event);
+                AllCourseRequestEntity.Data data2 = new AllCourseRequestEntity.Data(1,CommonDataObject.COURSE_NUM_SHOWING);
+                data2.setUserId(AccountUtil.getUserId(getActivity()));
+                AllCourseRequestEntity entity2 = new AllCourseRequestEntity(CommonDataObject.COURSE_BOUGHT_REQUEST_CODE,data2);
+                getCourseListAdapterEvent(event,entity2);
                 break;
             case 2:
+                //查询播放历史
+                List<CourseEntity> temp = CourseHistoryUtil.listHistory(getActivity());
+                event.setAdapter(new CourseListAdapter(temp,getActivity()));
                 event.setRequestCode(null);
                 EventBus.getDefault().post(event);
                 break;
         }
+    }
+
+    private void getCourseListAdapterEvent(final CourseListResultEvent event, final AllCourseRequestEntity entity) {
+        StringRequest request = new StringRequest(Request.Method.POST, CommonDataObject.COURSE_LIST_URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                JSONObject object = null;
+                System.out.println(s);
+                try {
+                    object = new JSONObject(s);
+                    if("0000".equals(object.getString("code"))){
+                        List<CourseEntity> temp = new ArrayList<>();
+                        CourseUtil.chargeCourseList(object.getJSONObject("data").getJSONArray("categories"), temp);
+
+                        CourseListAdapter adapter = new CourseListAdapter(temp,getActivity());
+                        event.setAdapter(adapter);
+                        EventBus.getDefault().post(event);
+                    }
+                } catch (JSONException e1) {
+                    e1.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+
+            }
+        }){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+
+                Map<String,String> params = new HashMap<>();
+                params.put("opjson",CommonDataObject.GSON.toJson(entity));
+                return params;
+            }
+        };
+        RequestQueue queue = Volley.newRequestQueue(getActivity());
+        queue.add(request);
+        queue.start();
     }
 
     @Nullable
@@ -150,9 +161,9 @@ public class MyCourseFragment extends Fragment implements View.OnClickListener {
 
         //初始化三碎片
         List<Fragment> fragments = new ArrayList<>();
-        fragments.add(new MyCourseListFragment());
-        fragments.add(new MyCourseListFragment());
-        fragments.add(new MyCourseListFragment());
+        fragments.add(new MyCourseListFragment().setNO(0));
+        fragments.add(new MyCourseListFragment().setNO(1));
+        fragments.add(new MyCourseListFragment().setNO(2));
 
         pager.setAdapter(new PagerAdapter(getFragmentManager(),fragments));
 

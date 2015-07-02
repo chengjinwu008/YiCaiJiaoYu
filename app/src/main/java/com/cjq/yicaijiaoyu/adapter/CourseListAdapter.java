@@ -20,6 +20,23 @@ import java.util.List;
 public class CourseListAdapter extends BaseAdapter {
     List<CourseEntity> courses;
     Context context;
+    private boolean showFree = true;
+
+    public Context getContext() {
+        return context;
+    }
+
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
+    public boolean isShowFree() {
+        return showFree;
+    }
+
+    public void setShowFree(boolean showFree) {
+        this.showFree = showFree;
+    }
 
     public List<CourseEntity> getCourses() {
         return courses;
@@ -63,6 +80,7 @@ public class CourseListAdapter extends BaseAdapter {
         }
         ViewHolder holder  = (ViewHolder) convertView.getTag();
         CourseEntity entity = courses.get(position);
+        if(showFree)
         if(entity.isFree()){
             holder.free.setText(context.getResources().getString(R.string.for_free));
             holder.free.setBackgroundColor(context.getResources().getColor(R.color.main_titlebar_background));
