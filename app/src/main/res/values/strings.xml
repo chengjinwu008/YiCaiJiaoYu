@@ -70,4 +70,5 @@
     <string name="submit">提交</string>
     <string name="thank_your_advise">谢谢您的宝贵意见</string>
     <string name="no_network">没有网络哦，亲~</string>
+    <string name="set_network">去设置网络</string>
 </resources>

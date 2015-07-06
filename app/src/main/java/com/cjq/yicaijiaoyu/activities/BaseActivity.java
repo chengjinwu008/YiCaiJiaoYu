@@ -32,6 +32,7 @@ public class BaseActivity extends FragmentActivity {
             public void onReceive(Context context, Intent intent) {
                 if(SHUTDOWN_ACTION.equals(intent.getAction())){
                     finish();
+                    System.exit(0);
                 }
             }
         };

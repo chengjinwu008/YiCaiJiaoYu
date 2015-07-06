@@ -12,6 +12,7 @@ import com.cjq.yicaijiaoyu.R;
 import com.cjq.yicaijiaoyu.entities.CourseEntity;
 import com.cjq.yicaijiaoyu.utils.ImageUtil;
 
+import java.io.ObjectInputStream;
 import java.util.List;
 
 /**
@@ -69,7 +70,7 @@ public class CourseListAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if(convertView==null){
-            convertView= LayoutInflater.from(context).inflate(R.layout.course_list_item,parent,false);
+            convertView= LayoutInflater.from(context).inflate(R.layout.course_list_item,null);
             ViewHolder holder = new ViewHolder();
             holder.cover = (ImageView) convertView.findViewById(R.id.cover);
             holder.courseTitle = (TextView) convertView.findViewById(R.id.course_title);

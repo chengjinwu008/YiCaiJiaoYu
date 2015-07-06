@@ -27,7 +27,7 @@ import com.easefun.polyvsdk.ijk.IjkBaseMediaController;
 import java.util.Locale;
 
 public class MediaController extends IjkBaseMediaController {
-    private static final String TAG = "MediaController";
+	private static final String TAG = "MediaController";
     private MediaPlayerControl mPlayer;
     private Context mContext;
     private PopupWindow mWindow;
@@ -36,8 +36,8 @@ public class MediaController extends IjkBaseMediaController {
     private View mRoot;
     private ProgressBar mProgress;
     private TextView mEndTime, mCurrentTime;
-
-
+    
+ 
     private String mTitle;
     private long mDuration;
     private boolean mShowing;
@@ -60,7 +60,7 @@ public class MediaController extends IjkBaseMediaController {
     private ImageButton btn_boardChange;
     private ImageButton btn_videoChange;
     private OnPreNextListener onPreNextListener;
-
+    
     public MediaController(Context context, AttributeSet attrs) {
         super(context, attrs);
         mRoot = this;
@@ -73,7 +73,7 @@ public class MediaController extends IjkBaseMediaController {
      * @param context
      * @param isUsePreNext
      */
-    public MediaController(Context context,boolean isUsePreNext) {
+    public MediaController(Context context, boolean isUsePreNext) {
         super(context);
         if (!mFromXml && initController(context))
             initFloatingWindow();
@@ -88,9 +88,9 @@ public class MediaController extends IjkBaseMediaController {
 
     @Override
     public void onFinishInflate() {
+        super.onFinishInflate();
         if (mRoot != null)
             initControllerView(mRoot);
-        super.onFinishInflate();
     }
 
     private void initFloatingWindow() {
@@ -105,7 +105,7 @@ public class MediaController extends IjkBaseMediaController {
     /**
      * Set the view that acts as the anchor for the control view. This can for
      * example be a VideoView, or your Activity's main view.
-     *
+     * 
      * @param view
      *            The view to which to anchor the controller when it is visible.
      */
@@ -125,24 +125,24 @@ public class MediaController extends IjkBaseMediaController {
 
     @Override
     protected View makeControllerView() {
-
-        mRoot =((LayoutInflater) mContext
+       
+    	mRoot =((LayoutInflater) mContext
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(
                 R.layout.ijkmedia_controller, this);
-        return mRoot;
+       return mRoot;
     }
     @Override
     protected void initControllerView(View v) {
 //        mPauseButton = (ImageButton) v.findViewById(R.id.mediacontroller_play_pause);
-        mPauseButton = (ImageButton) v.findViewById(getResourseIdByName("id", "mediacontroller_play_pause"));
-        if (mPauseButton != null) {
+    	mPauseButton = (ImageButton) v.findViewById(getResourseIdByName("id", "mediacontroller_play_pause"));
+    	if (mPauseButton != null) {
             mPauseButton.requestFocus();
             mPauseButton.setOnClickListener(mPauseListener);
         }
 //        mFfwdButton =(ImageButton)v.findViewById(R.id.ffwd);
         mFfwdButton =(ImageButton)v.findViewById(getResourseIdByName("id", "ffwd"));
         mFfwdButton.setOnClickListener(mFfwdListener);
-
+        
 //        mRewButton=(ImageButton)v.findViewById(R.id.rew);
         mRewButton=(ImageButton)v.findViewById(getResourseIdByName("id", "rew"));
         mRewButton.setOnClickListener(mRewListener);
@@ -153,18 +153,18 @@ public class MediaController extends IjkBaseMediaController {
         btn_videoChange=(ImageButton)v.findViewById(getResourseIdByName("id", "videochange"));
         btn_videoChange.setTag("0");
         btn_videoChange.setOnClickListener(mVideoListener);
-
+       
 //       mPreButton=(ImageButton)v.findViewById(getResourseIdByName("id", "prev"));
 //       mNextButton=(ImageButton)v.findViewById(getResourseIdByName("id", "next"));
         mPreButton=(ImageButton)v.findViewById(R.id.prev);
         mNextButton=(ImageButton)v.findViewById(R.id.next);
-        if(isUsePreNext){
-            mPreButton.setVisibility(View.VISIBLE);
-            mNextButton.setVisibility(View.VISIBLE);
-        }
-        mPreButton.setOnClickListener(mPreListener);
-        mNextButton.setOnClickListener(mNextListener);
-        mProgress = (SeekBar) v.findViewById(R.id.mediacontroller_seekbar);
+       if(isUsePreNext){
+    	  mPreButton.setVisibility(View.VISIBLE);
+    	  mNextButton.setVisibility(View.VISIBLE);
+       }
+       mPreButton.setOnClickListener(mPreListener);
+       mNextButton.setOnClickListener(mNextListener);
+     mProgress = (SeekBar) v.findViewById(R.id.mediacontroller_seekbar);
 //        mProgress = (ProgressBar) v.findViewById(getResourseIdByName("id", "mediacontroller_seekbar"));
         if (mProgress != null) {
             if (mProgress instanceof SeekBar) {
@@ -182,121 +182,121 @@ public class MediaController extends IjkBaseMediaController {
 //        mCurrentTime = (TextView) v.findViewById(getResourseIdByName("id", "mediacontroller_time_current"));
 
     }
+    
 
-
-
-
-    public void setOnBoardChangeListener(OnBoardChangeListener l){
-        onBoardChangeListener = l;
-    }
+    
+ 
+   public void setOnBoardChangeListener(OnBoardChangeListener l){
+	   onBoardChangeListener = l;
+   }
 
     public void setOnVideoChangeListener(OnVideoChangeListener l){
-        onVideoChangeListener=l;
+    	onVideoChangeListener=l;
     }
-
+    
     public void setOnPreNextListener(OnPreNextListener l){
-        onPreNextListener=l;
-    }
-
+    	onPreNextListener=l;
+   }
+   
     public interface OnBoardChangeListener{
-        public void onLandscape();
-        public void onPortrait();
+    	public void onLandscape();
+    	public void onPortrait();
     }
-
+    
     public interface OnVideoChangeListener{
-        public void onVideoChange(int layout );
+    	public void onVideoChange(int layout);
     }
-
+    
     public interface OnPreNextListener{
-        public void onPreviou();
-        public void onNext();
+    	public void onPreviou();
+    	public void onNext();
     }
-
+    
     private boolean isScreenPortrait(){
-        return mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+    	return mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
     }
-
+    
     private View.OnClickListener mPreListener = new View.OnClickListener() {
 
-        @Override
-        public void onClick(View arg0) {
-            // TODO Auto-generated method stub
-            if(onPreNextListener!=null) onPreNextListener.onPreviou();
-        }
-    };
+		@Override
+		public void onClick(View arg0) {
+			// TODO Auto-generated method stub
+			if(onPreNextListener!=null) onPreNextListener.onPreviou();
+		}
+	};
 
-    private View.OnClickListener mNextListener = new View.OnClickListener() {
+	private View.OnClickListener mNextListener = new View.OnClickListener() {
 
-        @Override
-        public void onClick(View arg0) {
-            // TODO Auto-generated method stub
-            if(onPreNextListener!=null) onPreNextListener.onNext();
-        }
-    };
+		@Override
+		public void onClick(View arg0) {
+			// TODO Auto-generated method stub
+			if(onPreNextListener!=null) onPreNextListener.onNext();
+		}
+	};
     private View.OnClickListener mVideoListener = new View.OnClickListener() {
 
-        @Override
-        public void onClick(View v) {
-            // TODO Auto-generated method stub
-            if(v.getTag().equals("0")){
-                v.setTag("1");
-                if(onVideoChangeListener!=null) onVideoChangeListener.onVideoChange(0);
-            }else if(v.getTag().equals("1")){
-                v.setTag("2");
-                if(onVideoChangeListener!=null) onVideoChangeListener.onVideoChange(1);
-            }else if(v.getTag().equals("2")) {
-                v.setTag("3");
-                if(onVideoChangeListener!=null) onVideoChangeListener.onVideoChange(2);
-            }else if(v.getTag().equals("3")){
-                v.setTag("0");
-                if(onVideoChangeListener!=null) onVideoChangeListener.onVideoChange(3);
-            }
-        }
-    };
+		@Override
+		public void onClick(View v) {
+			// TODO Auto-generated method stub
+			if(v.getTag().equals("0")){
+				v.setTag("1");
+				if(onVideoChangeListener!=null) onVideoChangeListener.onVideoChange(0);
+			}else if(v.getTag().equals("1")){
+				v.setTag("2");
+				if(onVideoChangeListener!=null) onVideoChangeListener.onVideoChange(1);
+			}else if(v.getTag().equals("2")) {
+				v.setTag("3");
+				if(onVideoChangeListener!=null) onVideoChangeListener.onVideoChange(2);
+			}else if(v.getTag().equals("3")){
+				v.setTag("0");
+				if(onVideoChangeListener!=null) onVideoChangeListener.onVideoChange(3);
+			}
+		}
+	};
     private View.OnClickListener mBoardListener = new View.OnClickListener() {
 
-        @Override
-        public void onClick(View v) {
-            // TODO Auto-generated method stub
-            if(isScreenPortrait()){//
-                if(onBoardChangeListener!=null)
-                    onBoardChangeListener.onPortrait();
-            }else{
-                if(onBoardChangeListener!=null)
-                    onBoardChangeListener.onLandscape();
-            }
+		@Override
+		public void onClick(View v) {
+			// TODO Auto-generated method stub
+			if(isScreenPortrait()){//
+				if(onBoardChangeListener!=null)
+				onBoardChangeListener.onPortrait();
+			}else{
+				if(onBoardChangeListener!=null)
+				onBoardChangeListener.onLandscape();
+			}
 
-        }
-    };
+		}
+	};
 
     private View.OnClickListener mFfwdListener = new View.OnClickListener() {
 
-        @Override
-        public void onClick(View arg0) {
-            // TODO Auto-generated method stub
-            Log.v("MediaController", "into the mFfw button");
+		@Override
+		public void onClick(View arg0) {
+			// TODO Auto-generated method stub
+			Log.v("MediaController", "into the mFfw button");
             int pos = mPlayer.getCurrentPosition();
             pos += 5000; // milliseconds
             mPlayer.seekTo(pos);
             setProgress();
 
             show(sDefaultTimeout);
-        }
-    };
-    private View.OnClickListener mRewListener = new View.OnClickListener() {
+		}
+	};
+	 private View.OnClickListener mRewListener = new View.OnClickListener() {
 
-        @Override
-        public void onClick(View arg0) {
-            // TODO Auto-generated method stub
-            Log.v("MediaController", "into the mRew button");
-            int pos = mPlayer.getCurrentPosition();
-            pos -= 5000; // milliseconds
-            mPlayer.seekTo(pos);
-            setProgress();
-            show(sDefaultTimeout);
-        }
-    };
-    @Override
+			@Override
+			public void onClick(View arg0) {
+				// TODO Auto-generated method stub
+				Log.v("MediaController", "into the mRew button");
+	            int pos = mPlayer.getCurrentPosition();
+	            pos -= 5000; // milliseconds
+	            mPlayer.seekTo(pos);
+	            setProgress();
+	            show(sDefaultTimeout);
+			}
+		};
+		@Override
     public void setMediaPlayer(MediaPlayerControl player) {
         mPlayer = player;
         updatePausePlay();
@@ -330,7 +330,7 @@ public class MediaController extends IjkBaseMediaController {
      * @param animationStyle
      *            animation style to use when the controller appears and
      *            disappears. Set to -1 for the default animation, 0 for no
-     *            animation, or a resource identifier for an explicit animation. 
+     *            animation, or a resource identifier for an explicit animation.
      */
     public void setAnimationStyle(int animationStyle) {
         mAnimStyle = animationStyle;
@@ -359,7 +359,7 @@ public class MediaController extends IjkBaseMediaController {
                 mAnchor.getLocationInWindow(location);
                 Rect anchorRect = new Rect(location[0], location[1],
                         location[0] + mAnchor.getWidth(), location[1]
-                        + mAnchor.getHeight());
+                                + mAnchor.getHeight());
                 mWindow.setWidth(mAnchor.getWidth());
                 mWindow.setHeight(mAnchor.getHeight());
                 mWindow.setAnimationStyle(mAnimStyle);
@@ -429,17 +429,17 @@ public class MediaController extends IjkBaseMediaController {
         public void handleMessage(Message msg) {
             long pos;
             switch (msg.what) {
-                case FADE_OUT:
-                    hide();
-                    break;
-                case SHOW_PROGRESS:
-                    pos = setProgress();
-                    if (!mDragging && mShowing) {
-                        msg = obtainMessage(SHOW_PROGRESS);
-                        sendMessageDelayed(msg, 1000 - (pos % 1000));
-                        updatePausePlay();
-                    }
-                    break;
+            case FADE_OUT:
+                hide();
+                break;
+            case SHOW_PROGRESS:
+                pos = setProgress();
+                if (!mDragging && mShowing) {
+                    msg = obtainMessage(SHOW_PROGRESS);
+                    sendMessageDelayed(msg, 1000 - (pos % 1000));
+                    updatePausePlay();
+                }
+                break;
             }
         }
     };
@@ -501,7 +501,7 @@ public class MediaController extends IjkBaseMediaController {
         int keyCode = event.getKeyCode();
         if (event.getRepeatCount() == 0
                 && (keyCode == KeyEvent.KEYCODE_HEADSETHOOK
-                || keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE || keyCode == KeyEvent.KEYCODE_SPACE)) {
+                        || keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE || keyCode == KeyEvent.KEYCODE_SPACE)) {
             doPauseResume();
             show(sDefaultTimeout);
             if (mPauseButton != null)
@@ -534,7 +534,7 @@ public class MediaController extends IjkBaseMediaController {
         if (mRoot == null || mPauseButton == null)
             return;
         if (mPlayer.isPlaying()){
-            mPauseButton.setImageResource(R.drawable.media_pause);
+        	mPauseButton.setImageResource(R.drawable.media_pause);
         }else{
             mPauseButton.setImageResource(R.drawable.media_play);
         }
@@ -549,38 +549,38 @@ public class MediaController extends IjkBaseMediaController {
     }
 
     private OnSeekBarChangeListener mSeekListener = new OnSeekBarChangeListener() {
-        public void onStartTrackingTouch(SeekBar bar) {
-            mDragging = true;
-            show(3600000);
-            mHandler.removeMessages(SHOW_PROGRESS);
-            if (mInstantSeeking)
-                mAM.setStreamMute(AudioManager.STREAM_MUSIC, true);
+    	  public void onStartTrackingTouch(SeekBar bar) {
+              mDragging = true;
+              show(3600000);
+              mHandler.removeMessages(SHOW_PROGRESS);
+              if (mInstantSeeking)
+                  mAM.setStreamMute(AudioManager.STREAM_MUSIC, true);
+        
+          }
 
-        }
+          public void onProgressChanged(SeekBar bar, int progress,
+                  boolean fromuser) {
+              if (!fromuser)
+                  return;
 
-        public void onProgressChanged(SeekBar bar, int progress,
-                                      boolean fromuser) {
-            if (!fromuser)
-                return;
+              long newposition = (mDuration * progress) / 1000;
+              String time = generateTime(newposition);
+              if (mInstantSeeking)
+                  mPlayer.seekTo(newposition);
 
-            long newposition = (mDuration * progress) / 1000;
-            String time = generateTime(newposition);
-            if (mInstantSeeking)
-                mPlayer.seekTo(newposition);
+              if (mCurrentTime != null)
+                  mCurrentTime.setText(time);
+          }
 
-            if (mCurrentTime != null)
-                mCurrentTime.setText(time);
-        }
-
-        public void onStopTrackingTouch(SeekBar bar) {
-            if (!mInstantSeeking)
-                mPlayer.seekTo((mDuration * bar.getProgress()) / 1000);
-            show(sDefaultTimeout);
-            mHandler.removeMessages(SHOW_PROGRESS);
-            mAM.setStreamMute(AudioManager.STREAM_MUSIC, false);
-            mDragging = false;
-            mHandler.sendEmptyMessageDelayed(SHOW_PROGRESS, 1000);
-        }
+          public void onStopTrackingTouch(SeekBar bar) {
+              if (!mInstantSeeking)
+                  mPlayer.seekTo((mDuration * bar.getProgress()) / 1000);
+              show(sDefaultTimeout);
+              mHandler.removeMessages(SHOW_PROGRESS);
+              mAM.setStreamMute(AudioManager.STREAM_MUSIC, false);
+              mDragging = false;
+              mHandler.sendEmptyMessageDelayed(SHOW_PROGRESS, 1000);
+          }
     };
 
     @Override
@@ -593,40 +593,40 @@ public class MediaController extends IjkBaseMediaController {
         super.setEnabled(enabled);
     }
 
-
+    
     public int getResourseIdByName(String className, String name) {
-        Class r = null;
-        int id = 0;
-        try { // System.out.println(getPackageName() + ".R");
-            r = Class.forName(mContext.getPackageName() + ".R");
+		Class r = null;
+		int id = 0;
+		try { // System.out.println(getPackageName() + ".R");
+			r = Class.forName(mContext.getPackageName() + ".R");
 
-            Class[] classes = r.getClasses();
-            Class desireClass = null;
+			Class[] classes = r.getClasses();
+			Class desireClass = null;
 
-            for (int i = 0; i < classes.length; i++) {
-                if (classes[i].getName().split("\\$")[1].equals(className)) {
-                    desireClass = classes[i];
-                    break;
-                }
-            }
+			for (int i = 0; i < classes.length; i++) {
+				if (classes[i].getName().split("\\$")[1].equals(className)) {
+					desireClass = classes[i];
+					break;
+				}
+			}
 
-            if (desireClass != null)
-                id = desireClass.getField(name).getInt(desireClass);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        }
+			if (desireClass != null)
+				id = desireClass.getField(name).getInt(desireClass);
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (NoSuchFieldException e) {
+			e.printStackTrace();
+		}
 
-        return id;
+		return id;
 
-    }
+	}
 
 
 

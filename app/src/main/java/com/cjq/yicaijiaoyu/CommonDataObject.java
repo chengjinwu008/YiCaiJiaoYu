@@ -4,6 +4,7 @@ import android.net.ConnectivityManager;
 
 import com.cjq.yicaijiaoyu.listener.RequestErrListener;
 import com.google.gson.Gson;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
 
 /**
  * Created by android on 2015/6/15.
@@ -11,6 +12,7 @@ import com.google.gson.Gson;
 public class CommonDataObject {
     public final static String DIR="YiCaiJiaoYu";
     public static final int UPLOAD=0x246;
+    public static DisplayImageOptions IMAGE_OPTION = null;
     public static RequestErrListener ERROR_LISTENER = null;
     public static int menuChecked=0;
     public static int categoryChecked=0;//全部课程列表筛选
@@ -35,6 +37,7 @@ public class CommonDataObject {
 
     public static final String AUTHORITY_URL = MAIN_URL+"/service/app.php";//权限请求接口
     public static final String FAVORATE_URL = MAIN_URL+"/service/app.php";//关注接口
+    public static final String VIDEO_INFO_URL = MAIN_URL+"/service/app.php";//请求课程详细信息的接口
 
     public static final String ADVISE_URL = MAIN_URL+"/service/app.php";//权限请求接口
 
@@ -55,4 +58,5 @@ public class CommonDataObject {
     public static final String ADVISE_REQUEST_CODE = "act_feedback";//意见反馈请求码
     public static final String ADD_FAVORATE_REQUEST_CODE = "act_addcollect";//添加关注请求码
     public static final String REMOVE_FAVORATE_REQUEST_CODE = "act_delcollect";//取消关注请求码
+    public static final String VIDEO_INFO_REQUEST_CODE="act_courseandteacher";//课程详情请求码
 }

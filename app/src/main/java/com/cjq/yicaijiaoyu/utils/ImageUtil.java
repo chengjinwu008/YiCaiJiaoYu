@@ -28,23 +28,23 @@ public class ImageUtil {
     public static ImageLoader loader;
 
     public static void LoadImage(Context context,String url,ImageView imageView){
-        if(url!=null)
-        try {
-            getImageLoader(context).get(url,getImageListener(imageView,R.drawable.guanggao,R.drawable.guanggao));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        else
-            imageView.setImageResource(R.drawable.guanggao);
-//        Picasso.with(context).load(url).placeholder(R.drawable.guanggao).into(imageView);
+//        if(url!=null)
+//        try {
+//            getImageLoader(context).get(url,getImageListener(imageView,R.drawable.guanggao,R.drawable.guanggao));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        else
+//            imageView.setImageResource(R.drawable.guanggao);
+        Picasso.with(context).load(url).placeholder(R.drawable.guanggao).resize(320,180).centerCrop().into(imageView);
     }
 
     public static void LoadImage(Context context,int id,ImageView imageView){
-        Picasso.with(context).load(id).placeholder(R.drawable.guanggao).into(imageView);
+        Picasso.with(context).load(id).placeholder(R.drawable.guanggao).resize(320,180).centerCrop().into(imageView);
     }
 
     public static void LoadImage(Context context,File file,ImageView imageView){
-        Picasso.with(context).load(file).placeholder(R.drawable.guanggao).into(imageView);
+        Picasso.with(context).load(file).placeholder(R.drawable.guanggao).resize(320,180).centerCrop().into(imageView);
     }
 
     public static ImageLoader getImageLoader(Context context) throws IOException {

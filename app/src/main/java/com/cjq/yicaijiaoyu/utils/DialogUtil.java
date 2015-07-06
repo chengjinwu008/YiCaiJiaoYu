@@ -16,6 +16,7 @@ public class DialogUtil {
     private static AlertDialog showLoginAlertDialog;
     private static AlertDialog showExitDialog;
     private static AlertDialog showPayDialog;
+    private static AlertDialog netWorkDialog;
 
     public static void showLoginAlert(final Context context){
         if(showLoginAlertDialog==null)
@@ -52,12 +53,13 @@ public class DialogUtil {
        showExitDialog.show();
     }
 
-    public static void showPayDialog(final Context context){
+    public static void showPayDialog(final Context context,final Runnable doWidthCancel){
         if(showPayDialog==null){
             showPayDialog = new AlertDialog.Builder(context).setMessage(R.string.buy_or_not).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     dialog.dismiss();
+                    doWidthCancel.run();
                 }
             }).setPositiveButton(R.string.buy, new DialogInterface.OnClickListener() {
                 @Override
@@ -67,6 +69,24 @@ public class DialogUtil {
             }).create();
         }
         showPayDialog.show();
+    }
+
+    public static void showNetWorkDialog(final Context context,final Runnable doWidthCancel){
+        if(netWorkDialog==null){
+            netWorkDialog = new AlertDialog.Builder(context).setMessage(R.string.no_network).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                    doWidthCancel.run();
+                }
+            }).setPositiveButton(R.string.set_network, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    //todo 打开网络设置
+                }
+            }).create();
+        }
+        netWorkDialog.show();
     }
 
 }

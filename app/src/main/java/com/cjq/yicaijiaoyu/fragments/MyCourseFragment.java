@@ -53,7 +53,7 @@ import java.util.Map;
 /**
  * Created by CJQ on 2015/6/25.
  */
-public class MyCourseFragment extends Fragment implements View.OnClickListener {
+public class MyCourseFragment extends Fragment implements View.OnClickListener, ViewPager.OnPageChangeListener {
 
     private View view;
     private View title;
@@ -165,6 +165,8 @@ public class MyCourseFragment extends Fragment implements View.OnClickListener {
         fragments.add(new MyCourseListFragment().setNO(2));
 
         pager.setAdapter(new PagerAdapter(getFragmentManager(),fragments));
+
+        pager.addOnPageChangeListener(this);
 
         //下拉分类点击注册
         arrowImage = (ImageView)view.findViewById(R.id.main_drop_arrow);
@@ -316,5 +318,21 @@ public class MyCourseFragment extends Fragment implements View.OnClickListener {
 
     private void changeFragment(){
         pager.setCurrentItem(tab);
+    }
+
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+    }
+
+    @Override
+    public void onPageSelected(int position) {
+        tab=position;
+        changeColor();
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+
     }
 }
