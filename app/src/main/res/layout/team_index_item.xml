@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:layout_margin="10dp"
+    android:padding="20dp"
+    >
+        <TextView
+            android:id="@+id/category"
+            android:textSize="18sp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:text="注册会计师"
+            android:gravity="center"
+            android:background="@drawable/aaaaa"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    <RelativeLayout
+        android:layout_below="@+id/category"
+        android:background="@drawable/team_item_backgroud"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <RelativeLayout
+            android:id="@+id/ft"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+
+            android:padding="10dp"
+            >
+            <de.hdodenhof.circleimageview.CircleImageView
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/menu_portrait"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/touxiang"
+                app:border_width="1px"
+                app:border_color="#FF000000"
+                />
+            <TextView
+                android:textColor="@color/main_titlebar_background"
+                android:layout_marginLeft="20dp"
+                android:layout_toRightOf="@+id/menu_portrait"
+                android:textSize="20sp"
+                android:id="@+id/title"
+                android:text="猫先生组"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:text="2015/07/06"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:id="@+id/time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:text="猫深色"
+                android:layout_alignParentBottom="true"
+                android:layout_toLeftOf="@+id/time_hint"
+                android:id="@+id/captain"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_marginLeft="20dp"
+                android:text="创建时间:"
+                android:layout_alignParentBottom="true"
+                android:layout_toLeftOf="@+id/time"
+                android:id="@+id/time_hint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:layout_marginLeft="20dp"
+                android:text="创建人:"
+                android:layout_alignParentBottom="true"
+                android:layout_toLeftOf="@+id/captain"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </RelativeLayout>
+
+        <FrameLayout
+            android:layout_below="@+id/ft"
+            android:id="@+id/dot"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"/>
+        <TextView
+            android:id="@+id/info"
+            android:textSize="16sp"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="10dp"
+            android:paddingBottom="30dp"
+            android:text="加入猫先生小组，成就你的梦想，带你装逼带你飞"
+            android:maxLines="100"
+            android:scrollHorizontally="false"
+            android:ellipsize="none"
+            android:layout_marginLeft="80dp"
+            android:layout_below="@+id/dot"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:visibility="gone"
+            android:id="@+id/position"
+            android:textSize="20sp"
+            android:gravity="bottom|left"
+            android:paddingLeft="10dp"
+            android:paddingBottom="5dp"
+            android:text="1"
+            android:textColor="@color/pure_white"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/sanjiao"
+            android:layout_width="60dp"
+            android:layout_height="60dp" />
+    </RelativeLayout>
+
+</RelativeLayout>

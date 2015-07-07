@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.cjq.yicaijiaoyu.CommonDataObject;
 import com.cjq.yicaijiaoyu.R;
 import com.cjq.yicaijiaoyu.entities.CourseEntity;
+import com.cjq.yicaijiaoyu.entities.VideoEntity;
 import com.cjq.yicaijiaoyu.utils.ImageUtil;
 
 import java.util.List;
@@ -19,18 +20,18 @@ import java.util.List;
  * Created by CJQ on 2015/6/26.
  */
 public class LChapterAdapter extends BaseAdapter {
-    List<CourseEntity> courses;
+    List<VideoEntity> courses;
     Context context;
 
-    public List<CourseEntity> getCourses() {
+    public List<VideoEntity> getCourses() {
         return courses;
     }
 
-    public void setCourses(List<CourseEntity> courses) {
+    public void setCourses(List<VideoEntity> courses) {
         this.courses = courses;
     }
 
-    public LChapterAdapter(List<CourseEntity> courses, Context context) {
+    public LChapterAdapter(List<VideoEntity> courses, Context context) {
         this.courses = courses;
         this.context = context;
     }
@@ -62,18 +63,18 @@ public class LChapterAdapter extends BaseAdapter {
             convertView.setTag(viewHolder);
         }
 
-        CourseEntity course = courses.get(position);
+        VideoEntity course = courses.get(position);
         ViewHolder holder = (ViewHolder) convertView.getTag();
-        if(CommonDataObject.nowPlayingId!=null && CommonDataObject.nowPlayingId.equals(course.getId())){
+        if(CommonDataObject.nowPlayingId!=null && CommonDataObject.nowPlayingId.equals(course.getVid())){
             ImageUtil.LoadImage(context,R.drawable.bofang_xuan,holder.imageView);
-            holder.title.setText(course.getTitle());
-            holder.time.setText(course.getLength());
+            holder.title.setText(course.getName());
+            holder.time.setText("3:30");
             holder.title.setTextColor(context.getResources().getColor(R.color.main_titlebar_background));
             holder.time.setTextColor(context.getResources().getColor(R.color.main_titlebar_background));
         }else{
             ImageUtil.LoadImage(context,R.drawable.bofang,holder.imageView);
-            holder.title.setText(course.getTitle());
-            holder.time.setText(course.getLength());
+            holder.title.setText(course.getName());
+            holder.time.setText("3:30");
         }
         return convertView;
     }

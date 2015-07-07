@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.cjq.yicaijiaoyu.R;
 import com.cjq.yicaijiaoyu.entities.ChapterEntity;
 import com.cjq.yicaijiaoyu.entities.CourseEntity;
+import com.cjq.yicaijiaoyu.entities.VideoEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,7 +67,7 @@ public class ChapterAdapter extends BaseAdapter{
             if(entity.getVideos()!=null){
                 lChapterAdapter.setCourses(entity.getVideos());
             }else{
-                lChapterAdapter.setCourses(new ArrayList<CourseEntity>());
+                lChapterAdapter.setCourses(new ArrayList<VideoEntity>());
             }
             lChapterAdapter.notifyDataSetChanged();
         }

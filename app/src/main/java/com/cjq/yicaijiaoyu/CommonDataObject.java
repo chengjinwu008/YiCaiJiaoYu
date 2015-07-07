@@ -6,6 +6,10 @@ import com.cjq.yicaijiaoyu.listener.RequestErrListener;
 import com.google.gson.Gson;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
 /**
  * Created by android on 2015/6/15.
  */
@@ -21,6 +25,7 @@ public class CommonDataObject {
     public static final Gson GSON = new Gson();
     public static int COURSE_NUM_SHOWING=5;//每页显示的条数
     public static String NO_CATE_ID="no_cate";//没有分类的时候的分类id
+    public static final DateFormat FORMAT = new SimpleDateFormat("yyyy/MM/dd", Locale.CHINESE);
 
     public final static String MAIN_URL="http://192.168.0.181/xct";
     public final static String POLYV_INIT_URL =MAIN_URL+"";//视频播放器初始化请求地址 请求json的地方
@@ -38,6 +43,9 @@ public class CommonDataObject {
     public static final String AUTHORITY_URL = MAIN_URL+"/service/app.php";//权限请求接口
     public static final String FAVORATE_URL = MAIN_URL+"/service/app.php";//关注接口
     public static final String VIDEO_INFO_URL = MAIN_URL+"/service/app.php";//请求课程详细信息的接口
+    public static final String COMMENTS_COMMIT_REQUEST_URL = MAIN_URL+"/service/app.php";//请求课程详细信息的接口
+    public static final String CHAPTER_REQUEST_URL = MAIN_URL+"/service/app.php";//章节请求接口
+    public static final String COMMENTS_REQUEST_URL = MAIN_URL+"/service/app.php";//评论请求接口
 
     public static final String ADVISE_URL = MAIN_URL+"/service/app.php";//权限请求接口
 
@@ -59,4 +67,8 @@ public class CommonDataObject {
     public static final String ADD_FAVORATE_REQUEST_CODE = "act_addcollect";//添加关注请求码
     public static final String REMOVE_FAVORATE_REQUEST_CODE = "act_delcollect";//取消关注请求码
     public static final String VIDEO_INFO_REQUEST_CODE="act_courseandteacher";//课程详情请求码
+    public static final String COMMENTS_COMMIT_REQUEST_CODE="act_coursecomment";//评论提交请求码
+    public static final String CHAPTER_REQUEST_CODE="act_courseseek";//章节请求码
+    public static final String COMMENTS_REQUEST_CODE="act_coursecommentlist";//评论请求码
+
 }

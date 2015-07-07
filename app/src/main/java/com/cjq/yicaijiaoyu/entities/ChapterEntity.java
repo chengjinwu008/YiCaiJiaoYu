@@ -8,7 +8,7 @@ import java.util.List;
 public class ChapterEntity {
     String name;
     String id;
-    List<CourseEntity> videos;
+    List<VideoEntity> videos;
 
     public ChapterEntity(String name, String id) {
         this.name = name;
@@ -23,11 +23,11 @@ public class ChapterEntity {
         this.id = id;
     }
 
-    public List<CourseEntity> getVideos() {
+    public List<VideoEntity> getVideos() {
         return videos;
     }
 
-    public void setVideos(List<CourseEntity> videos) {
+    public void setVideos(List<VideoEntity> videos) {
         this.videos = videos;
     }
 

@@ -34,21 +34,25 @@ import com.cjq.yicaijiaoyu.adapter.CommentsAdapter;
 import com.cjq.yicaijiaoyu.adapter.PagerAdapter;
 import com.cjq.yicaijiaoyu.entities.AuthorityRequestEntity;
 import com.cjq.yicaijiaoyu.entities.ChapterEntity;
+import com.cjq.yicaijiaoyu.entities.ChapterRequestEntity;
 import com.cjq.yicaijiaoyu.entities.ChapterRequestEvent;
 import com.cjq.yicaijiaoyu.entities.ChapterResultEvent;
 import com.cjq.yicaijiaoyu.entities.CommentsEntity;
+import com.cjq.yicaijiaoyu.entities.CommentsRequestEntity;
 import com.cjq.yicaijiaoyu.entities.CommentsRequestEvent;
 import com.cjq.yicaijiaoyu.entities.CommentsResultEvent;
 import com.cjq.yicaijiaoyu.entities.CourseEntity;
 import com.cjq.yicaijiaoyu.entities.FavoriteEntity;
 import com.cjq.yicaijiaoyu.entities.NeedVideoInfoEvent;
 import com.cjq.yicaijiaoyu.entities.UserEntity;
+import com.cjq.yicaijiaoyu.entities.VideoEntity;
 import com.cjq.yicaijiaoyu.entities.VideoInfoEvent;
 import com.cjq.yicaijiaoyu.entities.VideoInfoRequestEntity;
 import com.cjq.yicaijiaoyu.fragments.ChapterFragment;
 import com.cjq.yicaijiaoyu.fragments.CommentsFragment;
 import com.cjq.yicaijiaoyu.fragments.CourseInfoFragment;
 import com.cjq.yicaijiaoyu.utils.AccountUtil;
+import com.cjq.yicaijiaoyu.utils.CommentsUtil;
 import com.cjq.yicaijiaoyu.utils.DialogUtil;
 import com.cjq.yicaijiaoyu.utils.NetStateUtil;
 import com.cjq.yicaijiaoyu.videoPlayer.DBservice;
@@ -121,42 +125,111 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
     //评论请求回调
     public void onEventBackgroundThread(CommentsRequestEvent e) {
         //todo 发起对视频评论的请求
-        CommentsEntity commentsEntity1 = new CommentsEntity(new Date().getTime(), new UserEntity("https://www.baidu.com/img/bd_logo1.png", "陈昶", "12"), "总之这个就是评论了，咋地吧");
-        CommentsEntity commentsEntity2 = new CommentsEntity(new Date().getTime(), new UserEntity("https://www.baidu.com/img/bd_logo1.png", "陈昶", "12"), "总之这个就是评论了，咋地吧");
-        List<CommentsEntity> commentsEntities = new ArrayList<>();
-        commentsEntities.add(commentsEntity1);
-        commentsEntities.add(commentsEntity2);
 
-        CommentsAdapter adapter = new CommentsAdapter(commentsEntities, this);
-        CommentsResultEvent event = new CommentsResultEvent(adapter);
+        final StringRequest request = new StringRequest(Request.Method.POST, CommonDataObject.COMMENTS_REQUEST_URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                try {
+                    JSONObject object = new JSONObject(s);
+                    if("0000".equals(object.getString("code"))){
+                        JSONArray comments = object.getJSONObject("data").getJSONObject("data").getJSONArray("data");
+                        List<CommentsEntity> commentsEntities = new ArrayList<>();
+                        for(int i = 0;i<comments.length();i++){
+                            JSONObject c = comments.getJSONObject(i);
+                            CommentsEntity cc=new CommentsEntity(c.getLong("add_time"),new UserEntity(null,c.getString("user_name"),c.getString("user_id")),c.getString("content"));
+                            commentsEntities.add(cc);
+                        }
+                        CommentsAdapter adapter = new CommentsAdapter(commentsEntities, PlayActivity.this);
+                        CommentsResultEvent event = new CommentsResultEvent(adapter);
+                        EventBus.getDefault().post(event);
+                    }
+                } catch (JSONException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
 
-        EventBus.getDefault().post(event);
+            }
+        }){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String,String> params = new HashMap<>();
+                CommentsRequestEntity.Data data = new CommentsRequestEntity.Data(1,id,AccountUtil.getUserId(PlayActivity.this));
+                CommentsRequestEntity entity = new CommentsRequestEntity(CommonDataObject.COMMENTS_REQUEST_CODE,data);
+                params.put("opjson",CommonDataObject.GSON.toJson(entity));
+                return params;
+            }
+        };
+
+        RequestQueue queue=Volley.newRequestQueue(PlayActivity.this);
+        queue.add(request);
+        queue.start();
     }
 
     //章节请求回调
     public void onEventBackgroundThread(ChapterRequestEvent e) {
         //todo 发起章节请求
-        ChapterEntity chapter1 = new ChapterEntity("第一张，我就呵呵了");
-        ChapterEntity chapter2 = new ChapterEntity("第二章，没有下文");
-        ChapterEntity chapter3 = new ChapterEntity("第三章，都说了没下文了……");
+        StringRequest request = new StringRequest(Request.Method.POST, CommonDataObject.CHAPTER_REQUEST_URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                System.out.println(s);
+                try {
+                    List<ChapterEntity> chapterList = new ArrayList<>();
+                    JSONObject object = new JSONObject(s);
+                    String code=object.getString("code");
+                    if("0000".equals(code)){
+                        JSONArray chapters = object.getJSONObject("data").getJSONObject("getSeek").getJSONArray("seek");
+                        // TODO: 2015/7/7 判断章节数量提示没有章节
 
-        List<CourseEntity> courses = new ArrayList<>();
-        courses.add(new CourseEntity("sl8da4jjbx5d715bc3a8ce8f8194afab_s", "再见今天", "3:30"));
-        courses.add(new CourseEntity("sl8da4jjbx5d715bc3a8ce8f8194afab_s", "再见明天", "3:30"));
-        courses.add(new CourseEntity("sl8da4jjbx5d715bc3a8ce8f8194afab_s", "再见后天", "3:30"));
+                        for(int i=0;i<chapters.length();i++){
+                            JSONObject o = chapters.getJSONObject(i);
+                            String title = o.getString("utit");
+                            String id = o.getString("sid");
+                            JSONArray a = o.getJSONArray("data");
+                            ChapterEntity e = new ChapterEntity(title,id);
+                            e.setVideos(new ArrayList<VideoEntity>());
+                            for(int j=0;j<a.length();j++){
+                                JSONObject o1 = a.getJSONObject(j);
+                                String nam = o1.getString("title");
+                                long seek = o1.getLong("seek");
+                                String vid =null;
+                                if(o1.has("vid")){
+                                    vid =o1.getString("vid");
+                                }
+                                e.getVideos().add(new VideoEntity(vid,nam,seek));
+                            }
+                            chapterList.add(e);
+                        }
+                        //构建adapter
+                        ChapterAdapter adapter = new ChapterAdapter(chapterList, PlayActivity.this);
+                        //发送adapter
+                        EventBus.getDefault().post(new ChapterResultEvent(adapter));
+                    }
+                } catch (JSONException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
 
-        chapter1.setVideos(courses);
+            }
+        }){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String,String> params = new HashMap<>();
+                ChapterRequestEntity.Data data = new ChapterRequestEntity.Data(id,AccountUtil.getUserId(PlayActivity.this));
+                ChapterRequestEntity entity = new ChapterRequestEntity(CommonDataObject.CHAPTER_REQUEST_CODE,data);
+                params.put("opjson",CommonDataObject.GSON.toJson(entity));
+                return params;
+            }
+        };
 
-        List<ChapterEntity> chapters = new ArrayList<>();
-        chapters.add(chapter1);
-        chapters.add(chapter2);
-        chapters.add(chapter3);
-
-        //构建adapter
-        ChapterAdapter adapter = new ChapterAdapter(chapters, this);
-
-        //发送adapter
-        EventBus.getDefault().post(new ChapterResultEvent(adapter));
+        RequestQueue queue=Volley.newRequestQueue(PlayActivity.this);
+        queue.add(request);
+        queue.start();
     }
 
     @Override
@@ -187,7 +260,6 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
             pager.setVisibility(View.GONE);
             rr.setVisibility(View.GONE);
         }
-//        botlayout = (RelativeLayout)findViewById(R.id.botlayout);
 
         service=new DBservice(this);
 
@@ -308,6 +380,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         StringRequest request = new StringRequest(Request.Method.POST, CommonDataObject.VIDEO_INFO_URL, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
+                System.out.println(s);
                 try {
                     JSONObject o = new JSONObject(s);
                     if ("0000".equals(o.getString("code"))) {
@@ -365,9 +438,9 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
 //
 //        }else{
         if(isLandscape){
-            videoView.setVid("ea307b2422ebe43ec2618ae1c8fa6c76_e",2);
+            videoView.setVid(vid,2);
         }else{
-            videoView.setVid("ea307b2422ebe43ec2618ae1c8fa6c76_e",1);
+            videoView.setVid(vid,1);
         }
 
             videoView.seekTo(stopPosition);
@@ -535,37 +608,37 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                 break;
             case R.id.add_to_favor:
                 // TODO: 2015/7/2 添加关注 应该先判断用户是否登录，并且登录了要判断用户是否关注该课程
-                if (AccountUtil.isLoggedIn(PlayActivity.this)) {
-                    StringRequest request = new StringRequest(Request.Method.POST, CommonDataObject.FAVORATE_URL, new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String s) {
-                            // TODO: 2015/7/2 根据回调改变关注图标的颜色
-                        }
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError volleyError) {
-
-                        }
-                    }) {
-                        @Override
-                        protected Map<String, String> getParams() throws AuthFailureError {
-                            FavoriteEntity.Data data = new FavoriteEntity.Data(AccountUtil.getUserId(PlayActivity.this), id);
-                            // TODO: 2015/7/2 根据关注状态来设置请求码
-                            FavoriteEntity entity = new FavoriteEntity(CommonDataObject.ADD_FAVORATE_REQUEST_CODE, data);
-
-                            Map<String, String> params = new HashMap<>();
-                            params.put("opjson", CommonDataObject.GSON.toJson(entity));
-                            return super.getParams();
-                        }
-                    };
-
-                    RequestQueue queue = Volley.newRequestQueue(this);
-                    queue.add(request);
-                    queue.start();
-                }
+//                if (AccountUtil.isLoggedIn(PlayActivity.this)) {
+//                    StringRequest request = new StringRequest(Request.Method.POST, CommonDataObject.FAVORATE_URL, new Response.Listener<String>() {
+//                        @Override
+//                        public void onResponse(String s) {
+//                            // TODO: 2015/7/2 根据回调改变关注图标的颜色
+//                        }
+//                    }, new Response.ErrorListener() {
+//                        @Override
+//                        public void onErrorResponse(VolleyError volleyError) {
+//
+//                        }
+//                    }) {
+//                        @Override
+//                        protected Map<String, String> getParams() throws AuthFailureError {
+//                            FavoriteEntity.Data data = new FavoriteEntity.Data(AccountUtil.getUserId(PlayActivity.this), id);
+//                            // TODO: 2015/7/2 根据关注状态来设置请求码
+//                            FavoriteEntity entity = new FavoriteEntity(CommonDataObject.ADD_FAVORATE_REQUEST_CODE, data);
+//
+//                            Map<String, String> params = new HashMap<>();
+//                            params.put("opjson", CommonDataObject.GSON.toJson(entity));
+//                            return super.getParams();
+//                        }
+//                    };
+//
+//                    RequestQueue queue = Volley.newRequestQueue(this);
+//                    queue.add(request);
+//                    queue.start();
+//                }
                 break;
             case R.id.write_comments:
-                // TODO: 2015/7/2 撰写评论
+                CommentsUtil.showCommentsActivity(this,id,AccountUtil.getUserId(this));
                 break;
         }
     }

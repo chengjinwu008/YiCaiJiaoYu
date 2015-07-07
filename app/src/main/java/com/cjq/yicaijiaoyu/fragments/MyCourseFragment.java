@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,8 +58,6 @@ public class MyCourseFragment extends Fragment implements View.OnClickListener, 
 
     private View view;
     private View title;
-    private List<CourseEntity> courseEntityList;
-    private CourseListAdapter courseListAdapter;
     private ImageView arrowImage;
     private CourseCategoryAdapter categoryAdapter;
     private PopupWindow window;
@@ -70,75 +69,7 @@ public class MyCourseFragment extends Fragment implements View.OnClickListener, 
     private TextView bought;//已购
     private TextView history;//历史
     private ViewPager pager;
-
-    public void onEventBackgroundThread(CourseListRequestEvent e){
-        //收到了请求
-        //生成Adapter
-        courseListAdapter = new CourseListAdapter(null,getActivity());
-        final CourseListResultEvent event = new CourseListResultEvent().setNO(e.getNO());
-        switch (e.getNO()){
-            case 0:
-                event.setRequestCode(CommonDataObject.COURSE_CARE_REQUEST_CODE);
-                AllCourseRequestEntity.Data data = new AllCourseRequestEntity.Data(1,CommonDataObject.COURSE_NUM_SHOWING);
-                data.setUserId(AccountUtil.getUserId(getActivity()));
-                AllCourseRequestEntity entity = new AllCourseRequestEntity(CommonDataObject.COURSE_CARE_REQUEST_CODE,data);
-                getCourseListAdapterEvent(event,entity);
-                break;
-            case 1:
-                event.setRequestCode(CommonDataObject.COURSE_BOUGHT_REQUEST_CODE);
-                AllCourseRequestEntity.Data data2 = new AllCourseRequestEntity.Data(1,CommonDataObject.COURSE_NUM_SHOWING);
-                data2.setUserId(AccountUtil.getUserId(getActivity()));
-                AllCourseRequestEntity entity2 = new AllCourseRequestEntity(CommonDataObject.COURSE_BOUGHT_REQUEST_CODE,data2);
-                getCourseListAdapterEvent(event,entity2);
-                break;
-            case 2:
-                //查询播放历史
-                List<CourseEntity> temp = CourseHistoryUtil.listHistory(getActivity());
-                event.setAdapter(new CourseListAdapter(temp,getActivity()));
-                event.setRequestCode(null);
-                EventBus.getDefault().post(event);
-                break;
-        }
-    }
-
-    private void getCourseListAdapterEvent(final CourseListResultEvent event, final AllCourseRequestEntity entity) {
-        StringRequest request = new StringRequest(Request.Method.POST, CommonDataObject.COURSE_LIST_URL, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String s) {
-                JSONObject object = null;
-                try {
-                    object = new JSONObject(s);
-                    if("0000".equals(object.getString("code"))){
-                        List<CourseEntity> temp = new ArrayList<>();
-                        CourseUtil.chargeCourseList(object.getJSONObject("data").getJSONArray("categories"), temp);
-
-                        CourseListAdapter adapter = new CourseListAdapter(temp,getActivity());
-                        event.setAdapter(adapter);
-                        EventBus.getDefault().post(event);
-                    }
-                } catch (JSONException e1) {
-                    e1.printStackTrace();
-                }
-
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-
-            }
-        }){
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-
-                Map<String,String> params = new HashMap<>();
-                params.put("opjson",CommonDataObject.GSON.toJson(entity));
-                return params;
-            }
-        };
-        RequestQueue queue = Volley.newRequestQueue(getActivity());
-        queue.add(request);
-        queue.start();
-    }
+    private List<Fragment> fragments;
 
     @Nullable
     @Override
@@ -152,14 +83,11 @@ public class MyCourseFragment extends Fragment implements View.OnClickListener, 
         //标题栏
         title = view.findViewById(R.id.title);
 
-        //事件注册
-        EventBus.getDefault().register(this);
-
         pager= (ViewPager) view.findViewById(R.id.pager);
         pager.setOffscreenPageLimit(4);
 
         //初始化三碎片
-        List<Fragment> fragments = new ArrayList<>();
+        fragments = new ArrayList<>();
         fragments.add(new MyCourseListFragment().setNO(0));
         fragments.add(new MyCourseListFragment().setNO(1));
         fragments.add(new MyCourseListFragment().setNO(2));
@@ -179,12 +107,6 @@ public class MyCourseFragment extends Fragment implements View.OnClickListener, 
         categoryAdapter = new CourseCategoryAdapter(categorys,getActivity());
 
         return view;
-    }
-
-    @Override
-    public void onDestroyView() {
-        EventBus.getDefault().unregister(this);
-        super.onDestroyView();
     }
 
     private void initialRR() {
@@ -322,13 +244,14 @@ public class MyCourseFragment extends Fragment implements View.OnClickListener, 
 
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
     }
 
     @Override
     public void onPageSelected(int position) {
         tab=position;
         changeColor();
+        MyCourseListFragment fragment = (MyCourseListFragment) fragments.get(position);
+        fragment.getContent();
     }
 
     @Override

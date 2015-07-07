@@ -268,10 +268,8 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
                         categoryEntityList.clear();
                         categoryEntityList.add(all);
                         CategoryUtil.chargeAdList(object.getJSONObject("data").getJSONArray("categories"), categoryEntityList);
-                        if(categoryAdapter==null)
+                        System.out.println(categoryAdapter);
                         categoryAdapter = new CourseCategoryAdapter(categoryEntityList,getActivity());
-                        else
-                            courseListAdapter.notifyDataSetChanged();
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();

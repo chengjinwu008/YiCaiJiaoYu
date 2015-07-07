@@ -37,6 +37,7 @@ import com.cjq.yicaijiaoyu.entities.UserLoginEvent;
 import com.cjq.yicaijiaoyu.fragments.AllCourseFragment;
 import com.cjq.yicaijiaoyu.fragments.MyCourseFragment;
 import com.cjq.yicaijiaoyu.fragments.MySettingFragment;
+import com.cjq.yicaijiaoyu.fragments.TeamFragment;
 import com.cjq.yicaijiaoyu.fragments.WelcomeOneFragment;
 import com.cjq.yicaijiaoyu.fragments.WelcomeThreeFragment;
 import com.cjq.yicaijiaoyu.fragments.WelcomeTwoFragment;
@@ -67,6 +68,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private AllCourseFragment fragment1;
     private MyCourseFragment fragment2;
     private MySettingFragment fragment3;
+    private TeamFragment fragment4;
 
     public void onEventMainThread(UserLoginEvent e) {
         checkLogin();
@@ -156,7 +158,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         List<MenuItemEntity> items = new ArrayList<>();
         items.add(new MenuItemEntity(getString(R.string.all_courses), R.drawable.kecheng_icon, R.drawable.kecheng_icon_dian));
         items.add(new MenuItemEntity(getString(R.string.my_courses), R.drawable.wode_icon, R.drawable.wode_icon_dian));
-//        items.add(new MenuItemEntity(getString(R.string.sign_up_online), R.drawable.baoming, R.drawable.baoming_dianji));
+        items.add(new MenuItemEntity(getString(R.string.team), R.drawable.baoming, R.drawable.baoming_dianji));
         items.add(new MenuItemEntity(getString(R.string.my_setting), R.drawable.shezhi, R.drawable.shezhi_dian));
 
         ListView listView = (ListView) menu.findViewById(R.id.menu_items);
@@ -197,10 +199,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                             loadFragment();
                             menu.toggle();
                             break;
-//                    case 3:
-//                        //我的设置
-//                        loadFragment();
-//                        break;
+                        case 3:
+                            //我的设置
+                            loadFragment();
+                            menu.toggle();
+                            break;
                     }
             }
         });
@@ -303,13 +306,15 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 if (fragment1 == null)
                     fragment1 = new AllCourseFragment();
                 android.support.v4.app.FragmentTransaction transaction = manager.beginTransaction();
-                if(!fragment1.isAdded())
-                    transaction.add(R.id.content,fragment1);
+                if (!fragment1.isAdded())
+                    transaction.add(R.id.content, fragment1);
                 transaction.show(fragment1);
-                if(fragment2!=null && !fragment2.isHidden())
+                if (fragment2 != null && !fragment2.isHidden())
                     transaction.hide(fragment2);
-                if(fragment3!=null && !fragment3.isHidden())
+                if (fragment3 != null && !fragment3.isHidden())
                     transaction.hide(fragment3);
+                if (fragment4 != null && !fragment4.isHidden())
+                    transaction.hide(fragment4);
                 transaction.commit();
                 fragment1.scrollToTop();
                 break;
@@ -318,27 +323,46 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 if (fragment2 == null)
                     fragment2 = new MyCourseFragment();
                 android.support.v4.app.FragmentTransaction transaction2 = manager.beginTransaction();
-                if(!fragment2.isAdded())
-                    transaction2.add(R.id.content,fragment2);
+                if (!fragment2.isAdded())
+                    transaction2.add(R.id.content, fragment2);
                 transaction2.show(fragment2);
-                if(fragment1!=null && !fragment1.isHidden())
+                if (fragment1 != null && !fragment1.isHidden())
                     transaction2.hide(fragment1);
-                if(fragment3!=null && !fragment3.isHidden())
+                if (fragment3 != null && !fragment3.isHidden())
                     transaction2.hide(fragment3);
+                if (fragment4 != null && !fragment4.isHidden())
+                    transaction2.hide(fragment4);
                 transaction2.commit();
                 break;
-            case 2:
+            case 3:
                 if (fragment3 == null)
                     fragment3 = new MySettingFragment();
                 android.support.v4.app.FragmentTransaction transaction3 = manager.beginTransaction();
-                if(!fragment3.isAdded())
-                    transaction3.add(R.id.content,fragment3);
+                if (!fragment3.isAdded())
+                    transaction3.add(R.id.content, fragment3);
                 transaction3.show(fragment3);
-                if(fragment2!=null && !fragment2.isHidden())
+                if (fragment2 != null && !fragment2.isHidden())
                     transaction3.hide(fragment2);
-                if(fragment1!=null && !fragment1.isHidden())
+                if (fragment1 != null && !fragment1.isHidden())
                     transaction3.hide(fragment1);
+                if (fragment4 != null && !fragment4.isHidden())
+                    transaction3.hide(fragment4);
                 transaction3.commit();
+                break;
+            case 2:
+                if (fragment4 == null)
+                    fragment4 = new TeamFragment();
+                android.support.v4.app.FragmentTransaction transaction4 = manager.beginTransaction();
+                if (!fragment4.isAdded())
+                    transaction4.add(R.id.content, fragment4);
+                transaction4.show(fragment4);
+                if (fragment2 != null && !fragment2.isHidden())
+                    transaction4.hide(fragment2);
+                if (fragment1 != null && !fragment1.isHidden())
+                    transaction4.hide(fragment1);
+                if (fragment3 != null && !fragment3.isHidden())
+                    transaction4.hide(fragment3);
+                transaction4.commit();
                 break;
         }
     }
@@ -403,7 +427,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if(keyCode == KeyEvent.KEYCODE_BACK){
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
             DialogUtil.showExitDialog(this);
         }
         return super.onKeyUp(keyCode, event);

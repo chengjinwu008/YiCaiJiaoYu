@@ -14,4 +14,7 @@
     <color name="light_blue">#3ab8ff</color>
     <color name="loading_background">#9fe9ec</color>
     <color name="lead_background">#fefdf6</color>
+    <color name="light_green">#ebfaf0</color>
+    <color name="gray_background">#f5f5f5</color>
+    <color name="dot">#aaaaaa</color>
 </resources>
