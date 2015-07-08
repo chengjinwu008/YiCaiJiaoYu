@@ -23,6 +23,14 @@ public class CommentsAdapter extends BaseAdapter {
     List<CommentsEntity> commentsEntities;
     Context context;
 
+    public List<CommentsEntity> getCommentsEntities() {
+        return commentsEntities;
+    }
+
+    public void setCommentsEntities(List<CommentsEntity> commentsEntities) {
+        this.commentsEntities = commentsEntities;
+    }
+
     public CommentsAdapter(List<CommentsEntity> commentsEntities, Context context) {
         this.commentsEntities = commentsEntities;
         this.context = context;

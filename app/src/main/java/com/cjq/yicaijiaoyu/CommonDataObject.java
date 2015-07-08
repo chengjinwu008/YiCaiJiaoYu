@@ -27,7 +27,7 @@ public class CommonDataObject {
     public static String NO_CATE_ID="no_cate";//没有分类的时候的分类id
     public static final DateFormat FORMAT = new SimpleDateFormat("yyyy/MM/dd", Locale.CHINESE);
 
-    public final static String MAIN_URL="http://192.168.0.181/xct";
+    public final static String MAIN_URL="http://192.168.1.228/xct";
     public final static String POLYV_INIT_URL =MAIN_URL+"";//视频播放器初始化请求地址 请求json的地方
     public static final String SMS_URL= MAIN_URL+"/service/app.php";
     public static final String REGISTER_URl=MAIN_URL+"/service/app.php";

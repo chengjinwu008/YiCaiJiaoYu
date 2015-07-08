@@ -12,7 +12,6 @@ import com.ypy.eventbus.EventBus;
  */
 public class VideoUtil {
     public static void startVideo(Activity activity, CourseEntity course) {
-        //首先判断是不是收费的
         Intent intent = new Intent(activity, PlayActivity.class);
         intent.putExtra(PlayActivity.URL, course.getRequestApi());
         intent.putExtra(PlayActivity.TITLE, course.getTitle());
@@ -24,8 +23,6 @@ public class VideoUtil {
         intent.putExtra(PlayActivity.ID, course.getId());
         intent.putExtra(PlayActivity.FREE, course.isFree());
         activity.startActivity(intent);
-
-        //// TODO: 2015/7/2  添加历史记录
 
         CourseHistoryUtil.addToHistory(activity,course);
     }

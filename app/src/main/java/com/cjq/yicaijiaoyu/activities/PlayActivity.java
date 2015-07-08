@@ -32,6 +32,7 @@ import com.cjq.yicaijiaoyu.R;
 import com.cjq.yicaijiaoyu.adapter.ChapterAdapter;
 import com.cjq.yicaijiaoyu.adapter.CommentsAdapter;
 import com.cjq.yicaijiaoyu.adapter.PagerAdapter;
+import com.cjq.yicaijiaoyu.dao.Course;
 import com.cjq.yicaijiaoyu.entities.AuthorityRequestEntity;
 import com.cjq.yicaijiaoyu.entities.ChapterEntity;
 import com.cjq.yicaijiaoyu.entities.ChapterRequestEntity;
@@ -53,11 +54,16 @@ import com.cjq.yicaijiaoyu.fragments.CommentsFragment;
 import com.cjq.yicaijiaoyu.fragments.CourseInfoFragment;
 import com.cjq.yicaijiaoyu.utils.AccountUtil;
 import com.cjq.yicaijiaoyu.utils.CommentsUtil;
+import com.cjq.yicaijiaoyu.utils.CourseHistoryUtil;
 import com.cjq.yicaijiaoyu.utils.DialogUtil;
+import com.cjq.yicaijiaoyu.utils.MessageDiagestUtil;
 import com.cjq.yicaijiaoyu.utils.NetStateUtil;
 import com.cjq.yicaijiaoyu.videoPlayer.DBservice;
 import com.cjq.yicaijiaoyu.videoPlayer.DownloadInfo;
 import com.cjq.yicaijiaoyu.videoPlayer.MediaController;
+import com.easefun.polyvsdk.PolyvDownloadProgressListener;
+import com.easefun.polyvsdk.PolyvDownloader;
+import com.easefun.polyvsdk.PolyvSDKClient;
 import com.easefun.polyvsdk.SDKUtil;
 import com.easefun.polyvsdk.ijk.IjkVideoView;
 import com.ypy.eventbus.EventBus;
@@ -66,6 +72,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -104,11 +111,12 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
     private int w;
     private int h;
     private RelativeLayout rl;
-//    private RelativeLayout botlayout;
-    private static int stopPosition=0;
-    private static boolean isLandscape=false;
+    //    private RelativeLayout botlayout;
+    private static int stopPosition = 0;
+    private static boolean isLandscape = false;
     private View rr;
     private View bottomBar;
+    private String length;
 
     //详情请求回调
     public void onEventBackgroundThread(NeedVideoInfoEvent e) {
@@ -131,16 +139,18 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
             public void onResponse(String s) {
                 try {
                     JSONObject object = new JSONObject(s);
-                    if("0000".equals(object.getString("code"))){
+                    if ("0000".equals(object.getString("code"))) {
                         JSONArray comments = object.getJSONObject("data").getJSONObject("data").getJSONArray("data");
                         List<CommentsEntity> commentsEntities = new ArrayList<>();
-                        for(int i = 0;i<comments.length();i++){
+                        for (int i = 0; i < comments.length(); i++) {
                             JSONObject c = comments.getJSONObject(i);
-                            CommentsEntity cc=new CommentsEntity(c.getLong("add_time"),new UserEntity(null,c.getString("user_name"),c.getString("user_id")),c.getString("content"));
+                            CommentsEntity cc = new CommentsEntity(c.getLong("add_time"), new UserEntity(null, c.getString("user_name"), c.getString("user_id")), c.getString("content"));
                             commentsEntities.add(cc);
                         }
                         CommentsAdapter adapter = new CommentsAdapter(commentsEntities, PlayActivity.this);
                         CommentsResultEvent event = new CommentsResultEvent(adapter);
+                        event.setGid(id);
+                        event.setUserId(AccountUtil.getUserId(PlayActivity.this));
                         EventBus.getDefault().post(event);
                     }
                 } catch (JSONException e1) {
@@ -152,18 +162,18 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
             public void onErrorResponse(VolleyError volleyError) {
 
             }
-        }){
+        }) {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String,String> params = new HashMap<>();
-                CommentsRequestEntity.Data data = new CommentsRequestEntity.Data(1,id,AccountUtil.getUserId(PlayActivity.this));
-                CommentsRequestEntity entity = new CommentsRequestEntity(CommonDataObject.COMMENTS_REQUEST_CODE,data);
-                params.put("opjson",CommonDataObject.GSON.toJson(entity));
+                Map<String, String> params = new HashMap<>();
+                CommentsRequestEntity.Data data = new CommentsRequestEntity.Data(1, id, AccountUtil.getUserId(PlayActivity.this));
+                CommentsRequestEntity entity = new CommentsRequestEntity(CommonDataObject.COMMENTS_REQUEST_CODE, data);
+                params.put("opjson", CommonDataObject.GSON.toJson(entity));
                 return params;
             }
         };
 
-        RequestQueue queue=Volley.newRequestQueue(PlayActivity.this);
+        RequestQueue queue = Volley.newRequestQueue(PlayActivity.this);
         queue.add(request);
         queue.start();
     }
@@ -171,72 +181,116 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
     //章节请求回调
     public void onEventBackgroundThread(ChapterRequestEvent e) {
         //todo 发起章节请求
-        StringRequest request = new StringRequest(Request.Method.POST, CommonDataObject.CHAPTER_REQUEST_URL, new Response.Listener<String>() {
+        NetStateUtil.checkNetwork(new NetStateUtil.NetWorkStateListener() {
             @Override
-            public void onResponse(String s) {
-                System.out.println(s);
+            public void doWithNetWork() {
+                StringRequest request = new StringRequest(Request.Method.POST, CommonDataObject.CHAPTER_REQUEST_URL, new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String s) {
+                        System.out.println(s);
+                        try {
+                            List<ChapterEntity> chapterList = new ArrayList<>();
+                            JSONObject object = new JSONObject(s);
+                            String code = object.getString("code");
+                            if ("0000".equals(code)) {
+                                JSONArray chapters = object.getJSONObject("data").getJSONObject("getSeek").getJSONArray("seek");
+                                // TODO: 2015/7/7 判断章节数量提示没有章节
+
+                                //todo 章节缓存
+                                length =  chapters.toString();
+
+                                for (int i = 0; i < chapters.length(); i++) {
+                                    JSONObject o = chapters.getJSONObject(i);
+                                    String title = o.getString("utit");
+                                    String id = o.getString("sid");
+                                    JSONArray a = o.getJSONArray("data");
+                                    ChapterEntity e = new ChapterEntity(title, id);
+                                    e.setVideos(new ArrayList<VideoEntity>());
+                                    for (int j = 0; j < a.length(); j++) {
+                                        JSONObject o1 = a.getJSONObject(j);
+                                        String nam = o1.getString("title");
+                                        long seek = o1.getLong("seek");
+                                        String vid = null;
+                                        if (o1.has("vid")) {
+                                            vid = o1.getString("vid");
+                                        }
+                                        e.getVideos().add(new VideoEntity(vid, nam, seek));
+                                    }
+                                    chapterList.add(e);
+                                }
+                                //构建adapter
+                                ChapterAdapter adapter = new ChapterAdapter(chapterList, PlayActivity.this);
+                                //发送adapter
+                                EventBus.getDefault().post(new ChapterResultEvent(adapter));
+                            }
+                        } catch (JSONException e1) {
+                            e1.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError volleyError) {
+
+                    }
+                }) {
+                    @Override
+                    protected Map<String, String> getParams() throws AuthFailureError {
+                        Map<String, String> params = new HashMap<>();
+                        ChapterRequestEntity.Data data = new ChapterRequestEntity.Data(id, AccountUtil.getUserId(PlayActivity.this));
+                        ChapterRequestEntity entity = new ChapterRequestEntity(CommonDataObject.CHAPTER_REQUEST_CODE, data);
+                        params.put("opjson", CommonDataObject.GSON.toJson(entity));
+                        return params;
+                    }
+                };
+
+                RequestQueue queue = Volley.newRequestQueue(PlayActivity.this);
+                queue.add(request);
+                queue.start();
+            }
+
+            @Override
+            public void doWithoutNetWork() {
+                Course course = CourseHistoryUtil.getOne(PlayActivity.this, id);
                 try {
                     List<ChapterEntity> chapterList = new ArrayList<>();
-                    JSONObject object = new JSONObject(s);
-                    String code=object.getString("code");
-                    if("0000".equals(code)){
-                        JSONArray chapters = object.getJSONObject("data").getJSONObject("getSeek").getJSONArray("seek");
-                        // TODO: 2015/7/7 判断章节数量提示没有章节
-
-                        for(int i=0;i<chapters.length();i++){
-                            JSONObject o = chapters.getJSONObject(i);
-                            String title = o.getString("utit");
-                            String id = o.getString("sid");
-                            JSONArray a = o.getJSONArray("data");
-                            ChapterEntity e = new ChapterEntity(title,id);
-                            e.setVideos(new ArrayList<VideoEntity>());
-                            for(int j=0;j<a.length();j++){
-                                JSONObject o1 = a.getJSONObject(j);
-                                String nam = o1.getString("title");
-                                long seek = o1.getLong("seek");
-                                String vid =null;
-                                if(o1.has("vid")){
-                                    vid =o1.getString("vid");
-                                }
-                                e.getVideos().add(new VideoEntity(vid,nam,seek));
+                    JSONArray chapters = new JSONArray( MessageDiagestUtil.getFromBase64(course.getLength()));
+                    for (int i = 0; i < chapters.length(); i++) {
+                        JSONObject o = chapters.getJSONObject(i);
+                        String title = o.getString("utit");
+                        String id = o.getString("sid");
+                        JSONArray a = o.getJSONArray("data");
+                        ChapterEntity e = new ChapterEntity(title, id);
+                        e.setVideos(new ArrayList<VideoEntity>());
+                        for (int j = 0; j < a.length(); j++) {
+                            JSONObject o1 = a.getJSONObject(j);
+                            String nam = o1.getString("title");
+                            long seek = o1.getLong("seek");
+                            String vid = null;
+                            if (o1.has("vid")) {
+                                vid = o1.getString("vid");
                             }
-                            chapterList.add(e);
+                            e.getVideos().add(new VideoEntity(vid, nam, seek));
                         }
-                        //构建adapter
-                        ChapterAdapter adapter = new ChapterAdapter(chapterList, PlayActivity.this);
-                        //发送adapter
-                        EventBus.getDefault().post(new ChapterResultEvent(adapter));
+                        chapterList.add(e);
                     }
+                    //构建adapter
+                    ChapterAdapter adapter = new ChapterAdapter(chapterList, PlayActivity.this);
+                    //发送adapter
+                    EventBus.getDefault().post(new ChapterResultEvent(adapter));
                 } catch (JSONException e1) {
                     e1.printStackTrace();
                 }
             }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
+        });
 
-            }
-        }){
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String,String> params = new HashMap<>();
-                ChapterRequestEntity.Data data = new ChapterRequestEntity.Data(id,AccountUtil.getUserId(PlayActivity.this));
-                ChapterRequestEntity entity = new ChapterRequestEntity(CommonDataObject.CHAPTER_REQUEST_CODE,data);
-                params.put("opjson",CommonDataObject.GSON.toJson(entity));
-                return params;
-            }
-        };
 
-        RequestQueue queue=Volley.newRequestQueue(PlayActivity.this);
-        queue.add(request);
-        queue.start();
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(isLandscape){
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        if (isLandscape) {
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         }
 
         setContentView(R.layout.activity_play);
@@ -246,22 +300,22 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
 
         bottomBar = findViewById(R.id.bottom_bar);
         pager = (ViewPager) findViewById(R.id.content);
-        rr=findViewById(R.id.rr);
+        rr = findViewById(R.id.rr);
         wm = this.getWindowManager();
         w = wm.getDefaultDisplay().getWidth();
         h = wm.getDefaultDisplay().getHeight();
         rl = (RelativeLayout) findViewById(R.id.rl);
 
 
-        if(isLandscape){
-            RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(w,h);
+        if (isLandscape) {
+            RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(w, h);
             rl.setLayoutParams(p);
             bottomBar.setVisibility(View.GONE);
             pager.setVisibility(View.GONE);
             rr.setVisibility(View.GONE);
         }
 
-        service=new DBservice(this);
+        service = new DBservice(this);
 
         //注册back键
         findViewById(R.id.back).setOnClickListener(this);
@@ -423,8 +477,6 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
     }
 
     private void playVideo() {
-        // TODO: 2015/7/3 播放
-//        String path = getPath(vid);
 
         videoView = (IjkVideoView) findViewById(R.id.videoview);
         progressBar = (ProgressBar) findViewById(R.id.loadingprogress);
@@ -432,19 +484,10 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         mediaController = new MediaController(PlayActivity.this, false);
         mediaController.setAnchorView(videoView);
         videoView.setMediaController(mediaController);
-//        if(path != null && path.length() > 0){
-//            progressBar.setVisibility(View.GONE);
-//            videoView.setVideoPath(path);
-//
-//        }else{
-        if(isLandscape){
-            videoView.setVid(vid,2);
-        }else{
-            videoView.setVid(vid,1);
-        }
-
-            videoView.seekTo(stopPosition);
-//        }
+        if (!PolyvDownloader.isVideoExists(vid, 1))
+            download();
+        videoView.setVid(vid, 1);
+        videoView.seekTo(stopPosition);
 
         //设置切屏事件
         mediaController.setOnBoardChangeListener(new MediaController.OnBoardChangeListener() {
@@ -495,17 +538,28 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
 //        videoView.setVid("ea307b2422ebe43ec2618ae1c8fa6c76_e");
     }
 
-    class VideoInfo extends AsyncTask<String,String,String> {
+    private String getPath(String vid) {
+        int range = vid.indexOf("_");
+        String vpid = vid.substring(0, range);
+        File mp4File = new File(PolyvSDKClient.getInstance().getDownloadDir(),
+                vpid + "_" + 1 + ".mp4");
+        if (mp4File.exists())
+            return mp4File.getPath();
+        else
+            return null;
+    }
+
+    class VideoInfo extends AsyncTask<String, String, String> {
         @Override
         protected String doInBackground(String... params) {
             // TODO Auto-generated method stub
-            DownloadInfo downloadInfo=null;
+            DownloadInfo downloadInfo = null;
             JSONArray jsonArray = SDKUtil.loadVideoInfo(params[0]);
             String vid = null;
             String duration = null;
             int filesize = 0;
             try {
-                JSONObject jsonObject =jsonArray.getJSONObject(0);
+                JSONObject jsonObject = jsonArray.getJSONObject(0);
                 vid = jsonObject.getString("vid");
                 duration = jsonObject.getString("duration");
                 filesize = jsonObject.getInt("filesize1");
@@ -514,9 +568,9 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                 e.printStackTrace();
             }
             downloadInfo = new DownloadInfo(vid, duration, filesize);
-            if(service!=null&&!service.isAdd(downloadInfo)){
+            if (service != null && !service.isAdd(downloadInfo)) {
                 service.addDownloadFile(downloadInfo);
-            }else{
+            } else {
                 runOnUiThread(new Runnable() {
 
                     @Override
@@ -638,7 +692,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
 //                }
                 break;
             case R.id.write_comments:
-                CommentsUtil.showCommentsActivity(this,id,AccountUtil.getUserId(this));
+                CommentsUtil.showCommentsActivity(this, id, AccountUtil.getUserId(this));
                 break;
         }
     }
@@ -710,15 +764,15 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
     }
 
     //	   切换到横屏
-    public void changeToLandscape(){
+    public void changeToLandscape() {
         stopPosition = videoView.getCurrentPosition();
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         isLandscape = !isLandscape;
     }
 
     //	切换到竖屏
-    public void changeToPortrait(){
-        RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(w, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,200,getResources().getDisplayMetrics()));
+    public void changeToPortrait() {
+        RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(w, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 200, getResources().getDisplayMetrics()));
         rl.setLayoutParams(p);
         stopPosition = videoView.getCurrentPosition();
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -727,10 +781,10 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode){
+        switch (requestCode) {
             case 0:
-                if(RESULT_OK==resultCode){
-                    stopPosition = data.getIntExtra("stopPosition",0);
+                if (RESULT_OK == resultCode) {
+                    stopPosition = data.getIntExtra("stopPosition", 0);
                     videoView.seekTo(stopPosition);
                     videoView.start();
                 }
@@ -740,11 +794,50 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if(keyCode==KeyEvent.KEYCODE_BACK){
-            if(isLandscape){
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (isLandscape) {
                 changeToPortrait();
             }
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    public void download() {
+        File dir = PolyvSDKClient.getInstance().getDownloadDir();
+        if (!dir.exists())
+            dir.mkdirs();
+        PolyvDownloader downloader = new PolyvDownloader(vid, 1);
+        downloader.start();
+
+        downloader.setPolyvDownloadProressListener(new PolyvDownloadProgressListener() {
+            @Override
+            public void onDownloadSuccess() {
+                // TODO 保存
+//                Log.i("aaa", "下载完成");
+            }
+
+            @Override
+            public void onDownload(long current, long total) {
+//                / TODO 显示进度
+//                Message msg = new Message();
+//                msg.what = DOWNLOAD;
+//                Bundle bundle/ = new Bundle();
+//                bundle.putLong("current", current);
+//                bundle.putLong("total", total);
+//                msg.setData(bundle);
+//                handler.sendMessage(msg);
+            }
+            @Override
+            public void onDownloadFail(String error) {
+//                // TODO 清除下载缓存
+//                Log.i("aaa", "下载失败 ："+error);
+            }
+        });
+
+
+        // TODO: 2015/7/7 移植该方法到设置里面去 给评论加下拉刷新
+        //downloader.deleteVideo(videoId, 1);
+//删除下载目录
+        //downloader.cleanDownloadDir();
     }
 }

@@ -15,6 +15,8 @@ import com.ypy.eventbus.EventBus;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.greenrobot.dao.query.WhereCondition;
+
 /**
  * Created by CJQ on 2015/7/2.
  */
@@ -95,4 +97,18 @@ public class CourseHistoryUtil {
         return res;
     }
 
+    public static Course getOne(Context context, final String id){
+        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(context, "course_db", null);
+        SQLiteDatabase db = helper.getWritableDatabase();
+        DaoMaster daoMaster = new DaoMaster(db);
+        DaoSession daoSession = daoMaster.newSession();
+        CourseDao courseDao = daoSession.getCourseDao();
+
+        return courseDao.queryBuilder().where(new WhereCondition.AbstractCondition() {
+            @Override
+            public void appendTo(StringBuilder stringBuilder, String s) {
+                stringBuilder.append("id = ").append(id);
+            }
+        }).unique();
+    }
 }

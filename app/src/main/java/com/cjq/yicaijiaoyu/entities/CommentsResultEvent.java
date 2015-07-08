@@ -8,6 +8,24 @@ import com.cjq.yicaijiaoyu.adapter.CommentsAdapter;
 public class CommentsResultEvent {
 
     CommentsAdapter adapter;
+    String gid;
+    String userId;
+
+    public String getGid() {
+        return gid;
+    }
+
+    public void setGid(String gid) {
+        this.gid = gid;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
     public CommentsResultEvent(CommentsAdapter adapter) {
         this.adapter = adapter;
