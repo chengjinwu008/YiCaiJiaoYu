@@ -7,9 +7,12 @@ import com.cjq.yicaijiaoyu.dao.Course;
 import com.cjq.yicaijiaoyu.dao.CourseDao;
 import com.cjq.yicaijiaoyu.dao.DaoMaster;
 import com.cjq.yicaijiaoyu.dao.DaoSession;
+import com.cjq.yicaijiaoyu.dao.Video;
+import com.cjq.yicaijiaoyu.dao.VideoDao;
 import com.cjq.yicaijiaoyu.entities.CourseEntity;
 import com.cjq.yicaijiaoyu.entities.LectureEntity;
 import com.cjq.yicaijiaoyu.entities.NewHistoryAddedEvent;
+import com.cjq.yicaijiaoyu.entities.VideoEntity;
 import com.ypy.eventbus.EventBus;
 
 import java.util.ArrayList;
@@ -104,11 +107,63 @@ public class CourseHistoryUtil {
         DaoSession daoSession = daoMaster.newSession();
         CourseDao courseDao = daoSession.getCourseDao();
 
-        return courseDao.queryBuilder().where(new WhereCondition.AbstractCondition() {
+        Course course = courseDao.queryBuilder().where(new WhereCondition.AbstractCondition() {
             @Override
             public void appendTo(StringBuilder stringBuilder, String s) {
                 stringBuilder.append("id = ").append(id);
             }
         }).unique();
+        db.close();
+        return course;
+    }
+
+    public static void addVideoToCacheLog(Context context,VideoEntity videoEntity){
+        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(context, "video_db", null);
+        SQLiteDatabase db = helper.getWritableDatabase();
+        DaoMaster daoMaster = new DaoMaster(db);
+        DaoSession daoSession = daoMaster.newSession();
+        VideoDao videoDao = daoSession.getVideoDao();
+
+        Video v =new Video();
+        v.setName(videoEntity.getName());
+        v.setVid(videoEntity.getVid());
+        v.setSeek(videoEntity.getSeek());
+
+        videoDao.insertWithoutSettingPk(v);
+        db.close();
+    }
+
+    public static void deleteAllVideosCacheLog(Context context){
+        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(context, "video_db", null);
+        SQLiteDatabase db = helper.getWritableDatabase();
+        DaoMaster daoMaster = new DaoMaster(db);
+        DaoSession daoSession = daoMaster.newSession();
+        VideoDao videoDao = daoSession.getVideoDao();
+        videoDao.deleteAll();
+        db.close();
+    }
+
+    public static List<VideoEntity> ListVideoCache(Context context){
+        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(context, "video_db", null);
+        SQLiteDatabase db = helper.getWritableDatabase();
+        DaoMaster daoMaster = new DaoMaster(db);
+        DaoSession daoSession = daoMaster.newSession();
+        VideoDao videoDao = daoSession.getVideoDao();
+
+        List<Video> videos = videoDao.queryBuilder().list();
+        List<VideoEntity> res=new ArrayList<>();
+
+        for(Video v:videos){
+            VideoEntity temp = new VideoEntity();
+
+            temp.setVid(v.getVid());
+            temp.setName(v.getName());
+            temp.setSeek(v.getSeek());
+
+            res.add(temp);
+        }
+
+        db.close();
+        return res;
     }
 }
