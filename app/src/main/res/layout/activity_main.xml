@@ -16,5 +16,20 @@
         android:layout_height="match_parent"
         android:layout_below="@+id/title"/>
 
+    <RelativeLayout
+        android:id="@+id/no_net_hint"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/title">
+
+
+        <Button
+            android:layout_centerInParent="true"
+            android:text="@string/off_line_videos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        </RelativeLayout>
+
 </RelativeLayout>
 
