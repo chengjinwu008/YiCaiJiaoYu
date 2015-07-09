@@ -9,6 +9,7 @@ public class VideoEntity {
     String name;
     long seek;
 
+
     public VideoEntity(String vid, String name, long seek) {
         this.vid = vid;
         this.name = name;

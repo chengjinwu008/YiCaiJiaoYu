@@ -1,12 +1,21 @@
 package com.cjq.yicaijiaoyu.activities;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.StatFs;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -65,6 +74,7 @@ import com.easefun.polyvsdk.PolyvDownloadProgressListener;
 import com.easefun.polyvsdk.PolyvDownloader;
 import com.easefun.polyvsdk.PolyvSDKClient;
 import com.easefun.polyvsdk.SDKUtil;
+import com.easefun.polyvsdk.Video;
 import com.easefun.polyvsdk.ijk.IjkVideoView;
 import com.ypy.eventbus.EventBus;
 
@@ -117,6 +127,9 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
     private View rr;
     private View bottomBar;
     private String length;
+    private BroadcastReceiver connectionReceiver;
+    private PolyvDownloader downloader;
+    private Handler mHandler=new Handler();
 
     //详情请求回调
     public void onEventBackgroundThread(NeedVideoInfoEvent e) {
@@ -195,9 +208,6 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                             if ("0000".equals(code)) {
                                 JSONArray chapters = object.getJSONObject("data").getJSONObject("getSeek").getJSONArray("seek");
                                 // TODO: 2015/7/7 判断章节数量提示没有章节
-
-                                //todo 章节缓存
-                                length =  chapters.toString();
 
                                 for (int i = 0; i < chapters.length(); i++) {
                                     JSONObject o = chapters.getJSONObject(i);
@@ -282,9 +292,9 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                 }
             }
         });
-
-
     }
+
+    //todo 实现新的事件回调，章节的播放回调
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -376,6 +386,8 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
 
         pager.addOnPageChangeListener(PlayActivity.this);
 
+        //注册网络监听
+        registerReceiver();
     }
 
     private void checkAuthority() {
@@ -391,6 +403,8 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                             authority = object.getJSONObject("data").getInt("dataBack") == 1;
                         else
                             authority = object.getJSONObject("data").getInt("head_seek") == 1;
+
+                        // TODO: 2015/7/8 得到了购买权限 加上视频权限得出播放权限
                         if (authority) {
                             //有权限
                             getCourseInfo();
@@ -445,7 +459,8 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                         video_info = data.getString("goods_decs");
 
                         vid = data.getString("goods_vid");
-                        playVideo();
+                        // TODO: 2015/7/8 之后会将这个移动到章节请求里面去
+                        playVideo(vid);
                         sendInfo();
                     }
                 } catch (JSONException e) {
@@ -476,16 +491,25 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         queue.start();
     }
 
-    private void playVideo() {
-
-        videoView = (IjkVideoView) findViewById(R.id.videoview);
-        progressBar = (ProgressBar) findViewById(R.id.loadingprogress);
-        videoView.setMediaBufferingIndicator(progressBar);
-        mediaController = new MediaController(PlayActivity.this, false);
-        mediaController.setAnchorView(videoView);
-        videoView.setMediaController(mediaController);
+    private void playVideo(String vid) {
+        if(vid==null || "".equals(vid)){
+            return;
+        }
+        if(videoView==null){
+            videoView = (IjkVideoView) findViewById(R.id.videoview);
+            progressBar = (ProgressBar) findViewById(R.id.loadingprogress);
+            videoView.setMediaBufferingIndicator(progressBar);
+            mediaController = new MediaController(PlayActivity.this, false);
+            mediaController.setAnchorView(videoView);
+            videoView.setMediaController(mediaController);
+        }
         if (!PolyvDownloader.isVideoExists(vid, 1))
-            download();
+            DialogUtil.showDownloadDialog(PlayActivity.this, new Runnable() {
+                @Override
+                public void run() {
+                    download();
+                }
+            });
         videoView.setVid(vid, 1);
         videoView.seekTo(stopPosition);
 
@@ -563,24 +587,74 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                 vid = jsonObject.getString("vid");
                 duration = jsonObject.getString("duration");
                 filesize = jsonObject.getInt("filesize1");
+
             } catch (JSONException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-            downloadInfo = new DownloadInfo(vid, duration, filesize);
-            if (service != null && !service.isAdd(downloadInfo)) {
-                service.addDownloadFile(downloadInfo);
-            } else {
-                runOnUiThread(new Runnable() {
 
+            //判断大小
+            File dir = PolyvSDKClient.getInstance().getDownloadDir();
+            if (!dir.exists())
+                dir.mkdirs();
+            StatFs statFs = new StatFs(Environment.getExternalStorageDirectory().getPath());
+            long blocksize=statFs.getBlockSize();
+//            long totalblocks=statFs.getBlockCount();
+            long availableblocks=statFs.getAvailableBlocks();
+            //判断容量
+            long size = availableblocks*blocksize;
+
+            if(filesize>size){
+                mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        // TODO Auto-generated method stub
-                        Toast.makeText(PlayActivity.this, "this video has been added !!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(PlayActivity.this,getString(R.string.no_rom),Toast.LENGTH_SHORT).show();
                     }
                 });
-
+                return null;
+                //容量不够，不进行下载，提示
             }
+            downloader = new PolyvDownloader(vid, 1);
+            downloader.start();
+
+            downloader.setPolyvDownloadProressListener(new PolyvDownloadProgressListener() {
+                @Override
+                public void onDownloadSuccess() {
+                    // TODO 保存
+//                Log.i("aaa", "下载完成");
+                }
+
+                @Override
+                public void onDownload(long current, long total) {
+//                / TODO 显示进度
+//                Message msg = new Message();
+//                msg.what = DOWNLOAD;
+//                Bundle bundle/ = new Bundle();
+//                bundle.putLong("current", current);
+//                bundle.putLong("total", total);
+//                msg.setData(bundle);
+//                handler.sendMessage(msg);
+                }
+                @Override
+                public void onDownloadFail(String error) {
+//                // TODO 清除下载缓存
+//                Log.i("aaa", "下载失败 ："+error);
+                }
+            });
+
+//            downloadInfo = new DownloadInfo(vid, duration, filesize);
+//            if (service != null && !service.isAdd(downloadInfo)) {
+//                service.addDownloadFile(downloadInfo);
+//            } else {
+//                runOnUiThread(new Runnable() {
+//
+//                    @Override
+//                    public void run() {
+//                        // TODO Auto-generated method stub
+//                        Toast.makeText(PlayActivity.this, "this video has been added !!", Toast.LENGTH_SHORT).show();
+//                    }
+//                });
+//            }
             return null;
         }
     }
@@ -589,6 +663,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
     protected void onDestroy() {
         CommonDataObject.nowPlayingId = null;
         EventBus.getDefault().unregister(this);
+        unRegisterReceiver();
         super.onDestroy();
     }
 
@@ -803,21 +878,41 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
     }
 
     public void download() {
-        File dir = PolyvSDKClient.getInstance().getDownloadDir();
-        if (!dir.exists())
-            dir.mkdirs();
-        PolyvDownloader downloader = new PolyvDownloader(vid, 1);
-        downloader.start();
+        if(Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())){
+            //判断大小
+            File dir = PolyvSDKClient.getInstance().getDownloadDir();
+            if (!dir.exists())
+                dir.mkdirs();
+            StatFs statFs = new StatFs(Environment.getExternalStorageDirectory().getPath());
+            long blocksize=statFs.getBlockSize();
+//            long totalblocks=statFs.getBlockCount();
+            long availableblocks=statFs.getAvailableBlocks();
+            //判断容量
+            long size = availableblocks*blocksize;
 
-        downloader.setPolyvDownloadProressListener(new PolyvDownloadProgressListener() {
-            @Override
-            public void onDownloadSuccess() {
-                // TODO 保存
+            //todo 得到视频大小
+//            if(filesize>size){
+//                mHandler.post(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        Toast.makeText(PlayActivity.this,getString(R.string.no_rom),Toast.LENGTH_SHORT).show();
+//                    }
+//                });
+//                return;
+//                //容量不够，不进行下载，提示
+//            }
+            downloader = new PolyvDownloader(vid, 1);
+            downloader.start();
+
+            downloader.setPolyvDownloadProressListener(new PolyvDownloadProgressListener() {
+                @Override
+                public void onDownloadSuccess() {
+                    // TODO 保存
 //                Log.i("aaa", "下载完成");
-            }
+                }
 
-            @Override
-            public void onDownload(long current, long total) {
+                @Override
+                public void onDownload(long current, long total) {
 //                / TODO 显示进度
 //                Message msg = new Message();
 //                msg.what = DOWNLOAD;
@@ -826,18 +921,47 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
 //                bundle.putLong("total", total);
 //                msg.setData(bundle);
 //                handler.sendMessage(msg);
-            }
-            @Override
-            public void onDownloadFail(String error) {
+                }
+                @Override
+                public void onDownloadFail(String error) {
 //                // TODO 清除下载缓存
 //                Log.i("aaa", "下载失败 ："+error);
-            }
-        });
-
-
+                }
+            });
+        }
         // TODO: 2015/7/7 移植该方法到设置里面去 给评论加下拉刷新
         //downloader.deleteVideo(videoId, 1);
 //删除下载目录
         //downloader.cleanDownloadDir();
+    }
+
+    private  void registerReceiver(){
+        IntentFilter filter=new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        connectionReceiver= new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                //网络状态改变，发送网络状态改变的函数
+                ConnectivityManager connectivityManager=(ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo mobNetInfo=connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+                NetworkInfo  wifiNetInfo=connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+
+                if(wifiNetInfo.isConnected()){
+                    // TODO: 2015/7/8 wifi连接
+                }else
+                if(mobNetInfo.isConnected()){
+                    // TODO: 2015/7/8 wifi 没连接，移动网络连接
+                    videoView.pause();
+                    if(downloader!=null)
+                        downloader.stop();
+                }else{
+                    // TODO: 2015/7/8 都不连接
+                }
+            }
+        };
+        this.registerReceiver(connectionReceiver, filter);
+    }
+
+    private void unRegisterReceiver(){
+        unregisterReceiver(connectionReceiver);
     }
 }

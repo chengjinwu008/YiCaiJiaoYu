@@ -88,7 +88,7 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         this.inflater = inflater;
 
         view = inflater.inflate(R.layout.activity_main,container,false);
@@ -98,82 +98,98 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
         //标题栏
         title = view.findViewById(R.id.title);
 
-        //注册下拉刷新和上拉加载
-        mRefreshLayout = (XScrollView) view.findViewById(R.id.refresh);
-        mRefreshLayout.setPullRefreshEnable(true);
+        NetStateUtil.checkNetwork(new NetStateUtil.NetWorkStateListener() {
+            @Override
+            public void doWithNetWork() {
+
+                view.findViewById(R.id.no_net_hint).setVisibility(View.GONE);
+                view.findViewById(R.id.refresh).setVisibility(View.VISIBLE);
+                //注册下拉刷新和上拉加载
+                mRefreshLayout = (XScrollView) view.findViewById(R.id.refresh);
+                mRefreshLayout.setPullRefreshEnable(true);
 //        mRefreshLayout.setPullLoadEnable(true);
 //        mRefreshLayout.setAutoLoadEnable(true);
 
-        mRefreshLayout.setIXScrollViewListener(this);
-        mRefreshLayout.setRefreshTime(getTime());
+                mRefreshLayout.setIXScrollViewListener(AllCourseFragment.this);
+                mRefreshLayout.setRefreshTime(getTime());
 
-        View content = inflater.inflate(R.layout.course_list_content, mRefreshLayout,false);
+                View content = inflater.inflate(R.layout.course_list_content, mRefreshLayout,false);
 
-        mRefreshLayout.setView(content);
-        //初始化课程list
-        courseEntityList=new ArrayList<>();
-        courseList = (ListView) content.findViewById(R.id.course_list);
-        courseList.setOnItemClickListener(this);
-        courseListAdapter = null;
+                mRefreshLayout.setView(content);
+                //初始化课程list
+                courseEntityList=new ArrayList<>();
+                courseList = (ListView) content.findViewById(R.id.course_list);
+                courseList.setOnItemClickListener(AllCourseFragment.this);
+                courseListAdapter = null;
 
-        //下拉分类点击注册
-        titleText = (TextView) view.findViewById(R.id.main_title_text);
-        arrowImage = (ImageView)view.findViewById(R.id.main_drop_arrow);
-        view.findViewById(R.id.main_click_drop).setOnClickListener(this);
+                //下拉分类点击注册
+                titleText = (TextView) view.findViewById(R.id.main_title_text);
+                arrowImage = (ImageView)view.findViewById(R.id.main_drop_arrow);
+                view.findViewById(R.id.main_click_drop).setOnClickListener(AllCourseFragment.this);
 
-        //注册搜索键
-        view.findViewById(R.id.main_search_button).setOnClickListener(this);
+                //注册搜索键
+                view.findViewById(R.id.main_search_button).setOnClickListener(AllCourseFragment.this);
 
-        //注册banner
-        banner_pager = (ViewPager)content.findViewById(R.id.banner_pager);
-        bannerList = new ArrayList<CourseEntity>();
+                //注册banner
+                banner_pager = (ViewPager)content.findViewById(R.id.banner_pager);
+                bannerList = new ArrayList<CourseEntity>();
 
-        //初始化全部列表请求参数
-        AllCourseRequestEntity.Data data = new AllCourseRequestEntity.Data(1,CommonDataObject.COURSE_NUM_SHOWING);
-        AllCourseRequestEntity entity =new AllCourseRequestEntity(CommonDataObject.ALLCOURSE_REQUEST_CODE,data);
+                //初始化全部列表请求参数
+                AllCourseRequestEntity.Data data = new AllCourseRequestEntity.Data(1,CommonDataObject.COURSE_NUM_SHOWING);
+                AllCourseRequestEntity entity =new AllCourseRequestEntity(CommonDataObject.ALLCOURSE_REQUEST_CODE,data);
 
-        refresh(entity);
+                refresh(entity);
 
 
-        //开启banner滚动线程
-        Thread timer = new TimerForSeconds(5000, -1, new TimerForSeconds.TimerListener() {
-            @Override
-            public void onEverySeconds(int timeLeft) {
-                int count = banner_pager.getChildCount();
-                final int num = banner_pager.getCurrentItem() + 1;
-                if (num < count)
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            banner_pager.setCurrentItem(num);
-                        }
-                    });
+                //开启banner滚动线程
+                Thread timer = new TimerForSeconds(5000, -1, new TimerForSeconds.TimerListener() {
+                    @Override
+                    public void onEverySeconds(int timeLeft) {
+                        int count = banner_pager.getChildCount();
+                        final int num = banner_pager.getCurrentItem() + 1;
+                        if (num < count)
+                            mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    banner_pager.setCurrentItem(num);
+                                }
+                            });
 
-                else
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            banner_pager.setCurrentItem(0);
-                        }
-                    });
+                        else
+                            mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    banner_pager.setCurrentItem(0);
+                                }
+                            });
+                    }
+
+                    @Override
+                    public void onTimeUp() {
+
+                    }
+
+                    @Override
+                    public boolean getTimerFlag() {
+                        return TIMER_NOT_DESTROYED;
+                    }
+
+                    @Override
+                    public boolean getTimerPauseFlag() {
+                        return TIMER_PAUSED;
+                    }
+                });
+                timer.start();
             }
 
             @Override
-            public void onTimeUp() {
-
-            }
-
-            @Override
-            public boolean getTimerFlag() {
-                return TIMER_NOT_DESTROYED;
-            }
-
-            @Override
-            public boolean getTimerPauseFlag() {
-                return TIMER_PAUSED;
+            public void doWithoutNetWork() {
+                view.findViewById(R.id.no_net_hint).setVisibility(View.VISIBLE);
+                view.findViewById(R.id.refresh).setVisibility(View.GONE);
             }
         });
-        timer.start();
+
+
         return view;
     }
 
@@ -523,21 +539,26 @@ public class AllCourseFragment extends Fragment implements View.OnClickListener,
                     if("0000".equals(object.getString("code"))){
                         JSONArray goods = object.getJSONObject("data").getJSONObject("categories").getJSONArray("goods");
 //                        courseEntityList.clear();
-                        List<CourseEntity> temp = new ArrayList<>();
+                        final List<CourseEntity> temp = new ArrayList<>();
 
                         if(goods.length()==0){
                             nowPage--;
                             Toast.makeText(getActivity(), getActivity().getString(R.string.hint11),Toast.LENGTH_SHORT).show();
                         }else{
                             CourseUtil.chargeCourseList(goods, temp);
-                            courseListAdapter.getCourses().addAll(temp);
+                            mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    courseListAdapter.getCourses().addAll(temp);
+                                }
+                            });
                         }
                         mHandler.postDelayed(new Runnable() {
                             @Override
                             public void run() {
                                 onLoad();
                             }
-                        },3000);
+                        },500);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();

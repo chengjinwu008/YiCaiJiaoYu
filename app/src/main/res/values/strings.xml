@@ -72,4 +72,9 @@
     <string name="no_network">没有网络哦，亲~</string>
     <string name="set_network">去设置网络</string>
     <string name="team">会计小组</string>
+    <string name="download_hint">要边看边下载吗（并不会多用流量）?</string>
+    <string name="certain">确定</string>
+    <string name="no_rom">SD卡容量不够</string>
+    <string name="off_line_videos">已离线的视频</string>
+    <string name="clean_hint">将要清空该缓存，确定吗？</string>
 </resources>

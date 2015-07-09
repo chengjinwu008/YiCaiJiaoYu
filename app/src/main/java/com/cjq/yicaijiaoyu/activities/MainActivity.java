@@ -1,6 +1,5 @@
 package com.cjq.yicaijiaoyu.activities;
 
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
@@ -43,7 +42,6 @@ import com.cjq.yicaijiaoyu.fragments.WelcomeThreeFragment;
 import com.cjq.yicaijiaoyu.fragments.WelcomeTwoFragment;
 import com.cjq.yicaijiaoyu.utils.AccountUtil;
 import com.cjq.yicaijiaoyu.utils.DialogUtil;
-import com.cjq.yicaijiaoyu.utils.ImageUtil;
 import com.cjq.yicaijiaoyu.utils.NetStateUtil;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import com.ypy.eventbus.EventBus;
