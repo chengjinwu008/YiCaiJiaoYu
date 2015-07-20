@@ -20,12 +20,13 @@ import com.android.volley.toolbox.Volley;
 import com.cjq.yicaijiaoyu.CommonDataObject;
 import com.cjq.yicaijiaoyu.R;
 import com.cjq.yicaijiaoyu.adapter.CourseListAdapter;
+import com.cjq.yicaijiaoyu.dao.Course;
 import com.cjq.yicaijiaoyu.entities.AllCourseRequestEntity;
-import com.cjq.yicaijiaoyu.entities.CourseEntity;
-import com.cjq.yicaijiaoyu.utils.CourseUtil;
+import com.cjq.yicaijiaoyu.utils.JsonUtil;
 import com.cjq.yicaijiaoyu.utils.VideoUtil;
 import com.markmao.pulltorefresh.widget.XListView;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -42,7 +43,7 @@ public class SearchActivity extends BaseActivity implements View.OnClickListener
     private EditText search;
     private int nowPage=1;
     private XListView refreshView;
-    private List<CourseEntity> courseEntities;
+    private List<Course> courseEntities;
     private CourseListAdapter adapter;
 
     @Override
@@ -91,15 +92,12 @@ public class SearchActivity extends BaseActivity implements View.OnClickListener
                             courseEntities=new ArrayList<>();
                         else
                             courseEntities.clear();
-                        CourseUtil.chargeCourseList(object.getJSONObject("data").getJSONObject("categories").getJSONArray("goods"), courseEntities);
-
-                        if(adapter==null){
-                            adapter = new CourseListAdapter(courseEntities,SearchActivity.this);
-                            refreshView.setAdapter(adapter);
+                        JSONArray a =object.getJSONObject("data").getJSONObject("categories").getJSONArray("goods");
+                        for(int i=0;i<a.length();i++) {
+                            JSONObject o=a.getJSONObject(i);
+                            courseEntities.add(JsonUtil.getFromCourseListNoCache(SearchActivity.this,o));
                         }
-                        else{
-                            adapter.notifyDataSetChanged();
-                        }
+                        refreshView.setAdapter(new CourseListAdapter(courseEntities,SearchActivity.this));
                         refreshView.stopRefresh();
                     }
                 } catch (JSONException e) {
@@ -144,10 +142,14 @@ public class SearchActivity extends BaseActivity implements View.OnClickListener
 
                         if(object.getJSONObject("data").getJSONObject("categories").getJSONArray("goods").length()==0){
                             refreshView.stopLoadMore();
-                            Toast.makeText(SearchActivity.this,getString(R.string.hint11),Toast.LENGTH_SHORT).show();
+                            Toast.makeText(SearchActivity.this, getString(R.string.hint11), Toast.LENGTH_SHORT).show();
                         }else{
-                            List<CourseEntity> temp = new ArrayList<>();
-                            CourseUtil.chargeCourseList(object.getJSONObject("data").getJSONObject("categories").getJSONArray("goods"), temp);
+                            List<Course> temp = new ArrayList<>();
+                            JSONArray a =object.getJSONObject("data").getJSONObject("categories").getJSONArray("goods");
+                            for(int i=0;i<a.length();i++) {
+                                JSONObject o=a.getJSONObject(i);
+                                temp.add(JsonUtil.getFromCourseListNoCache(SearchActivity.this,o));
+                            }
                             courseEntities.addAll(temp);
 
                             adapter.notifyDataSetChanged();
@@ -181,7 +183,7 @@ public class SearchActivity extends BaseActivity implements View.OnClickListener
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        CourseEntity entity = courseEntities.get(position);
-        VideoUtil.startVideo(this,entity);
+        Course entity = courseEntities.get(position);
+        VideoUtil.startVideo(this, entity);
     }
 }

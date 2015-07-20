@@ -4,52 +4,20 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-import com.cjq.yicaijiaoyu.CommonDataObject;
 import com.cjq.yicaijiaoyu.R;
-import com.cjq.yicaijiaoyu.adapter.CourseCategoryAdapter;
-import com.cjq.yicaijiaoyu.adapter.CourseListAdapter;
 import com.cjq.yicaijiaoyu.adapter.PagerAdapter;
-import com.cjq.yicaijiaoyu.entities.AllCourseRequestEntity;
-import com.cjq.yicaijiaoyu.entities.CategoryEntity;
-import com.cjq.yicaijiaoyu.entities.CourseCategory;
-import com.cjq.yicaijiaoyu.entities.CourseEntity;
-import com.cjq.yicaijiaoyu.entities.CourseListRequestEvent;
-import com.cjq.yicaijiaoyu.entities.CourseListResultEvent;
-import com.cjq.yicaijiaoyu.entities.LectureEntity;
 import com.cjq.yicaijiaoyu.entities.MainMenuEvent;
-import com.cjq.yicaijiaoyu.utils.AccountUtil;
-import com.cjq.yicaijiaoyu.utils.CourseHistoryUtil;
-import com.cjq.yicaijiaoyu.utils.CourseUtil;
-import com.cjq.yicaijiaoyu.utils.NetStateUtil;
-import com.cjq.yicaijiaoyu.utils.PopWindowUtil;
 import com.ypy.eventbus.EventBus;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by CJQ on 2015/6/25.
@@ -57,12 +25,6 @@ import java.util.Map;
 public class MyCourseFragment extends Fragment implements View.OnClickListener, ViewPager.OnPageChangeListener {
 
     private View view;
-    private View title;
-    private ImageView arrowImage;
-    private CourseCategoryAdapter categoryAdapter;
-    private PopupWindow window;
-    private View windowView;
-    private LayoutInflater inflater;
     private int tab;
     private View soap;
     private TextView careFor;//关注
@@ -74,37 +36,24 @@ public class MyCourseFragment extends Fragment implements View.OnClickListener, 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        this.inflater = inflater;
 
         view = inflater.inflate(R.layout.my_courses,container,false);
         //注册菜单键
         view.findViewById(R.id.main_left_menu_button).setOnClickListener(this);
         initialRR();
-        //标题栏
-        title = view.findViewById(R.id.title);
 
         pager= (ViewPager) view.findViewById(R.id.pager);
         pager.setOffscreenPageLimit(4);
 
         //初始化三碎片
         fragments = new ArrayList<>();
-        fragments.add(new MyCourseListFragment().setNO(0));
-        fragments.add(new MyCourseListFragment().setNO(1));
-        fragments.add(new MyCourseListFragment().setNO(2));
+        fragments.add(new MyCaredListFragment());
+        fragments.add(new MyBoughtListFragment());
+        fragments.add(new MyHistoryListFragment());
 
         pager.setAdapter(new PagerAdapter(getFragmentManager(),fragments));
 
         pager.addOnPageChangeListener(this);
-
-        //下拉分类点击注册
-        arrowImage = (ImageView)view.findViewById(R.id.main_drop_arrow);
-        view.findViewById(R.id.main_click_drop).setOnClickListener(this);
-
-        //初始化课程分类下拉适配器
-        List<CategoryEntity> categorys = new ArrayList<>();
-        categorys.add(new CategoryEntity(CommonDataObject.NO_CATE_ID,null,getActivity().getString(R.string.all_courses),R.drawable.all_icon));
-
-        categoryAdapter = new CourseCategoryAdapter(categorys,getActivity());
 
         return view;
     }
@@ -140,43 +89,43 @@ public class MyCourseFragment extends Fragment implements View.OnClickListener, 
             case R.id.main_left_menu_button:
                 EventBus.getDefault().post(new MainMenuEvent());
                 break;
-            case R.id.main_click_drop:
-                //点击下拉课程分类
-                if(window ==null ){
-                    window = new PopupWindow(view.getMeasuredWidth(), 400);
-                    window.setOnDismissListener(new PopupWindow.OnDismissListener() {
-                        @Override
-                        public void onDismiss() {
-                            arrowImage.setImageResource(R.drawable.jiantou);
-                        }
-                    });
-                }
-                if(windowView ==null){
-                    windowView = inflater.inflate(R.layout.my_sort_window, null);
-                    ListView listView = (ListView) windowView;
-                    listView.setAdapter(categoryAdapter);
-
-                    listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                            CommonDataObject.categoryChecked=position;
-                            categoryAdapter.notifyDataSetChanged();
-                            NetStateUtil.checkNetwork(new NetStateUtil.NetWorkStateListener() {
-                                @Override
-                                public void doWithNetWork() {
-                                }
-
-                                @Override
-                                public void doWithoutNetWork() {
-
-                                }
-                            });
-                        }
-                    });
-                }
-                PopWindowUtil.show(windowView, title, null, window, R.style.course_category_list);
-                arrowImage.setImageResource(R.drawable.jiantou_shang);
-                break;
+//            case R.id.main_click_drop:
+//                //点击下拉课程分类
+//                if(window ==null ){
+//                    window = new PopupWindow(view.getMeasuredWidth(), 400);
+//                    window.setOnDismissListener(new PopupWindow.OnDismissListener() {
+//                        @Override
+//                        public void onDismiss() {
+//                            arrowImage.setImageResource(R.drawable.jiantou);
+//                        }
+//                    });
+//                }
+//                if(windowView ==null){
+//                    windowView = inflater.inflate(R.layout.my_sort_window, null);
+//                    ListView listView = (ListView) windowView;
+//                    listView.setAdapter(categoryAdapter);
+//
+//                    listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//                        @Override
+//                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                            CommonDataObject.categoryChecked=position;
+//                            categoryAdapter.notifyDataSetChanged();
+//                            NetStateUtil.checkNetwork(new NetStateUtil.NetWorkStateListener() {
+//                                @Override
+//                                public void doWithNetWork() {
+//                                }
+//
+//                                @Override
+//                                public void doWithoutNetWork() {
+//
+//                                }
+//                            });
+//                        }
+//                    });
+//                }
+//                PopWindowUtil.show(windowView, title, null, window, R.style.course_category_list);
+//                arrowImage.setImageResource(R.drawable.jiantou_shang);
+//                break;
             case R.id.detail:
                 tab = 0;
                 changeColor();
@@ -250,8 +199,6 @@ public class MyCourseFragment extends Fragment implements View.OnClickListener, 
     public void onPageSelected(int position) {
         tab=position;
         changeColor();
-        MyCourseListFragment fragment = (MyCourseListFragment) fragments.get(position);
-        fragment.getContent();
     }
 
     @Override

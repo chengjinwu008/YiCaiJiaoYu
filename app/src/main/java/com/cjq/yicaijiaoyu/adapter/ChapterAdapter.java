@@ -9,9 +9,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.cjq.yicaijiaoyu.R;
-import com.cjq.yicaijiaoyu.entities.ChapterEntity;
-import com.cjq.yicaijiaoyu.entities.CourseEntity;
-import com.cjq.yicaijiaoyu.entities.VideoEntity;
+import com.cjq.yicaijiaoyu.dao.Chapter;
+import com.cjq.yicaijiaoyu.dao.Video;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,10 +20,10 @@ import java.util.List;
  */
 public class ChapterAdapter extends BaseAdapter{
 
-    List<ChapterEntity> chapters;
+    List<Chapter> chapters;
     Context context;
 
-    public ChapterAdapter(List<ChapterEntity> chapters, Context context) {
+    public ChapterAdapter(List<Chapter> chapters, Context context) {
         this.chapters = chapters;
         this.context = context;
     }
@@ -55,19 +54,19 @@ public class ChapterAdapter extends BaseAdapter{
 
             convertView.setTag(holder);
         }
-        ChapterEntity entity = chapters.get(position);
+        Chapter entity = chapters.get(position);
         ViewHolder holder = (ViewHolder) convertView.getTag();
 
         holder.title.setText(entity.getName());
         if(holder.chapter.getAdapter()==null){
-            if(entity.getVideos()!=null)
-            holder.chapter.setAdapter(new LChapterAdapter(entity.getVideos(),context));
+            if(entity.getVideoList()!=null)
+            holder.chapter.setAdapter(new LChapterAdapter(entity.getVideoList(),context));
         }else{
             LChapterAdapter lChapterAdapter = (LChapterAdapter) holder.chapter.getAdapter();
-            if(entity.getVideos()!=null){
-                lChapterAdapter.setCourses(entity.getVideos());
+            if(entity.getVideoList()!=null){
+                lChapterAdapter.setCourses(entity.getVideoList());
             }else{
-                lChapterAdapter.setCourses(new ArrayList<VideoEntity>());
+                lChapterAdapter.setCourses(new ArrayList<Video>());
             }
             lChapterAdapter.notifyDataSetChanged();
         }

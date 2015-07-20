@@ -9,7 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.cjq.yicaijiaoyu.R;
-import com.cjq.yicaijiaoyu.entities.CourseEntity;
+import com.cjq.yicaijiaoyu.dao.Ad;
 import com.cjq.yicaijiaoyu.utils.ImageUtil;
 
 import java.util.List;
@@ -19,18 +19,18 @@ import java.util.List;
  */
 public class RecommendCourseAdapter extends PagerAdapter {
 
-    List<CourseEntity> courses;
+    List<Ad> courses;
     private Context context;
 
-    public List<CourseEntity> getCourses() {
+    public List<Ad> getCourses() {
         return courses;
     }
 
-    public void setCourses(List<CourseEntity> courses) {
+    public void setCourses(List<Ad> courses) {
         this.courses = courses;
     }
 
-    public RecommendCourseAdapter(List<CourseEntity> courses, Context context) {
+    public RecommendCourseAdapter(List<Ad> courses, Context context) {
         this.courses = courses;
         this.context = context;
     }
@@ -54,8 +54,8 @@ public class RecommendCourseAdapter extends PagerAdapter {
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
         View view = courses.get(position).getView();
-        ImageUtil.LoadImage(context, courses.get(position).getCover_image_url(), (ImageView) view.findViewById(R.id.image));
-        ((TextView) view.findViewById(R.id.text)).setText(courses.get(position).getTitle());
+        ImageUtil.LoadImage(context, courses.get(position).getImage(), (ImageView) view.findViewById(R.id.image));
+        ((TextView) view.findViewById(R.id.text)).setText(courses.get(position).getAd_name());
         container.addView(view);
         return view;
     }

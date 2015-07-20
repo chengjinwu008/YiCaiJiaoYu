@@ -1,41 +1,23 @@
 package com.cjq.yicaijiaoyu.entities;
 
-import com.cjq.yicaijiaoyu.adapter.CommentsAdapter;
+import com.cjq.yicaijiaoyu.dao.Course;
 
 /**
  * Created by CJQ on 2015/6/26.
  */
 public class CommentsResultEvent {
 
-    CommentsAdapter adapter;
-    String gid;
-    String userId;
+    Course course;
 
-    public String getGid() {
-        return gid;
+    public CommentsResultEvent(Course course) {
+        this.course = course;
     }
 
-    public void setGid(String gid) {
-        this.gid = gid;
+    public Course getCourse() {
+        return course;
     }
 
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public CommentsResultEvent(CommentsAdapter adapter) {
-        this.adapter = adapter;
-    }
-
-    public CommentsAdapter getAdapter() {
-        return adapter;
-    }
-
-    public void setAdapter(CommentsAdapter adapter) {
-        this.adapter = adapter;
+    public void setCourse(Course course) {
+        this.course = course;
     }
 }

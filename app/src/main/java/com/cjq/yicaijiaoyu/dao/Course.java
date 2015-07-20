@@ -1,5 +1,6 @@
 package com.cjq.yicaijiaoyu.dao;
 
+import java.util.List;
 import com.cjq.yicaijiaoyu.dao.DaoSession;
 import de.greenrobot.dao.DaoException;
 
@@ -13,16 +14,27 @@ import de.greenrobot.dao.DaoException;
 public class Course {
 
     private Long id;
-    private String length;
-    private Integer progress;
-    private String requestApi;
-    private String thumb;
-    private String title;
-    private String lectureName;
-    private String category;
-    private String intro;
-    private String courseId;
-    private Boolean free;
+    private String name;
+    private Boolean giftBag;
+    private Integer authority;
+    private String image;
+    private String userId;
+    private Long order;
+    private Boolean cared;
+    private String categoryName;
+    private Boolean bought;
+    private String goods_id;
+    private Long categoryId;
+    private String info;
+    private String parent_goods_id;
+
+    public void setLectureList(List<Lecture> lectureList) {
+        this.lectureList = lectureList;
+    }
+
+    public void setCourseList(List<Course> courseList) {
+        this.courseList = courseList;
+    }
 
     /** Used to resolve relations */
     private transient DaoSession daoSession;
@@ -30,6 +42,8 @@ public class Course {
     /** Used for active entity operations. */
     private transient CourseDao myDao;
 
+    private List<Course> courseList;
+    private List<Lecture> lectureList;
 
     // KEEP FIELDS - put your custom fields here
     // KEEP FIELDS END
@@ -41,18 +55,21 @@ public class Course {
         this.id = id;
     }
 
-    public Course(Long id, String length, Integer progress, String requestApi, String thumb, String title, String lectureName, String category, String intro, String courseId, Boolean free) {
+    public Course(Long id, String name, Boolean giftBag, Integer authority, String image, String userId, Long order, Boolean cared, String categoryName, Boolean bought, String goods_id, Long categoryId, String info, String parent_goods_id) {
         this.id = id;
-        this.length = length;
-        this.progress = progress;
-        this.requestApi = requestApi;
-        this.thumb = thumb;
-        this.title = title;
-        this.lectureName = lectureName;
-        this.category = category;
-        this.intro = intro;
-        this.courseId = courseId;
-        this.free = free;
+        this.name = name;
+        this.giftBag = giftBag;
+        this.authority = authority;
+        this.image = image;
+        this.userId = userId;
+        this.order = order;
+        this.cared = cared;
+        this.categoryName = categoryName;
+        this.bought = bought;
+        this.goods_id = goods_id;
+        this.categoryId = categoryId;
+        this.info = info;
+        this.parent_goods_id = parent_goods_id;
     }
 
     /** called by internal mechanisms, do not call yourself. */
@@ -69,84 +86,152 @@ public class Course {
         this.id = id;
     }
 
-    public String getLength() {
-        return length;
+    public String getName() {
+        return name;
     }
 
-    public void setLength(String length) {
-        this.length = length;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public Integer getProgress() {
-        return progress;
+    public Boolean getGiftBag() {
+        return giftBag;
     }
 
-    public void setProgress(Integer progress) {
-        this.progress = progress;
+    public void setGiftBag(Boolean giftBag) {
+        this.giftBag = giftBag;
     }
 
-    public String getRequestApi() {
-        return requestApi;
+    public Integer getAuthority() {
+        return authority;
     }
 
-    public void setRequestApi(String requestApi) {
-        this.requestApi = requestApi;
+    public void setAuthority(Integer authority) {
+        this.authority = authority;
     }
 
-    public String getThumb() {
-        return thumb;
+    public String getImage() {
+        return image;
     }
 
-    public void setThumb(String thumb) {
-        this.thumb = thumb;
+    public void setImage(String image) {
+        this.image = image;
     }
 
-    public String getTitle() {
-        return title;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
-    public String getLectureName() {
-        return lectureName;
+    public Long getOrder() {
+        return order;
     }
 
-    public void setLectureName(String lectureName) {
-        this.lectureName = lectureName;
+    public void setOrder(Long order) {
+        this.order = order;
     }
 
-    public String getCategory() {
-        return category;
+    public Boolean getCared() {
+        return cared;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
+    public void setCared(Boolean cared) {
+        this.cared = cared;
     }
 
-    public String getIntro() {
-        return intro;
+    public String getCategoryName() {
+        return categoryName;
     }
 
-    public void setIntro(String intro) {
-        this.intro = intro;
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
     }
 
-    public String getCourseId() {
-        return courseId;
+    public Boolean getBought() {
+        return bought;
     }
 
-    public void setCourseId(String courseId) {
-        this.courseId = courseId;
+    public void setBought(Boolean bought) {
+        this.bought = bought;
     }
 
-    public Boolean getFree() {
-        return free;
+    public String getGoods_id() {
+        return goods_id;
     }
 
-    public void setFree(Boolean free) {
-        this.free = free;
+    public void setGoods_id(String goods_id) {
+        this.goods_id = goods_id;
+    }
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public String getInfo() {
+        return info;
+    }
+
+    public void setInfo(String info) {
+        this.info = info;
+    }
+
+    public String getParent_goods_id() {
+        return parent_goods_id;
+    }
+
+    public void setParent_goods_id(String parent_goods_id) {
+        this.parent_goods_id = parent_goods_id;
+    }
+
+    /** To-many relationship, resolved on first access (and after reset). Changes to to-many relations are not persisted, make changes to the target entity. */
+    public List<Course> getCourseList() {
+        if (courseList == null) {
+            if (daoSession == null) {
+                throw new DaoException("Entity is detached from DAO context");
+            }
+            CourseDao targetDao = daoSession.getCourseDao();
+            List<Course> courseListNew = targetDao._queryCourse_CourseList(goods_id);
+            synchronized (this) {
+                if(courseList == null) {
+                    courseList = courseListNew;
+                }
+            }
+        }
+        return courseList;
+    }
+
+    /** Resets a to-many relationship, making the next get call to query for a fresh result. */
+    public synchronized void resetCourseList() {
+        courseList = null;
+    }
+
+    /** To-many relationship, resolved on first access (and after reset). Changes to to-many relations are not persisted, make changes to the target entity. */
+    public List<Lecture> getLectureList() {
+        if (lectureList == null) {
+            if (daoSession == null) {
+                throw new DaoException("Entity is detached from DAO context");
+            }
+            LectureDao targetDao = daoSession.getLectureDao();
+            List<Lecture> lectureListNew = targetDao._queryCourse_LectureList(goods_id);
+            synchronized (this) {
+                if(lectureList == null) {
+                    lectureList = lectureListNew;
+                }
+            }
+        }
+        return lectureList;
+    }
+
+    /** Resets a to-many relationship, making the next get call to query for a fresh result. */
+    public synchronized void resetLectureList() {
+        lectureList = null;
     }
 
     /** Convenient call for {@link AbstractDao#delete(Object)}. Entity must attached to an entity context. */

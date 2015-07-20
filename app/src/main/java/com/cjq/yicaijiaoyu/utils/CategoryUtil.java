@@ -1,19 +1,12 @@
 package com.cjq.yicaijiaoyu.utils;
 
-import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.View;
-
 import com.cjq.yicaijiaoyu.CommonDataObject;
-import com.cjq.yicaijiaoyu.R;
 import com.cjq.yicaijiaoyu.entities.CategoryEntity;
-import com.cjq.yicaijiaoyu.entities.CourseEntity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.util.List;
 
 /**

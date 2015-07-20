@@ -3,11 +3,11 @@ package com.cjq.yicaijiaoyu.entities;
 /**
  * Created by CJQ on 2015/7/2.
  */
-public class VideoInfoRequestEntity {
+public class CourseInfoRequestEntity {
     String code;
     Data data;
 
-    public VideoInfoRequestEntity(String code, Data data) {
+    public CourseInfoRequestEntity(String code, Data data) {
         this.code = code;
         this.data = data;
     }

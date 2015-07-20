@@ -77,4 +77,6 @@
     <string name="no_rom">SD卡容量不够</string>
     <string name="off_line_videos">已离线的视频</string>
     <string name="clean_hint">将要清空该缓存，确定吗？</string>
+    <string name="free_for_member">会员免费</string>
+    <string name="card">学习卡免费</string>
 </resources>

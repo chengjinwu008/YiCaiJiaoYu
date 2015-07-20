@@ -1,5 +1,6 @@
 package com.cjq.yicaijiaoyu.dao;
 
+import java.util.List;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
@@ -7,6 +8,8 @@ import android.database.sqlite.SQLiteStatement;
 import de.greenrobot.dao.AbstractDao;
 import de.greenrobot.dao.Property;
 import de.greenrobot.dao.internal.DaoConfig;
+import de.greenrobot.dao.query.Query;
+import de.greenrobot.dao.query.QueryBuilder;
 
 import com.cjq.yicaijiaoyu.dao.Video;
 
@@ -27,10 +30,19 @@ public class VideoDao extends AbstractDao<Video, Long> {
         public final static Property Vid = new Property(1, String.class, "vid", false, "VID");
         public final static Property Name = new Property(2, String.class, "name", false, "NAME");
         public final static Property Seek = new Property(3, Long.class, "seek", false, "SEEK");
+        public final static Property Length = new Property(4, Long.class, "length", false, "LENGTH");
+        public final static Property Size = new Property(5, Long.class, "size", false, "SIZE");
+        public final static Property UserId = new Property(6, String.class, "userId", false, "USER_ID");
+        public final static Property Cached = new Property(7, Boolean.class, "cached", false, "CACHED");
+        public final static Property Free = new Property(8, Boolean.class, "free", false, "FREE");
+        public final static Property Order = new Property(9, String.class, "order", false, "ORDER");
+        public final static Property Chapter_id = new Property(10, String.class, "chapter_id", false, "CHAPTER_ID");
+        public final static Property Goods_id = new Property(11, String.class, "goods_id", false, "GOODS_ID");
     };
 
     private DaoSession daoSession;
 
+    private Query<Video> chapter_VideoListQuery;
 
     public VideoDao(DaoConfig config) {
         super(config);
@@ -45,10 +57,18 @@ public class VideoDao extends AbstractDao<Video, Long> {
     public static void createTable(SQLiteDatabase db, boolean ifNotExists) {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "'VIDEO' (" + //
-                "'_id' INTEGER PRIMARY KEY ," + // 0: id
+                "'_id' INTEGER PRIMARY KEY AUTOINCREMENT ," + // 0: id
                 "'VID' TEXT," + // 1: vid
                 "'NAME' TEXT," + // 2: name
-                "'SEEK' INTEGER);"); // 3: seek
+                "'SEEK' INTEGER," + // 3: seek
+                "'LENGTH' INTEGER," + // 4: length
+                "'SIZE' INTEGER," + // 5: size
+                "'USER_ID' TEXT," + // 6: userId
+                "'CACHED' INTEGER," + // 7: cached
+                "'FREE' INTEGER," + // 8: free
+                "'ORDER' TEXT," + // 9: order
+                "'CHAPTER_ID' TEXT," + // 10: chapter_id
+                "'GOODS_ID' TEXT);"); // 11: goods_id
     }
 
     /** Drops the underlying database table. */
@@ -81,6 +101,46 @@ public class VideoDao extends AbstractDao<Video, Long> {
         if (seek != null) {
             stmt.bindLong(4, seek);
         }
+ 
+        Long length = entity.getLength();
+        if (length != null) {
+            stmt.bindLong(5, length);
+        }
+ 
+        Long size = entity.getSize();
+        if (size != null) {
+            stmt.bindLong(6, size);
+        }
+ 
+        String userId = entity.getUserId();
+        if (userId != null) {
+            stmt.bindString(7, userId);
+        }
+ 
+        Boolean cached = entity.getCached();
+        if (cached != null) {
+            stmt.bindLong(8, cached ? 1l: 0l);
+        }
+ 
+        Boolean free = entity.getFree();
+        if (free != null) {
+            stmt.bindLong(9, free ? 1l: 0l);
+        }
+ 
+        String order = entity.getOrder();
+        if (order != null) {
+            stmt.bindString(10, order);
+        }
+ 
+        String chapter_id = entity.getChapter_id();
+        if (chapter_id != null) {
+            stmt.bindString(11, chapter_id);
+        }
+ 
+        String goods_id = entity.getGoods_id();
+        if (goods_id != null) {
+            stmt.bindString(12, goods_id);
+        }
     }
 
     @Override
@@ -102,7 +162,15 @@ public class VideoDao extends AbstractDao<Video, Long> {
             cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
             cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // vid
             cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // name
-            cursor.isNull(offset + 3) ? null : cursor.getLong(offset + 3) // seek
+            cursor.isNull(offset + 3) ? null : cursor.getLong(offset + 3), // seek
+            cursor.isNull(offset + 4) ? null : cursor.getLong(offset + 4), // length
+            cursor.isNull(offset + 5) ? null : cursor.getLong(offset + 5), // size
+            cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6), // userId
+            cursor.isNull(offset + 7) ? null : cursor.getShort(offset + 7) != 0, // cached
+            cursor.isNull(offset + 8) ? null : cursor.getShort(offset + 8) != 0, // free
+            cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9), // order
+            cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10), // chapter_id
+            cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11) // goods_id
         );
         return entity;
     }
@@ -114,6 +182,14 @@ public class VideoDao extends AbstractDao<Video, Long> {
         entity.setVid(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
         entity.setName(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
         entity.setSeek(cursor.isNull(offset + 3) ? null : cursor.getLong(offset + 3));
+        entity.setLength(cursor.isNull(offset + 4) ? null : cursor.getLong(offset + 4));
+        entity.setSize(cursor.isNull(offset + 5) ? null : cursor.getLong(offset + 5));
+        entity.setUserId(cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6));
+        entity.setCached(cursor.isNull(offset + 7) ? null : cursor.getShort(offset + 7) != 0);
+        entity.setFree(cursor.isNull(offset + 8) ? null : cursor.getShort(offset + 8) != 0);
+        entity.setOrder(cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9));
+        entity.setChapter_id(cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10));
+        entity.setGoods_id(cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11));
      }
     
     /** @inheritdoc */
@@ -139,4 +215,20 @@ public class VideoDao extends AbstractDao<Video, Long> {
         return true;
     }
     
+    /** Internal query to resolve the "videoList" to-many relationship of Chapter. */
+    public List<Video> _queryChapter_VideoList(String chapter_id, String goods_id) {
+        synchronized (this) {
+            if (chapter_VideoListQuery == null) {
+                QueryBuilder<Video> queryBuilder = queryBuilder();
+                queryBuilder.where(Properties.Chapter_id.eq(null));
+                queryBuilder.where(Properties.Goods_id.eq(null));
+                chapter_VideoListQuery = queryBuilder.build();
+            }
+        }
+        Query<Video> query = chapter_VideoListQuery.forCurrentThread();
+        query.setParameter(0, chapter_id);
+        query.setParameter(1, goods_id);
+        return query.list();
+    }
+
 }

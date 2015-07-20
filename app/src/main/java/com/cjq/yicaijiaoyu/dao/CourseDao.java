@@ -1,5 +1,6 @@
 package com.cjq.yicaijiaoyu.dao;
 
+import java.util.List;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
@@ -7,6 +8,8 @@ import android.database.sqlite.SQLiteStatement;
 import de.greenrobot.dao.AbstractDao;
 import de.greenrobot.dao.Property;
 import de.greenrobot.dao.internal.DaoConfig;
+import de.greenrobot.dao.query.Query;
+import de.greenrobot.dao.query.QueryBuilder;
 
 import com.cjq.yicaijiaoyu.dao.Course;
 
@@ -24,20 +27,24 @@ public class CourseDao extends AbstractDao<Course, Long> {
     */
     public static class Properties {
         public final static Property Id = new Property(0, Long.class, "id", true, "_id");
-        public final static Property Length = new Property(1, String.class, "length", false, "LENGTH");
-        public final static Property Progress = new Property(2, Integer.class, "progress", false, "PROGRESS");
-        public final static Property RequestApi = new Property(3, String.class, "requestApi", false, "REQUEST_API");
-        public final static Property Thumb = new Property(4, String.class, "thumb", false, "THUMB");
-        public final static Property Title = new Property(5, String.class, "title", false, "TITLE");
-        public final static Property LectureName = new Property(6, String.class, "lectureName", false, "LECTURE_NAME");
-        public final static Property Category = new Property(7, String.class, "category", false, "CATEGORY");
-        public final static Property Intro = new Property(8, String.class, "intro", false, "INTRO");
-        public final static Property CourseId = new Property(9, String.class, "courseId", false, "COURSE_ID");
-        public final static Property Free = new Property(10, Boolean.class, "free", false, "FREE");
+        public final static Property Name = new Property(1, String.class, "name", false, "NAME");
+        public final static Property GiftBag = new Property(2, Boolean.class, "giftBag", false, "GIFT_BAG");
+        public final static Property Authority = new Property(3, Integer.class, "authority", false, "AUTHORITY");
+        public final static Property Image = new Property(4, String.class, "image", false, "IMAGE");
+        public final static Property UserId = new Property(5, String.class, "userId", false, "USER_ID");
+        public final static Property Order = new Property(6, Long.class, "order", false, "ORDER");
+        public final static Property Cared = new Property(7, Boolean.class, "cared", false, "CARED");
+        public final static Property CategoryName = new Property(8, String.class, "categoryName", false, "CATEGORY_NAME");
+        public final static Property Bought = new Property(9, Boolean.class, "bought", false, "BOUGHT");
+        public final static Property Goods_id = new Property(10, String.class, "goods_id", false, "GOODS_ID");
+        public final static Property CategoryId = new Property(11, Long.class, "categoryId", false, "CATEGORY_ID");
+        public final static Property Info = new Property(12, String.class, "info", false, "INFO");
+        public final static Property Parent_goods_id = new Property(13, String.class, "parent_goods_id", false, "PARENT_GOODS_ID");
     };
 
     private DaoSession daoSession;
 
+    private Query<Course> course_CourseListQuery;
 
     public CourseDao(DaoConfig config) {
         super(config);
@@ -52,17 +59,20 @@ public class CourseDao extends AbstractDao<Course, Long> {
     public static void createTable(SQLiteDatabase db, boolean ifNotExists) {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "'COURSE' (" + //
-                "'_id' INTEGER PRIMARY KEY ," + // 0: id
-                "'LENGTH' TEXT," + // 1: length
-                "'PROGRESS' INTEGER," + // 2: progress
-                "'REQUEST_API' TEXT," + // 3: requestApi
-                "'THUMB' TEXT," + // 4: thumb
-                "'TITLE' TEXT," + // 5: title
-                "'LECTURE_NAME' TEXT," + // 6: lectureName
-                "'CATEGORY' TEXT," + // 7: category
-                "'INTRO' TEXT," + // 8: intro
-                "'COURSE_ID' TEXT," + // 9: courseId
-                "'FREE' INTEGER);"); // 10: free
+                "'_id' INTEGER PRIMARY KEY AUTOINCREMENT ," + // 0: id
+                "'NAME' TEXT," + // 1: name
+                "'GIFT_BAG' INTEGER," + // 2: giftBag
+                "'AUTHORITY' INTEGER," + // 3: authority
+                "'IMAGE' TEXT," + // 4: image
+                "'USER_ID' TEXT," + // 5: userId
+                "'ORDER' INTEGER," + // 6: order
+                "'CARED' INTEGER," + // 7: cared
+                "'CATEGORY_NAME' TEXT," + // 8: categoryName
+                "'BOUGHT' INTEGER," + // 9: bought
+                "'GOODS_ID' TEXT," + // 10: goods_id
+                "'CATEGORY_ID' INTEGER," + // 11: categoryId
+                "'INFO' TEXT," + // 12: info
+                "'PARENT_GOODS_ID' TEXT);"); // 13: parent_goods_id
     }
 
     /** Drops the underlying database table. */
@@ -81,54 +91,69 @@ public class CourseDao extends AbstractDao<Course, Long> {
             stmt.bindLong(1, id);
         }
  
-        String length = entity.getLength();
-        if (length != null) {
-            stmt.bindString(2, length);
+        String name = entity.getName();
+        if (name != null) {
+            stmt.bindString(2, name);
         }
  
-        Integer progress = entity.getProgress();
-        if (progress != null) {
-            stmt.bindLong(3, progress);
+        Boolean giftBag = entity.getGiftBag();
+        if (giftBag != null) {
+            stmt.bindLong(3, giftBag ? 1l: 0l);
         }
  
-        String requestApi = entity.getRequestApi();
-        if (requestApi != null) {
-            stmt.bindString(4, requestApi);
+        Integer authority = entity.getAuthority();
+        if (authority != null) {
+            stmt.bindLong(4, authority);
         }
  
-        String thumb = entity.getThumb();
-        if (thumb != null) {
-            stmt.bindString(5, thumb);
+        String image = entity.getImage();
+        if (image != null) {
+            stmt.bindString(5, image);
         }
  
-        String title = entity.getTitle();
-        if (title != null) {
-            stmt.bindString(6, title);
+        String userId = entity.getUserId();
+        if (userId != null) {
+            stmt.bindString(6, userId);
         }
  
-        String lectureName = entity.getLectureName();
-        if (lectureName != null) {
-            stmt.bindString(7, lectureName);
+        Long order = entity.getOrder();
+        if (order != null) {
+            stmt.bindLong(7, order);
         }
  
-        String category = entity.getCategory();
-        if (category != null) {
-            stmt.bindString(8, category);
+        Boolean cared = entity.getCared();
+        if (cared != null) {
+            stmt.bindLong(8, cared ? 1l: 0l);
         }
  
-        String intro = entity.getIntro();
-        if (intro != null) {
-            stmt.bindString(9, intro);
+        String categoryName = entity.getCategoryName();
+        if (categoryName != null) {
+            stmt.bindString(9, categoryName);
         }
  
-        String courseId = entity.getCourseId();
-        if (courseId != null) {
-            stmt.bindString(10, courseId);
+        Boolean bought = entity.getBought();
+        if (bought != null) {
+            stmt.bindLong(10, bought ? 1l: 0l);
         }
  
-        Boolean free = entity.getFree();
-        if (free != null) {
-            stmt.bindLong(11, free ? 1l: 0l);
+        String goods_id = entity.getGoods_id();
+        if (goods_id != null) {
+            stmt.bindString(11, goods_id);
+        }
+ 
+        Long categoryId = entity.getCategoryId();
+        if (categoryId != null) {
+            stmt.bindLong(12, categoryId);
+        }
+ 
+        String info = entity.getInfo();
+        if (info != null) {
+            stmt.bindString(13, info);
+        }
+ 
+        String parent_goods_id = entity.getParent_goods_id();
+        if (parent_goods_id != null) {
+            stmt.bindString(14, parent_goods_id);
         }
     }
 
@@ -149,16 +174,19 @@ public class CourseDao extends AbstractDao<Course, Long> {
     public Course readEntity(Cursor cursor, int offset) {
         Course entity = new Course( //
             cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
-            cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // length
-            cursor.isNull(offset + 2) ? null : cursor.getInt(offset + 2), // progress
-            cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // requestApi
-            cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // thumb
-            cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // title
-            cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6), // lectureName
-            cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7), // category
-            cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8), // intro
-            cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9), // courseId
-            cursor.isNull(offset + 10) ? null : cursor.getShort(offset + 10) != 0 // free
+            cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // name
+            cursor.isNull(offset + 2) ? null : cursor.getShort(offset + 2) != 0, // giftBag
+            cursor.isNull(offset + 3) ? null : cursor.getInt(offset + 3), // authority
+            cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // image
+            cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // userId
+            cursor.isNull(offset + 6) ? null : cursor.getLong(offset + 6), // order
+            cursor.isNull(offset + 7) ? null : cursor.getShort(offset + 7) != 0, // cared
+            cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8), // categoryName
+            cursor.isNull(offset + 9) ? null : cursor.getShort(offset + 9) != 0, // bought
+            cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10), // goods_id
+            cursor.isNull(offset + 11) ? null : cursor.getLong(offset + 11), // categoryId
+            cursor.isNull(offset + 12) ? null : cursor.getString(offset + 12), // info
+            cursor.isNull(offset + 13) ? null : cursor.getString(offset + 13) // parent_goods_id
         );
         return entity;
     }
@@ -167,16 +195,19 @@ public class CourseDao extends AbstractDao<Course, Long> {
     @Override
     public void readEntity(Cursor cursor, Course entity, int offset) {
         entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
-        entity.setLength(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
-        entity.setProgress(cursor.isNull(offset + 2) ? null : cursor.getInt(offset + 2));
-        entity.setRequestApi(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
-        entity.setThumb(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
-        entity.setTitle(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
-        entity.setLectureName(cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6));
-        entity.setCategory(cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7));
-        entity.setIntro(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));
-        entity.setCourseId(cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9));
-        entity.setFree(cursor.isNull(offset + 10) ? null : cursor.getShort(offset + 10) != 0);
+        entity.setName(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
+        entity.setGiftBag(cursor.isNull(offset + 2) ? null : cursor.getShort(offset + 2) != 0);
+        entity.setAuthority(cursor.isNull(offset + 3) ? null : cursor.getInt(offset + 3));
+        entity.setImage(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
+        entity.setUserId(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
+        entity.setOrder(cursor.isNull(offset + 6) ? null : cursor.getLong(offset + 6));
+        entity.setCared(cursor.isNull(offset + 7) ? null : cursor.getShort(offset + 7) != 0);
+        entity.setCategoryName(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));
+        entity.setBought(cursor.isNull(offset + 9) ? null : cursor.getShort(offset + 9) != 0);
+        entity.setGoods_id(cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10));
+        entity.setCategoryId(cursor.isNull(offset + 11) ? null : cursor.getLong(offset + 11));
+        entity.setInfo(cursor.isNull(offset + 12) ? null : cursor.getString(offset + 12));
+        entity.setParent_goods_id(cursor.isNull(offset + 13) ? null : cursor.getString(offset + 13));
      }
     
     /** @inheritdoc */
@@ -202,4 +233,18 @@ public class CourseDao extends AbstractDao<Course, Long> {
         return true;
     }
     
+    /** Internal query to resolve the "courseList" to-many relationship of Course. */
+    public List<Course> _queryCourse_CourseList(String parent_goods_id) {
+        synchronized (this) {
+            if (course_CourseListQuery == null) {
+                QueryBuilder<Course> queryBuilder = queryBuilder();
+                queryBuilder.where(Properties.Parent_goods_id.eq(null));
+                course_CourseListQuery = queryBuilder.build();
+            }
+        }
+        Query<Course> query = course_CourseListQuery.forCurrentThread();
+        query.setParameter(0, parent_goods_id);
+        return query.list();
+    }
+
 }

@@ -10,6 +10,8 @@ import android.widget.TextView;
 
 import com.cjq.yicaijiaoyu.CommonDataObject;
 import com.cjq.yicaijiaoyu.R;
+import com.cjq.yicaijiaoyu.dao.Category;
+import com.cjq.yicaijiaoyu.dao.Course;
 import com.cjq.yicaijiaoyu.entities.CategoryEntity;
 import com.cjq.yicaijiaoyu.entities.CourseCategory;
 import com.cjq.yicaijiaoyu.utils.ImageUtil;
@@ -20,10 +22,10 @@ import java.util.List;
  * Created by CJQ on 2015/6/24.
  */
 public class CourseCategoryAdapter extends BaseAdapter {
-    List<CategoryEntity> list;
+    List<Category> list;
     Context context;
 
-    public CourseCategoryAdapter(List<CategoryEntity> list, Context context) {
+    public CourseCategoryAdapter(List<Category> list, Context context) {
         this.list = list;
         this.context = context;
     }
@@ -54,12 +56,12 @@ public class CourseCategoryAdapter extends BaseAdapter {
             convertView.setTag(holder);
         }
 
-        CategoryEntity categoryEntity = list.get(position);
+        Category categoryEntity = list.get(position);
         ViewHolder holder = (ViewHolder) convertView.getTag();
-        if(categoryEntity.getImageId()!=null)
-        ImageUtil.LoadImage(context,categoryEntity.getImageId(),holder.imageView);
+        if(categoryEntity.getImage()!=null)
+        ImageUtil.LoadImage(context,categoryEntity.getImage(),holder.imageView);
         else
-        ImageUtil.LoadImage(context,categoryEntity.getImageResource(),holder.imageView);
+        ImageUtil.LoadImage(context,categoryEntity.getImage(),holder.imageView);
         holder.textView.setText(categoryEntity.getName());
         if(CommonDataObject.categoryChecked==position)
             holder.view.setVisibility(View.VISIBLE);

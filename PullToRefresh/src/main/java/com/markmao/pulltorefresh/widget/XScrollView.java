@@ -380,7 +380,6 @@ public class XScrollView extends ScrollView implements OnScrollListener {
             case MotionEvent.ACTION_DOWN:
                 mLastY = ev.getRawY();
                 break;
-
             case MotionEvent.ACTION_MOVE:
                 final float deltaY = ev.getRawY() - mLastY;
                 mLastY = ev.getRawY();
@@ -396,11 +395,9 @@ public class XScrollView extends ScrollView implements OnScrollListener {
 
                 }
                 break;
-
             default:
                 // reset
                 mLastY = -1;
-
                 resetHeaderOrBottom();
                 break;
         }

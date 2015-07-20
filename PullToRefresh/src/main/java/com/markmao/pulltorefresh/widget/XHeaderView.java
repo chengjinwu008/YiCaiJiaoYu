@@ -112,7 +112,6 @@ public class XHeaderView extends LinearLayout {
                     mHintTextView.setText(R.string.header_hint_refresh_ready);
                 }
                 break;
-
             case STATE_REFRESHING:
                 mHintTextView.setText(R.string.header_hint_refresh_loading);
                 break;

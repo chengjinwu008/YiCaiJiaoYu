@@ -12,11 +12,15 @@ import com.cjq.yicaijiaoyu.activities.MainActivity;
 public class AccountUtil {
 
     public static boolean isLoggedIn(Context context){
-        return getUserId(context) != null;
+        String id = getUserId(context);
+        return  id!= null && !"0".equals(id);
     }
 
     public static String getUserId(Context context){
-        return SharedPreferenceUtil.getInstance(context).readString(SharedPreferenceUtil.USER_ID);
+        String name=SharedPreferenceUtil.getInstance(context).readString(SharedPreferenceUtil.USER_ID);
+        if(name==null)
+            return "0";
+        return name;
     }
 
     public static void doLogin(){

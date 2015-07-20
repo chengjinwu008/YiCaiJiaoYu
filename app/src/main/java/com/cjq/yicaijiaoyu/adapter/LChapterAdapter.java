@@ -8,11 +8,8 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.cjq.yicaijiaoyu.CommonDataObject;
 import com.cjq.yicaijiaoyu.R;
-import com.cjq.yicaijiaoyu.entities.CourseEntity;
-import com.cjq.yicaijiaoyu.entities.VideoEntity;
-import com.cjq.yicaijiaoyu.utils.ImageUtil;
+import com.cjq.yicaijiaoyu.dao.Video;
 
 import java.util.List;
 
@@ -20,18 +17,18 @@ import java.util.List;
  * Created by CJQ on 2015/6/26.
  */
 public class LChapterAdapter extends BaseAdapter {
-    List<VideoEntity> courses;
+    List<Video> courses;
     Context context;
 
-    public List<VideoEntity> getCourses() {
+    public List<Video> getCourses() {
         return courses;
     }
 
-    public void setCourses(List<VideoEntity> courses) {
+    public void setCourses(List<Video> courses) {
         this.courses = courses;
     }
 
-    public LChapterAdapter(List<VideoEntity> courses, Context context) {
+    public LChapterAdapter(List<Video> courses, Context context) {
         this.courses = courses;
         this.context = context;
     }
@@ -63,19 +60,19 @@ public class LChapterAdapter extends BaseAdapter {
             convertView.setTag(viewHolder);
         }
 
-        VideoEntity course = courses.get(position);
+        Video course = courses.get(position);
         ViewHolder holder = (ViewHolder) convertView.getTag();
-        if(CommonDataObject.nowPlayingId!=null && CommonDataObject.nowPlayingId.equals(course.getVid())){
-            ImageUtil.LoadImage(context,R.drawable.bofang_xuan,holder.imageView);
-            holder.title.setText(course.getName());
-            holder.time.setText("3:30");
-            holder.title.setTextColor(context.getResources().getColor(R.color.main_titlebar_background));
-            holder.time.setTextColor(context.getResources().getColor(R.color.main_titlebar_background));
-        }else{
-            ImageUtil.LoadImage(context,R.drawable.bofang,holder.imageView);
-            holder.title.setText(course.getName());
-            holder.time.setText("3:30");
-        }
+//        if(CommonDataObject.nowPlayingId!=null && CommonDataObject.nowPlayingId.equals(course.getVid())){
+//            ImageUtil.LoadImage(context, R.drawable.bofang_xuan, holder.imageView);
+//            holder.title.setText(course.getName());
+//            holder.time.setText(getLength(course.getLength()));
+//            holder.title.setTextColor(context.getResources().getColor(R.color.main_titlebar_background));
+//            holder.time.setTextColor(context.getResources().getColor(R.color.main_titlebar_background));
+//        }else{
+//            ImageUtil.LoadImage(context,R.drawable.bofang,holder.imageView);
+//            holder.title.setText(course.getName());
+//            holder.time.setText(getLength(course.getLength()));
+//        }
         return convertView;
     }
 
@@ -83,5 +80,13 @@ public class LChapterAdapter extends BaseAdapter {
         ImageView imageView;
         TextView title;
         TextView time;
+    }
+
+    private String getLength(Long length){
+        long len = length/1000;
+        int h= (int) (len/3600);
+        int m= (int) ((len-h*3600)/60);
+        int s = (int) (len-h*3600-m*60);
+        return String.format("%02d", h) + ":" + String.format("%02d", h) + ":" + String.format("%02d", h);
     }
 }

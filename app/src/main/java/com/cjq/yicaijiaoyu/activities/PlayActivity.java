@@ -15,13 +15,11 @@ import android.os.StatFs;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -38,26 +36,20 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.cjq.yicaijiaoyu.CommonDataObject;
 import com.cjq.yicaijiaoyu.R;
-import com.cjq.yicaijiaoyu.adapter.ChapterAdapter;
-import com.cjq.yicaijiaoyu.adapter.CommentsAdapter;
 import com.cjq.yicaijiaoyu.adapter.PagerAdapter;
+import com.cjq.yicaijiaoyu.dao.Comments;
 import com.cjq.yicaijiaoyu.dao.Course;
 import com.cjq.yicaijiaoyu.entities.AuthorityRequestEntity;
 import com.cjq.yicaijiaoyu.entities.ChapterEntity;
 import com.cjq.yicaijiaoyu.entities.ChapterRequestEntity;
 import com.cjq.yicaijiaoyu.entities.ChapterRequestEvent;
-import com.cjq.yicaijiaoyu.entities.ChapterResultEvent;
-import com.cjq.yicaijiaoyu.entities.CommentsEntity;
 import com.cjq.yicaijiaoyu.entities.CommentsRequestEntity;
 import com.cjq.yicaijiaoyu.entities.CommentsRequestEvent;
 import com.cjq.yicaijiaoyu.entities.CommentsResultEvent;
-import com.cjq.yicaijiaoyu.entities.CourseEntity;
-import com.cjq.yicaijiaoyu.entities.FavoriteEntity;
+import com.cjq.yicaijiaoyu.entities.CourseInfoRequestEntity;
 import com.cjq.yicaijiaoyu.entities.NeedVideoInfoEvent;
-import com.cjq.yicaijiaoyu.entities.UserEntity;
 import com.cjq.yicaijiaoyu.entities.VideoEntity;
 import com.cjq.yicaijiaoyu.entities.VideoInfoEvent;
-import com.cjq.yicaijiaoyu.entities.VideoInfoRequestEntity;
 import com.cjq.yicaijiaoyu.fragments.ChapterFragment;
 import com.cjq.yicaijiaoyu.fragments.CommentsFragment;
 import com.cjq.yicaijiaoyu.fragments.CourseInfoFragment;
@@ -65,7 +57,6 @@ import com.cjq.yicaijiaoyu.utils.AccountUtil;
 import com.cjq.yicaijiaoyu.utils.CommentsUtil;
 import com.cjq.yicaijiaoyu.utils.CourseHistoryUtil;
 import com.cjq.yicaijiaoyu.utils.DialogUtil;
-import com.cjq.yicaijiaoyu.utils.MessageDiagestUtil;
 import com.cjq.yicaijiaoyu.utils.NetStateUtil;
 import com.cjq.yicaijiaoyu.videoPlayer.DBservice;
 import com.cjq.yicaijiaoyu.videoPlayer.DownloadInfo;
@@ -74,7 +65,6 @@ import com.easefun.polyvsdk.PolyvDownloadProgressListener;
 import com.easefun.polyvsdk.PolyvDownloader;
 import com.easefun.polyvsdk.PolyvSDKClient;
 import com.easefun.polyvsdk.SDKUtil;
-import com.easefun.polyvsdk.Video;
 import com.easefun.polyvsdk.ijk.IjkVideoView;
 import com.ypy.eventbus.EventBus;
 
@@ -84,27 +74,18 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class PlayActivity extends BaseActivity implements View.OnClickListener, ViewPager.OnPageChangeListener {
-
-    public static final String URL = "url";
-    public static final String TITLE = "title";
-    public static final String PROGRESS = "progress";
-    public static final String LEC_NAME = "lectureName";
-    public static final String LEC_INTRO = "lectureIntro";
-    public static final String LEC_PORT = "lecturePortrait";
-    public static final String INTRO = "intro";
     public static final String ID = "id";
-    public static final String FREE = "free";
     private MediaController mediaController;
     private static int fragment_chosen = 2;
     private TextView detail;
     private TextView pinlun;
     private TextView chapter;
+    private int nowCommentsPage=0;
     private View soap;
     private String lec_portrait;
     private String lec_name;
@@ -130,171 +111,25 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
     private BroadcastReceiver connectionReceiver;
     private PolyvDownloader downloader;
     private Handler mHandler=new Handler();
+    private Course course;
 
     //详情请求回调
     public void onEventBackgroundThread(NeedVideoInfoEvent e) {
         //接到请求视频信息的请求
-        sendInfo();
-    }
-
-    private void sendInfo() {
-        VideoInfoEvent event = new VideoInfoEvent(lec_portrait, lec_name, lec_info, video_info);
-
-        EventBus.getDefault().post(event);
+        EventBus.getDefault().post(new VideoInfoEvent(course));
     }
 
     //评论请求回调
     public void onEventBackgroundThread(CommentsRequestEvent e) {
-        //todo 发起对视频评论的请求
-
-        final StringRequest request = new StringRequest(Request.Method.POST, CommonDataObject.COMMENTS_REQUEST_URL, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String s) {
-                try {
-                    JSONObject object = new JSONObject(s);
-                    if ("0000".equals(object.getString("code"))) {
-                        JSONArray comments = object.getJSONObject("data").getJSONObject("data").getJSONArray("data");
-                        List<CommentsEntity> commentsEntities = new ArrayList<>();
-                        for (int i = 0; i < comments.length(); i++) {
-                            JSONObject c = comments.getJSONObject(i);
-                            CommentsEntity cc = new CommentsEntity(c.getLong("add_time"), new UserEntity(null, c.getString("user_name"), c.getString("user_id")), c.getString("content"));
-                            commentsEntities.add(cc);
-                        }
-                        CommentsAdapter adapter = new CommentsAdapter(commentsEntities, PlayActivity.this);
-                        CommentsResultEvent event = new CommentsResultEvent(adapter);
-                        event.setGid(id);
-                        event.setUserId(AccountUtil.getUserId(PlayActivity.this));
-                        EventBus.getDefault().post(event);
-                    }
-                } catch (JSONException e1) {
-                    e1.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-
-            }
-        }) {
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> params = new HashMap<>();
-                CommentsRequestEntity.Data data = new CommentsRequestEntity.Data(1, id, AccountUtil.getUserId(PlayActivity.this));
-                CommentsRequestEntity entity = new CommentsRequestEntity(CommonDataObject.COMMENTS_REQUEST_CODE, data);
-                params.put("opjson", CommonDataObject.GSON.toJson(entity));
-                return params;
-            }
-        };
-
-        RequestQueue queue = Volley.newRequestQueue(PlayActivity.this);
-        queue.add(request);
-        queue.start();
+        //1.加载评论缓存
+        EventBus.getDefault().post(new CommentsResultEvent(course));
     }
 
     //章节请求回调
     public void onEventBackgroundThread(ChapterRequestEvent e) {
         //todo 发起章节请求
-        NetStateUtil.checkNetwork(new NetStateUtil.NetWorkStateListener() {
-            @Override
-            public void doWithNetWork() {
-                StringRequest request = new StringRequest(Request.Method.POST, CommonDataObject.CHAPTER_REQUEST_URL, new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String s) {
-                        System.out.println(s);
-                        try {
-                            List<ChapterEntity> chapterList = new ArrayList<>();
-                            JSONObject object = new JSONObject(s);
-                            String code = object.getString("code");
-                            if ("0000".equals(code)) {
-                                JSONArray chapters = object.getJSONObject("data").getJSONObject("getSeek").getJSONArray("seek");
-                                // TODO: 2015/7/7 判断章节数量提示没有章节
 
-                                for (int i = 0; i < chapters.length(); i++) {
-                                    JSONObject o = chapters.getJSONObject(i);
-                                    String title = o.getString("utit");
-                                    String id = o.getString("sid");
-                                    JSONArray a = o.getJSONArray("data");
-                                    ChapterEntity e = new ChapterEntity(title, id);
-                                    e.setVideos(new ArrayList<VideoEntity>());
-                                    for (int j = 0; j < a.length(); j++) {
-                                        JSONObject o1 = a.getJSONObject(j);
-                                        String nam = o1.getString("title");
-                                        long seek = o1.getLong("seek");
-                                        String vid = null;
-                                        if (o1.has("vid")) {
-                                            vid = o1.getString("vid");
-                                        }
-                                        e.getVideos().add(new VideoEntity(vid, nam, seek));
-                                    }
-                                    chapterList.add(e);
-                                }
-                                //构建adapter
-                                ChapterAdapter adapter = new ChapterAdapter(chapterList, PlayActivity.this);
-                                //发送adapter
-                                EventBus.getDefault().post(new ChapterResultEvent(adapter));
-                            }
-                        } catch (JSONException e1) {
-                            e1.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError volleyError) {
-
-                    }
-                }) {
-                    @Override
-                    protected Map<String, String> getParams() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<>();
-                        ChapterRequestEntity.Data data = new ChapterRequestEntity.Data(id, AccountUtil.getUserId(PlayActivity.this));
-                        ChapterRequestEntity entity = new ChapterRequestEntity(CommonDataObject.CHAPTER_REQUEST_CODE, data);
-                        params.put("opjson", CommonDataObject.GSON.toJson(entity));
-                        return params;
-                    }
-                };
-
-                RequestQueue queue = Volley.newRequestQueue(PlayActivity.this);
-                queue.add(request);
-                queue.start();
-            }
-
-            @Override
-            public void doWithoutNetWork() {
-                Course course = CourseHistoryUtil.getOne(PlayActivity.this, id);
-                try {
-                    List<ChapterEntity> chapterList = new ArrayList<>();
-                    JSONArray chapters = new JSONArray( MessageDiagestUtil.getFromBase64(course.getLength()));
-                    for (int i = 0; i < chapters.length(); i++) {
-                        JSONObject o = chapters.getJSONObject(i);
-                        String title = o.getString("utit");
-                        String id = o.getString("sid");
-                        JSONArray a = o.getJSONArray("data");
-                        ChapterEntity e = new ChapterEntity(title, id);
-                        e.setVideos(new ArrayList<VideoEntity>());
-                        for (int j = 0; j < a.length(); j++) {
-                            JSONObject o1 = a.getJSONObject(j);
-                            String nam = o1.getString("title");
-                            long seek = o1.getLong("seek");
-                            String vid = null;
-                            if (o1.has("vid")) {
-                                vid = o1.getString("vid");
-                            }
-                            e.getVideos().add(new VideoEntity(vid, nam, seek));
-                        }
-                        chapterList.add(e);
-                    }
-                    //构建adapter
-                    ChapterAdapter adapter = new ChapterAdapter(chapterList, PlayActivity.this);
-                    //发送adapter
-                    EventBus.getDefault().post(new ChapterResultEvent(adapter));
-                } catch (JSONException e1) {
-                    e1.printStackTrace();
-                }
-            }
-        });
     }
-
-    //todo 实现新的事件回调，章节的播放回调
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -302,7 +137,6 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         if (isLandscape) {
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         }
-
         setContentView(R.layout.activity_play);
 
         initialRR();
@@ -335,40 +169,34 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         findViewById(R.id.write_comments).setOnClickListener(this);
 
         final Intent intent = getIntent();
+        //获取goods_id
         id = intent.getStringExtra(ID);
-        final boolean free = intent.getBooleanExtra(FREE, false);
-        CommonDataObject.nowPlayingId = id;
+//        首先可以获取到课程实体
+        course = CourseHistoryUtil.getCourse(this,id);
 
-        //判断网络
-        NetStateUtil.checkNetwork(new NetStateUtil.NetWorkStateListener() {
+        //开始请求详细信息
+        StringRequest stringRequest  =  new StringRequest(Request.Method.POST, CommonDataObject.COURSE_INFO_URL, new Response.Listener<String>() {
             @Override
-            public void doWithNetWork() {
-                if (free) {
-                    //免费的不用判断
-                    getCourseInfo();
-                } else {
-                    //判断登录
-                    if (AccountUtil.isLoggedIn(PlayActivity.this)) {
-                        //登录了
-                        checkAuthority();
-                    } else {
-                        //没登录
-                        DialogUtil.showLoginAlert(PlayActivity.this);
-                    }
-                }
+            public void onResponse(String s) {
+                System.out.println(s);
             }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
 
-            @Override
-            public void doWithoutNetWork() {
-                Toast.makeText(PlayActivity.this, R.string.no_network, Toast.LENGTH_SHORT).show();
-                DialogUtil.showNetWorkDialog(PlayActivity.this, new Runnable() {
-                    @Override
-                    public void run() {
-                        finish();
-                    }
-                });
             }
-        });
+        }){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String,String> params = new HashMap<>();
+                params.put("opjson",CommonDataObject.GSON.toJson(new CourseInfoRequestEntity(CommonDataObject.COURSE_INFO_REQUEST_CODE,new CourseInfoRequestEntity.Data(course.getGoods_id(),course.getUserId()))));
+                return params;
+            }
+        };
+
+        RequestQueue queue = Volley.newRequestQueue(PlayActivity.this);
+        queue.add(stringRequest);
+        queue.start();
 
         lec_portrait = null;// intent.getStringExtra(LEC_PORT);
         lec_name = null;// intent.getStringExtra(LEC_NAME);
@@ -388,107 +216,14 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
 
         //注册网络监听
         registerReceiver();
-    }
 
-    private void checkAuthority() {
-        // TODO: 2015/7/3 检查权限
-        StringRequest request = new StringRequest(Request.Method.POST, CommonDataObject.AUTHORITY_URL, new Response.Listener<String>() {
+        mHandler.postDelayed(new Runnable() {
             @Override
-            public void onResponse(String s) {
-                try {
-                    JSONObject object = new JSONObject(s);
-                    if ("0000".equals(object.getString("code"))) {
-                        boolean authority;
-                        if (object.getJSONObject("data").has("dataBack"))
-                            authority = object.getJSONObject("data").getInt("dataBack") == 1;
-                        else
-                            authority = object.getJSONObject("data").getInt("head_seek") == 1;
-
-                        // TODO: 2015/7/8 得到了购买权限 加上视频权限得出播放权限
-                        if (authority) {
-                            //有权限
-                            getCourseInfo();
-                        } else {
-                            //没有权限
-                            DialogUtil.showPayDialog(PlayActivity.this, new Runnable() {
-                                @Override
-                                public void run() {
-                                    finish();
-                                }
-                            });
-                        }
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+            public void run() {
+                changeColor();
+                changeFragment();
             }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-
-            }
-        }) {
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                AuthorityRequestEntity.Data data = new AuthorityRequestEntity.Data(id, AccountUtil.getUserId(PlayActivity.this));
-                AuthorityRequestEntity entity = new AuthorityRequestEntity(CommonDataObject.AUTHORITY_REQUEST_CODE, data);
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("opjson", CommonDataObject.GSON.toJson(entity));
-                return params;
-            }
-        };
-
-        RequestQueue queue = Volley.newRequestQueue(PlayActivity.this);
-        queue.add(request);
-        queue.start();
-    }
-
-    private void getCourseInfo() {
-        // TODO: 2015/7/3 进行请求并回显
-        StringRequest request = new StringRequest(Request.Method.POST, CommonDataObject.VIDEO_INFO_URL, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String s) {
-                System.out.println(s);
-                try {
-                    JSONObject o = new JSONObject(s);
-                    if ("0000".equals(o.getString("code"))) {
-                        JSONObject data = o.getJSONObject("data").getJSONObject("data");
-                        lec_portrait = CommonDataObject.MAIN_URL + data.getString("tea_img");
-                        lec_name = data.getString("tea_name");
-                        lec_info = data.getString("tea_desc");
-                        video_info = data.getString("goods_decs");
-
-                        vid = data.getString("goods_vid");
-                        // TODO: 2015/7/8 之后会将这个移动到章节请求里面去
-                        playVideo(vid);
-                        sendInfo();
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-
-            }
-        }) {
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-
-                VideoInfoRequestEntity.Data data = new VideoInfoRequestEntity.Data(id, AccountUtil.getUserId(PlayActivity.this));
-                VideoInfoRequestEntity entity = new VideoInfoRequestEntity(CommonDataObject.VIDEO_INFO_REQUEST_CODE, data);
-
-                Map<String, String> params = new HashMap<>();
-                params.put("opjson", CommonDataObject.GSON.toJson(entity));
-
-                return params;
-            }
-        };
-
-        RequestQueue queue = Volley.newRequestQueue(PlayActivity.this);
-        queue.add(request);
-        queue.start();
+        },500);
     }
 
     private void playVideo(String vid) {
@@ -661,7 +396,6 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
 
     @Override
     protected void onDestroy() {
-        CommonDataObject.nowPlayingId = null;
         EventBus.getDefault().unregister(this);
         unRegisterReceiver();
         super.onDestroy();

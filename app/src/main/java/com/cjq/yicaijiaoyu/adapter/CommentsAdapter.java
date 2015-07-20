@@ -9,7 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.cjq.yicaijiaoyu.R;
-import com.cjq.yicaijiaoyu.entities.CommentsEntity;
+import com.cjq.yicaijiaoyu.dao.Comments;
 import com.cjq.yicaijiaoyu.utils.ImageUtil;
 
 import java.util.Calendar;
@@ -20,18 +20,18 @@ import java.util.Locale;
  * Created by CJQ on 2015/6/26.
  */
 public class CommentsAdapter extends BaseAdapter {
-    List<CommentsEntity> commentsEntities;
+    List<Comments> commentsEntities;
     Context context;
 
-    public List<CommentsEntity> getCommentsEntities() {
+    public List<Comments> getCommentsEntities() {
         return commentsEntities;
     }
 
-    public void setCommentsEntities(List<CommentsEntity> commentsEntities) {
+    public void setCommentsEntities(List<Comments> commentsEntities) {
         this.commentsEntities = commentsEntities;
     }
 
-    public CommentsAdapter(List<CommentsEntity> commentsEntities, Context context) {
+    public CommentsAdapter(List<Comments> commentsEntities, Context context) {
         this.commentsEntities = commentsEntities;
         this.context = context;
     }
@@ -63,26 +63,26 @@ public class CommentsAdapter extends BaseAdapter {
             convertView.setTag(holder);
         }
         ViewHolder holder = (ViewHolder) convertView.getTag();
-        CommentsEntity entity = commentsEntities.get(position);
+        Comments entity = commentsEntities.get(position);
 
         holder.comments_content.setText(entity.getContent());
-        holder.name.setText(entity.getUser().getName());
+        holder.name.setText(entity.getUserName());
 
         //生成时间字符串
         Calendar now = Calendar.getInstance(Locale.CHINA);
 
         Calendar calendar = Calendar.getInstance(Locale.CHINA);
-        calendar.setTimeInMillis(entity.getTime());
+        calendar.setTimeInMillis(entity.getDate());
         String timeString;
-        if(now.getTime().getTime()-entity.getTime()<10*60*1000){
+        if(now.getTime().getTime()-entity.getDate()<10*60*1000){
             timeString = context.getString(R.string.just_now);
-        }else if(now.getTime().getTime()-entity.getTime()<60*60*1000){
+        }else if(now.getTime().getTime()-entity.getDate()<60*60*1000){
             timeString=now.get(Calendar.MINUTE)-calendar.get(Calendar.MINUTE)+context.getString(R.string.minute_ago);
         }else{
             timeString = calendar.get(Calendar.MONTH)+"-"+calendar.get(Calendar.DATE);
         }
         holder.time.setText(timeString);
-        ImageUtil.LoadImage(context,entity.getUser().getProtrait_url(),holder.menu_portrait);
+        ImageUtil.LoadImage(context,entity.getUserPortrait(),holder.menu_portrait);
         return convertView;
     }
 

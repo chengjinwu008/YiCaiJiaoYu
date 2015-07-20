@@ -32,7 +32,7 @@ public class CommentsRequestEntity {
 
     public static class Data{
         int page;
-        int limit = CommonDataObject.COURSE_NUM_SHOWING;
+        int limit = 20;
         String gid;
         String userId;
 

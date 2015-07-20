@@ -9,17 +9,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.cjq.yicaijiaoyu.R;
-import com.cjq.yicaijiaoyu.entities.CourseEntity;
+import com.cjq.yicaijiaoyu.dao.Course;
+import com.cjq.yicaijiaoyu.dao.Lecture;
 import com.cjq.yicaijiaoyu.utils.ImageUtil;
 
-import java.io.ObjectInputStream;
 import java.util.List;
 
 /**
  * Created by android on 2015/6/24.
  */
 public class CourseListAdapter extends BaseAdapter {
-    List<CourseEntity> courses;
+    List<Course> courses;
     Context context;
     private boolean showFree = true;
 
@@ -39,15 +39,15 @@ public class CourseListAdapter extends BaseAdapter {
         this.showFree = showFree;
     }
 
-    public List<CourseEntity> getCourses() {
+    public List<Course> getCourses() {
         return courses;
     }
 
-    public void setCourses(List<CourseEntity> courses) {
+    public void setCourses(List<Course> courses) {
         this.courses = courses;
     }
 
-    public CourseListAdapter(List<CourseEntity> courses, Context context) {
+    public CourseListAdapter(List<Course> courses, Context context) {
         this.courses = courses;
         this.context = context;
     }
@@ -80,20 +80,43 @@ public class CourseListAdapter extends BaseAdapter {
             convertView.setTag(holder);
         }
         ViewHolder holder  = (ViewHolder) convertView.getTag();
-        CourseEntity entity = courses.get(position);
+        Course entity = courses.get(position);
         if(showFree)
-        if(entity.isFree()){
-            holder.free.setText(context.getResources().getString(R.string.for_free));
-            holder.free.setBackgroundColor(context.getResources().getColor(R.color.main_titlebar_background));
-        }else{
-            holder.free.setText(context.getResources().getString(R.string.not_free));
-            holder.free.setBackgroundColor(context.getResources().getColor(R.color.orange_background));
+        switch (entity.getAuthority()) {
+            case 0:
+                holder.free.setText(context.getResources().getString(R.string.for_free));
+                holder.free.setBackgroundColor(context.getResources().getColor(R.color.main_titlebar_background));
+                break;
+            case 1:
+                holder.free.setText(context.getResources().getString(R.string.free_for_member));
+                holder.free.setBackgroundColor(context.getResources().getColor(R.color.main_titlebar_background));
+                break;
+            case 2:
+                holder.free.setText(context.getResources().getString(R.string.not_free));
+                holder.free.setBackgroundColor(context.getResources().getColor(R.color.orange_background));
+                break;
+            case 3:
+                holder.free.setText(context.getResources().getString(R.string.card));
+                holder.free.setBackgroundColor(context.getResources().getColor(R.color.main_titlebar_background));
+                break;
         }
-        ImageUtil.LoadImage(context,entity.getCover_image_url(),holder.cover);
-        holder.courseTitle.setText(entity.getTitle());
-        if(entity.getLecture()!=null)
-        holder.lecture.setText(entity.getLecture().getName());
-        holder.category.setText(entity.getCategory());
+        ImageUtil.LoadImage(context, entity.getImage(), holder.cover);
+        holder.courseTitle.setText(entity.getName());
+        StringBuilder sb = new StringBuilder();
+        if(entity.getLectureList()!=null)
+            //todo 拼接字符串
+            for(Lecture l:entity.getLectureList()){
+                sb.append(l.getName()).append("、");
+            }
+        if(sb.lastIndexOf("、")>0)
+        sb.deleteCharAt(sb.lastIndexOf("、"));
+        int len = sb.length();
+        if(len>7){
+            holder.lecture.setText(sb.toString().substring(0,6)+"…");
+        }else{
+            holder.lecture.setText(sb.toString());
+        }
+        holder.category.setText(entity.getCategoryName());
         return convertView;
     }
 

@@ -16,6 +16,14 @@ public class Video {
     private String vid;
     private String name;
     private Long seek;
+    private Long length;
+    private Long size;
+    private String userId;
+    private Boolean cached;
+    private Boolean free;
+    private String order;
+    private String chapter_id;
+    private String goods_id;
 
     /** Used to resolve relations */
     private transient DaoSession daoSession;
@@ -34,11 +42,19 @@ public class Video {
         this.id = id;
     }
 
-    public Video(Long id, String vid, String name, Long seek) {
+    public Video(Long id, String vid, String name, Long seek, Long length, Long size, String userId, Boolean cached, Boolean free, String order, String chapter_id, String goods_id) {
         this.id = id;
         this.vid = vid;
         this.name = name;
         this.seek = seek;
+        this.length = length;
+        this.size = size;
+        this.userId = userId;
+        this.cached = cached;
+        this.free = free;
+        this.order = order;
+        this.chapter_id = chapter_id;
+        this.goods_id = goods_id;
     }
 
     /** called by internal mechanisms, do not call yourself. */
@@ -77,6 +93,70 @@ public class Video {
 
     public void setSeek(Long seek) {
         this.seek = seek;
+    }
+
+    public Long getLength() {
+        return length;
+    }
+
+    public void setLength(Long length) {
+        this.length = length;
+    }
+
+    public Long getSize() {
+        return size;
+    }
+
+    public void setSize(Long size) {
+        this.size = size;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public Boolean getCached() {
+        return cached;
+    }
+
+    public void setCached(Boolean cached) {
+        this.cached = cached;
+    }
+
+    public Boolean getFree() {
+        return free;
+    }
+
+    public void setFree(Boolean free) {
+        this.free = free;
+    }
+
+    public String getOrder() {
+        return order;
+    }
+
+    public void setOrder(String order) {
+        this.order = order;
+    }
+
+    public String getChapter_id() {
+        return chapter_id;
+    }
+
+    public void setChapter_id(String chapter_id) {
+        this.chapter_id = chapter_id;
+    }
+
+    public String getGoods_id() {
+        return goods_id;
+    }
+
+    public void setGoods_id(String goods_id) {
+        this.goods_id = goods_id;
     }
 
     /** Convenient call for {@link AbstractDao#delete(Object)}. Entity must attached to an entity context. */
